@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('expenses', function (Blueprint $table) {
+        Schema::create('budgets', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('department_id')->constrained()->onDelete('cascade');
-            $table->decimal('amount', 15, 2);
-            $table->string('category');
-            $table->text('description')->nullable();
-            $table->string('status')->default('pending');
-            $table->string('receipt_path')->nullable();
+            $table->decimal('total_amount', 15, 2);
+            $table->decimal('used_amount', 15, 2)->default(0);
+            $table->date('period_start');
+            $table->date('period_end');
+            $table->string('status')->default('active'); // e.g., active, closed
+            $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
