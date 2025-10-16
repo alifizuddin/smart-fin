@@ -17,32 +17,42 @@
         <div class="relative min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900">
             <main class="flex items-center justify-center w-full p-4">
                 <div class="w-full max-w-5xl mx-auto flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden">
+                    
+                    {{-- Left-side image --}}
                     <div class="hidden md:block md:w-1/2">
-                        <img class="h-full w-full object-cover" src="https://images.unsplash.com/photo-1664575602276-acd073f104c1?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8YnVzaW5lc3N8ZW58MHx8MHx8fDA%3D&fm=jpg&q=60&w=3000" alt="Financial Planning Meeting">
+                        <img class="h-full w-full object-cover" 
+                             src="https://images.unsplash.com/photo-1664575602276-acd073f104c1?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8YnVzaW5lc3N8ZW58MHx8MHx8fDA%3D&fm=jpg&q=60&w=3000" 
+                             alt="Financial Planning Meeting">
                     </div>
 
+                    {{-- Right-side content --}}
                     <div class="w-full md:w-1/2 flex flex-col items-center justify-center p-8 sm:p-12">
                         <div class="w-full">
                             <div class="flex justify-center mb-6">
-                                @if (request()->routeIs('login'))
+                                @if (request()->routeIs('password.request'))
                                     <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center">
-                                        Login
+                                        Forgot Password
                                     </h1>
                                 @elseif (request()->routeIs('register'))
-                                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white text-center">
+                                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center">
                                         Sign Up
-                                    </h2>
+                                    </h1>
+                                @elseif (request()->routeIs('login'))
+                                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center">
+                                        Log In
+                                    </h1>
                                 @else
-                                    {{-- Fallback for other guest pages like forgot-password --}}
-                                    <a href="/" wire:navigate>
-                                        <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-                                    </a>
+                                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center">
+                                        Log In
+                                    </h1>
+                                    {{-- Default: Show app logo (e.g. for login page) --}}
                                 @endif
                             </div>
+
                             {{ $slot }}
                         </div>
                     </div>
-                    </div>
+
                 </div>
             </main>
         </div>
