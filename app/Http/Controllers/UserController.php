@@ -3,46 +3,61 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Department;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role; // Import the Role model
 
 class UserController extends Controller
 {
     /**
-     * Display a listing of the users.
+     * Display a listing of the resource.
      */
     public function index()
     {
         $users = User::with('roles')->get();
         return view('admin.users.index', compact('users'));
-        $users = User::with('department')->paginate(10);
-        return view('users.index', compact('users'));
     }
 
     /**
-     * Show the form for editing the specified user.
+     * Show the form for editing the specified resource.
      */
     public function edit(User $user)
     {
-        $departments = Department::all();
-        $roles = ['admin', 'manager', 'staff'];
-        return view('users.edit', compact('user', 'departments', 'roles'));
+        $roles = Role::all();
+        return view('admin.users.edit', compact('user', 'roles'));
     }
 
     /**
-     * Update the specified user in storage.
+     * Update the specified resource in storage.
      */
     public function update(Request $request, User $user)
     {
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'role' => 'required|string|in:admin,manager,staff',
-            'department_id' => 'nullable|exists:departments,id',
+            'roles' => 'required|array'
         ]);
 
-        $user->update($request->all());
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+        ]);
+
+        $user->syncRoles($request->roles);
 
         return redirect()->route('users.index')->with('success', 'User updated successfully.');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(User $user)
+    {
+        // Optional: Add a check to prevent admins from deleting themselves
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'You cannot delete your own account.');
+        }
+
+        $user->delete();
+        return redirect()->route('users.index')->with('success', 'User deleted successfully.');
     }
 }
