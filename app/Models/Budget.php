@@ -16,10 +16,16 @@ class Budget extends Model
         'used_amount',
         'period_start',
         'period_end',
+        'status',
+        'created_by',
     ];
 
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
+    }
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

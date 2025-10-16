@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\BudgetController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome');
@@ -20,6 +21,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
     });
+    Route::resource('budgets', BudgetController::class);
 
     // You can add more role-specific routes here
     Route::middleware('role:Manager')->group(function () {

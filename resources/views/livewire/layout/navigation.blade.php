@@ -33,6 +33,9 @@ new class extends Component
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('budgets.index')" :active="request()->routeIs('budgets.*')" wire:navigate>
+                        {{ __('Budgets') }}
+                    </x-nav-link>
                     @role('Admin')
                         <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')" wire:navigate>
                             {{ __('User Management') }}
@@ -88,6 +91,9 @@ new class extends Component
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                 {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('budgets.index')" :active="request()->routeIs('budgets.*')" wire:navigate>
+                {{ __('Budgets') }}
             </x-responsive-nav-link>
             @role('Admin')
                 <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')" wire:navigate>
