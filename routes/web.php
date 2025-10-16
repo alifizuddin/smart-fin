@@ -15,10 +15,19 @@ Route::view('profile', 'profile')
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    Route::middleware('can:is-admin')->group(function () {
+    Route::middleware('role:Admin')->group(function () { // Use role middleware
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+    });
+
+    // You can add more role-specific routes here
+    Route::middleware('role:Manager')->group(function () {
+        // Manager-specific routes
+    });
+
+    Route::middleware('role:Staff')->group(function () {
+        // Staff-specific routes
     });
 });
 require __DIR__.'/auth.php';
