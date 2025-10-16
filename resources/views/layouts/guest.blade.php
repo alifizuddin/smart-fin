@@ -1,3 +1,4 @@
+{{-- resources/views/layouts/guest.blade.php --}}
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
@@ -8,13 +9,12 @@
         <title>SmartFin360</title>
 
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600&display=swap" rel="stylesheet" />
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans text-gray-900 antialiased">
         <div class="relative min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900">
-
             <main class="flex items-center justify-center w-full p-4">
                 <div class="w-full max-w-5xl mx-auto flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden">
                     <div class="hidden md:block md:w-1/2">
@@ -32,7 +32,6 @@
                                     <h2 class="text-3xl font-bold text-gray-900 dark:text-white text-center">
                                         Sign Up
                                     </h2>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 text-center mt-2">Please sign up to continue.</p>
                                 @else
                                     {{-- Fallback for other guest pages like forgot-password --}}
                                     <a href="/" wire:navigate>
@@ -42,6 +41,7 @@
                             </div>
                             {{ $slot }}
                         </div>
+                    </div>
                     </div>
                 </div>
             </main>
