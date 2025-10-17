@@ -53,6 +53,16 @@
                             />
                             <x-input-error :messages="$errors->get('email')" class="mt-2" />
                         </div>
+                        <div class="mb-4">
+                            <x-input-label for="department_id" class="text-gray-700 dark:text-gray-300">Department</x-input-label>
+                            <select name="department_id" id="department_id" class="block mt-2 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                @foreach ($departments as $department)
+                                    <option value="{{ $department->id }}" {{ $user->department_id == $department->id ? 'selected' : '' }}>
+                                        {{ $department->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
 
                         <!-- Roles -->
                         <div>

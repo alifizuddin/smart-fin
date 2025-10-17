@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             DepartmentSeeder::class,
             RolesAndPermissionsSeeder::class,
             UserSeeder::class,// <-- Add this line
+            BudgetSeeder::class,
         ]);
     }
 }

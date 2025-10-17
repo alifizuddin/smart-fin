@@ -57,6 +57,7 @@
                                             class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
                                     </th>
                                     <th scope="col" class="px-6 py-3">Name</th>
+                                    <th scope="col" class="px-6 py-3">Department</th>
                                     <th scope="col" class="px-6 py-3">Roles</th>
                                     <th scope="col" class="px-6 py-3 text-right">Action</th>
                                 </tr>
@@ -78,6 +79,13 @@
                                                     <div class="text-sm text-gray-500">{{ $user->email }}</div>
                                                 </div>
                                             </div>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            @if ($user->department)
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                                    {{ $user->department->name }}
+                                                </span>
+                                            @endif
                                         </td>
                                         <td class="px-6 py-4">
                                             @foreach ($user->roles as $role)

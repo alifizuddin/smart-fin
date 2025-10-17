@@ -7,25 +7,66 @@ use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Spatie\Permission\Models\Role;
 
 class BudgetController extends Controller
 {
-    /**
-     * Display a listing of the budgets.
-     */
-    public function index()
-    {
-        if (Auth::user()->role === 'admin') {
-            $budgets = Budget::with('department')->latest()->paginate(10);
-        } else {
-            // Managers and Staff see budgets for their department only
-            $budgets = Budget::where('department_id', Auth::user()->department_id)
-                ->with('department')
-                ->latest()
-                ->paginate(10);
-        }
-        return view('budgets.index', compact('budgets'));
+
+public function index()
+{
+    if (Auth::user()->hasRole('Admin')) {
+        $budgets = Budget::with('department')->latest()->paginate(10);
+        // For admin, calculate stats across all budgets
+        $allBudgets = Budget::with('department')->get();
+    } else {
+        // For others, scope everything to their department
+        $departmentId = Auth::user()->department_id;
+        $budgets = Budget::where('department_id', $departmentId)
+            ->with('department')
+            ->latest()
+            ->paginate(10);
+        $allBudgets = Budget::where('department_id', $departmentId)->get();
     }
+
+    // --- Tier 2: Summary Card and Chart Data ---
+
+    // 1. Summary Card Calculations
+    $totalBudget = $allBudgets->sum('total_amount');
+    $totalSpent = $allBudgets->sum('used_amount');
+    $remainingFunds = $totalBudget - $totalSpent;
+    $overBudgetCount = $allBudgets->where('used_amount', '>', 'total_amount')->count();
+
+    // 2. Chart Data Preparation
+    $departmentBudgets = $allBudgets->groupBy('department.name');
+
+    $pieChartData = $departmentBudgets->map(function ($group) {
+        return $group->sum('total_amount');
+    });
+
+    $barChartData = $departmentBudgets->map(function ($group) {
+        return [
+            'total' => $group->sum('total_amount'),
+            'used' => $group->sum('used_amount'),
+        ];
+    });
+
+    // Consolidate all data for the view
+    $viewData = [
+        'budgets' => $budgets,
+        'summary' => [
+            'totalBudget' => $totalBudget,
+            'totalSpent' => $totalSpent,
+            'remainingFunds' => $remainingFunds,
+            'overBudgetCount' => $overBudgetCount,
+        ],
+        'charts' => [
+            'pie' => $pieChartData,
+            'bar' => $barChartData,
+        ],
+    ];
+
+    return view('budgets.index', $viewData);
+}
 
     /**
      * Show the form for creating a new budget.

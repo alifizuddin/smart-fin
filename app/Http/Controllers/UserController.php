@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Department; // Import the Department model
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role; // Import the Role model
 
@@ -23,7 +24,8 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $roles = Role::all();
-        return view('admin.users.edit', compact('user', 'roles'));
+        $departments = Department::all();
+        return view('admin.users.edit', compact('user', 'roles', 'departments'));
     }
 
     /**
@@ -34,12 +36,14 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'roles' => 'required|array'
+            'roles' => 'required|array',
+            'department_id' => 'required|exists:departments,id',
         ]);
 
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
+            'department_id' => $request->department_id,
         ]);
 
         $user->syncRoles($request->roles);
