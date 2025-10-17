@@ -5,9 +5,7 @@
 - Composer
 - Node.js >= 14.x
 - MySQL or other database
-- Laravel 11
-- Google Maps API Key
-- Pusher API Credentials
+- Laravel 12
 
 ## Installation Guide
 1. Clone the repository:
@@ -37,7 +35,7 @@
 
 6.  Run database migrations:
 ```bash
-php artisan migrate
+    php artisan migrate
 ```
 
 7.  Compile assets:
