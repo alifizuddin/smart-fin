@@ -131,7 +131,7 @@
                                             <td class="px-6 py-4 text-sm">{{ $budget->creator->name ?? 'N/A' }}</td>
                                             <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $budget->status === 'active' ? 'bg-green-100 text-white-800 dark:bg-green-900' : 'bg-red-100 text-red-800 dark:bg-red-900' }}">{{ ucfirst($budget->status) }}</span></td>
                                             <td class="px-6 py-4 text-right">
-                                                <a href="{{ route('budgets.show', $budget) }}" class="text-indigo-600 dark:text-indigo-400 hover:underline font-medium">View</a>
+                                                <button type="button" class="view-budget-btn text-indigo-600 dark:text-indigo-400 hover:underline font-medium" data-budget-id="{{ $budget->id }}">View</button>
                                                 @can('is-admin')<a href="{{ route('budgets.edit', $budget) }}" class="ml-3 text-blue-600 dark:text-blue-400 hover:underline font-medium">Edit</a>@endcan
                                             </td>
                                         </tr>
@@ -146,6 +146,53 @@
             </div>
         </div>
     </div>
+
+    <div id="viewBudgetModal" tabindex="-1" aria-hidden="true"
+     class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div class="relative w-full max-w-3xl mx-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden">
+            
+            {{-- Header --}}
+            <div class="flex justify-between items-center p-6 border-b dark:border-gray-700">
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                              d="M12 8c-1.657 0-3 .895-3 2v4c0 1.105 1.343 2 3 2s3-.895 3-2v-4c0-1.105-1.343-2-3-2z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                              d="M5 8v8a7 7 0 0014 0V8" />
+                    </svg>
+                    Budget Details
+                </h3>
+                <button type="button"
+                        class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                        data-modal-close>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none"
+                         viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            {{-- Body --}}
+            <div id="modal-body-content" class="p-6 space-y-6">
+                {{-- Dynamic content will be injected here --}}
+                <div class="flex justify-center py-10">
+                    <span class="text-gray-400 dark:text-gray-500 text-sm">Loading details...</span>
+                </div>
+            </div>
+
+            {{-- Footer --}}
+            <div class="flex justify-end items-center gap-3 p-6 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                <button type="button"
+                        class="px-4 py-2 rounded-lg text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white font-medium"
+                        data-modal-close>Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -189,6 +236,116 @@
                         }
                     }
                 });
+
+                // View Budget Modal
+                // View Budget Modal
+const viewBudgetButtons = document.querySelectorAll('.view-budget-btn');
+const viewBudgetModal = document.getElementById('viewBudgetModal');
+const modalBodyContent = document.getElementById('modal-body-content');
+const closeModalButtons = viewBudgetModal.querySelectorAll('[data-modal-close]');
+
+// Function to open modal
+function openModal() {
+    viewBudgetModal.classList.remove('hidden');
+    viewBudgetModal.setAttribute('aria-hidden', 'false');
+}
+
+// Function to close modal
+function closeModal() {
+    viewBudgetModal.classList.add('hidden');
+    viewBudgetModal.setAttribute('aria-hidden', 'true');
+    modalBodyContent.innerHTML = '';
+}
+
+// Event listeners for close
+closeModalButtons.forEach(btn => btn.addEventListener('click', closeModal));
+viewBudgetModal.addEventListener('click', (e) => {
+    if (e.target === viewBudgetModal) closeModal(); // close on overlay click
+});
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal(); // close on Esc
+});
+
+viewBudgetButtons.forEach(button => {
+    button.addEventListener('click', function () {
+        const budgetId = this.dataset.budgetId;
+
+        modalBodyContent.innerHTML = `
+            <div class="flex justify-center py-8">
+                <div class="animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent"></div>
+            </div>
+        `;
+
+        fetch(`/budgets/${budgetId}/json`)
+            .then(response => response.json())
+            .then(data => {
+                const remaining = data.total_amount - data.used_amount;
+                const percentage = data.total_amount > 0
+                    ? Math.round((data.used_amount / data.total_amount) * 100)
+                    : 0;
+
+                const colorClass =
+                    percentage < 70 ? 'bg-green-500' :
+                    percentage < 90 ? 'bg-yellow-500' : 'bg-red-500';
+
+                modalBodyContent.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-3">
+                            <div>
+                                <h4 class="text-gray-500 text-sm uppercase dark:text-gray-400">Department</h4>
+                                <p class="text-lg font-semibold text-gray-900 dark:text-white">${data.department.name}</p>
+                            </div>
+                            <div>
+                                <h4 class="text-gray-500 text-sm uppercase dark:text-gray-400">Total Amount</h4>
+                                <p class="text-lg font-semibold text-gray-900 dark:text-white">$${Number(data.total_amount).toLocaleString()}</p>
+                            </div>
+                            <div>
+                                <h4 class="text-gray-500 text-sm uppercase dark:text-gray-400">Used Amount</h4>
+                                <p class="text-lg font-semibold text-gray-900 dark:text-white">$${Number(data.used_amount).toLocaleString()}</p>
+                            </div>
+                            <div>
+                                <h4 class="text-gray-500 text-sm uppercase dark:text-gray-400">Remaining</h4>
+                                <p class="text-lg font-semibold ${remaining >= 0 ? 'text-green-600' : 'text-red-600'}">
+                                    $${remaining.toLocaleString()}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col justify-center">
+                            <div class="mb-2 flex justify-between text-sm text-gray-500 dark:text-gray-400">
+                                <span>Usage</span>
+                                <span>${percentage}%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                                <div class="h-3 rounded-full ${colorClass}" style="width: ${percentage}%"></div>
+                            </div>
+
+                            <div class="mt-4">
+                                <h4 class="text-gray-500 text-sm uppercase dark:text-gray-400">Period</h4>
+                                <p class="text-sm text-gray-800 dark:text-gray-200">${new Date(data.period_start).toLocaleDateString()} - ${new Date(data.period_end).toLocaleDateString()}</p>
+                            </div>
+
+                            <div class="mt-4">
+                                <h4 class="text-gray-500 text-sm uppercase dark:text-gray-400">Status</h4>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${data.status === 'active'
+                                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}">
+                                    ${data.status.toUpperCase()}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                openModal();
+            })
+            .catch(() => {
+                modalBodyContent.innerHTML = `<p class="text-center text-red-500">Failed to load budget details.</p>`;
+                openModal();
+            });
+    });
+});
+
             });
         </script>
     @endpush

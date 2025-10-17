@@ -21,6 +21,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::resource('users', UserController::class);
+        Route::get('/budgets/{budget}/json', [BudgetController::class, 'showJson'])->name('budgets.showJson');
     });
     Route::resource('budgets', BudgetController::class);
     Route::post('budgets-bulk-action', [BudgetController::class, 'bulkAction'])->name('budgets.bulkAction');

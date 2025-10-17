@@ -107,6 +107,12 @@ class BudgetController extends Controller
         $departments = Department::all();
         return view('budgets.create', compact('departments'));
     }
+    public function showJson(Budget $budget)
+{
+    // Eager load the department relationship to avoid N+1 issues
+    $budget->load('department'); 
+    return response()->json($budget);
+}
 
     public function store(Request $request)
     {
