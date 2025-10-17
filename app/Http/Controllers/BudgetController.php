@@ -7,80 +7,107 @@ use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
-use Spatie\Permission\Models\Role;
 
 class BudgetController extends Controller
 {
+    /**
+     * Display a listing of the budgets.
+     */
+    public function index(Request $request)
+    {
+        // Base query
+        $query = Budget::with(['department', 'creator']);
 
-public function index()
-{
-    if (Auth::user()->hasRole('Admin')) {
-        $budgets = Budget::with('department')->latest()->paginate(10);
-        // For admin, calculate stats across all budgets
-        $allBudgets = Budget::with('department')->get();
-    } else {
-        // For others, scope everything to their department
-        $departmentId = Auth::user()->department_id;
-        $budgets = Budget::where('department_id', $departmentId)
-            ->with('department')
-            ->latest()
-            ->paginate(10);
-        $allBudgets = Budget::where('department_id', $departmentId)->get();
+        // --- Tier 1: Filtering and Sorting ---
+        $query->when($request->filled('status'), function ($q) use ($request) {
+            return $q->where('status', $request->status);
+        });
+
+        $query->when($request->filled('start_date'), function ($q) use ($request) {
+            return $q->where('period_start', '>=', $request->start_date);
+        });
+
+        $query->when($request->filled('end_date'), function ($q) use ($request) {
+            return $q->where('period_end', '<=', $request->end_date);
+        });
+        
+        // Default sort
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+
+        if ($sortBy == 'department') {
+            $query->join('departments', 'budgets.department_id', '=', 'departments.id')
+                  ->orderBy('departments.name', $sortOrder)
+                  ->select('budgets.*'); // Avoid column name conflicts
+        } else {
+            $query->orderBy($sortBy, $sortOrder);
+        }
+
+        // Apply role-based visibility
+        if (Auth::user()->hasRole('Admin')) {
+            $budgets = $query->paginate(10);
+            $allBudgets = Budget::with('department')->get(); // For stats
+        } else {
+            $departmentId = Auth::user()->department_id;
+            $budgets = $query->where('budgets.department_id', $departmentId)->paginate(10);
+            $allBudgets = Budget::where('department_id', $departmentId)->get(); // For stats
+        }
+
+        // --- Tier 2 Data (from previous step) ---
+        $totalBudget = $allBudgets->sum('total_amount');
+        $totalSpent = $allBudgets->sum('used_amount');
+
+        $viewData = [
+            'budgets' => $budgets->appends($request->except('page')), // Persist filters on pagination
+            'summary' => [
+                'totalBudget' => $totalBudget,
+                'totalSpent' => $totalSpent,
+                'remainingFunds' => $totalBudget - $totalSpent,
+                'overBudgetCount' => $allBudgets->where('used_amount', '>', 'total_amount')->count(),
+            ],
+            'charts' => [
+                'pie' => $allBudgets->groupBy('department.name')->map->sum('total_amount'),
+                'bar' => $allBudgets->groupBy('department.name')->map(fn($g) => ['total' => $g->sum('total_amount'), 'used' => $g->sum('used_amount')]),
+            ],
+            // Pass current filters to the view for the form fields
+            'filters' => $request->only(['status', 'start_date', 'end_date', 'sort_by', 'sort_order']),
+        ];
+
+        return view('budgets.index', $viewData);
     }
 
-    // --- Tier 2: Summary Card and Chart Data ---
-
-    // 1. Summary Card Calculations
-    $totalBudget = $allBudgets->sum('total_amount');
-    $totalSpent = $allBudgets->sum('used_amount');
-    $remainingFunds = $totalBudget - $totalSpent;
-    $overBudgetCount = $allBudgets->where('used_amount', '>', 'total_amount')->count();
-
-    // 2. Chart Data Preparation
-    $departmentBudgets = $allBudgets->groupBy('department.name');
-
-    $pieChartData = $departmentBudgets->map(function ($group) {
-        return $group->sum('total_amount');
-    });
-
-    $barChartData = $departmentBudgets->map(function ($group) {
-        return [
-            'total' => $group->sum('total_amount'),
-            'used' => $group->sum('used_amount'),
-        ];
-    });
-
-    // Consolidate all data for the view
-    $viewData = [
-        'budgets' => $budgets,
-        'summary' => [
-            'totalBudget' => $totalBudget,
-            'totalSpent' => $totalSpent,
-            'remainingFunds' => $remainingFunds,
-            'overBudgetCount' => $overBudgetCount,
-        ],
-        'charts' => [
-            'pie' => $pieChartData,
-            'bar' => $barChartData,
-        ],
-    ];
-
-    return view('budgets.index', $viewData);
-}
+    // --- Add the new bulkAction method below ---
 
     /**
-     * Show the form for creating a new budget.
+     * Handle bulk actions on budgets.
      */
+    public function bulkAction(Request $request)
+    {
+        Gate::authorize('is-admin');
+
+        $request->validate([
+            'action' => 'required|string|in:delete',
+            'budget_ids' => 'required|array',
+            'budget_ids.*' => 'exists:budgets,id',
+        ]);
+
+        if ($request->action === 'delete') {
+            Budget::destroy($request->budget_ids);
+            return redirect()->route('budgets.index')->with('success', 'Selected budgets have been deleted successfully.');
+        }
+
+        return redirect()->route('budgets.index')->with('error', 'Invalid action selected.');
+    }
+
+    // --- Keep the rest of the controller methods (create, store, show, edit, update) as they are ---
+    
     public function create()
     {
-        Gate::authorize('is-admin'); // Only admins can create budgets
+        Gate::authorize('is-admin');
         $departments = Department::all();
         return view('budgets.create', compact('departments'));
     }
 
-    /**
-     * Store a newly created budget in storage.
-     */
     public function store(Request $request)
     {
         Gate::authorize('is-admin');
@@ -97,18 +124,22 @@ public function index()
         return redirect()->route('budgets.index')->with('success', 'Budget created successfully.');
     }
 
-    /**
-     * Display the specified budget.
-     */
-    public function show(Budget $budget)
+    public function show(Request $request, Budget $budget)
     {
         Gate::authorize('view-budget', $budget);
+
+    // Eager load relationships for both JSON and view responses
+        $budget->load(['department', 'creator', 'expenses.user']);
+
+    // --- Add this block to handle AJAX requests for the modal ---
+        if ($request->wantsJson()) {
+            return response()->json($budget);
+        }
+
+    // This remains for users who might access the URL directly
         return view('budgets.show', compact('budget'));
     }
 
-    /**
-     * Show the form for editing the specified budget.
-     */
     public function edit(Budget $budget)
     {
         Gate::authorize('is-admin');
@@ -116,9 +147,6 @@ public function index()
         return view('budgets.edit', compact('budget', 'departments'));
     }
 
-    /**
-     * Update the specified budget in storage.
-     */
     public function update(Request $request, Budget $budget)
     {
         Gate::authorize('is-admin');

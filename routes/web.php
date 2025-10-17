@@ -23,6 +23,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('users', UserController::class);
     });
     Route::resource('budgets', BudgetController::class);
+    Route::post('budgets-bulk-action', [BudgetController::class, 'bulkAction'])->name('budgets.bulkAction');
 
     // You can add more role-specific routes here
     Route::middleware('role:Manager')->group(function () {
