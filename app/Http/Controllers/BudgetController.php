@@ -75,6 +75,56 @@ class BudgetController extends Controller
 
         return view('budgets.index', $viewData);
     }
+    /**
+ * Display a printable budget report.
+ */
+public function report(Request $request)
+{
+    // Base query
+    $query = Budget::with(['department', 'creator']);
+
+    // --- Filtering from the index page can be applied here as well ---
+    $query->when($request->filled('status'), function ($q) use ($request) {
+        return $q->where('status', $request->status);
+    });
+
+    $query->when($request->filled('start_date'), function ($q) use ($request) {
+        return $q->where('period_start', '>=', $request->start_date);
+    });
+
+    $query->when($request->filled('end_date'), function ($q) use ($request) {
+        return $q->where('period_end', '<=', $request->end_date);
+    });
+    
+    // Apply role-based visibility
+    if (Auth::user()->hasRole('Admin')) {
+        $allBudgets = $query->get();
+    } else {
+        $departmentId = Auth::user()->department_id;
+        $allBudgets = $query->where('budgets.department_id', $departmentId)->get();
+    }
+
+    $totalBudget = $allBudgets->sum('total_amount');
+    $totalSpent = $allBudgets->sum('used_amount');
+
+    $viewData = [
+        'budgets' => $allBudgets,
+        'summary' => [
+            'totalBudget' => $totalBudget,
+            'totalSpent' => $totalSpent,
+            'remainingFunds' => $totalBudget - $totalSpent,
+            'overBudgetCount' => $allBudgets->where('used_amount', '>', 'total_amount')->count(),
+        ],
+        'charts' => [
+            'pie' => $allBudgets->groupBy('department.name')->map->sum('total_amount'),
+            'bar' => $allBudgets->groupBy('department.name')->map(fn($g) => ['total' => $g->sum('total_amount'), 'used' => $g->sum('used_amount')]),
+        ],
+        // Pass current filters to the view for context
+        'filters' => $request->only(['status', 'start_date', 'end_date']),
+    ];
+
+    return view('budgets.report', $viewData);
+}
 
     // --- Add the new bulkAction method below ---
 
