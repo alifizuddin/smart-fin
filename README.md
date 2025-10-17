@@ -35,7 +35,7 @@
 
 6.  Run database migrations:
 ```bash
-php artisan migrate
+    php artisan migrate
 ```
 
 7.  Compile assets:
