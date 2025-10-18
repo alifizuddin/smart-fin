@@ -330,9 +330,8 @@ public function show(Request $request, Budget $budget)
     // ============================================================
     // 1️⃣ Authorization
     // ============================================================
-    Gate::authorize('view-budget', $budget);
     if ($request->wantsJson()) {
-        Gate::authorize('is-admin');
+        Gate::authorize('is-admin|is-manager', $budget);
         // For JSON requests, return budget data as JSON
         return response()->json($budget);
     } else { 

@@ -95,7 +95,6 @@
         </div>
     </div>
 </form>
-
                     <form action="{{ route('budgets.bulkAction') }}" method="POST" id="bulk-action-form">
                         @csrf
                         <input type="hidden" name="action" id="bulk-action-input">
@@ -114,7 +113,6 @@
                                 </div>
                             </div>
                         </div>
-
                         {{-- Table --}}
                         <div class="overflow-x-auto rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
     <table class="w-full text-sm text-left text-gray-600 dark:text-gray-300">
@@ -213,7 +211,6 @@
                             {{ ucfirst($budget->status) }}
                         </span>
                     </td>
-
                     {{-- Actions --}}
                     <td class="px-6 py-4 text-right space-x-2">
     {{-- View Button --}}
@@ -225,11 +222,9 @@
                dark:hover:bg-indigo-800/60 transition-all duration-200 shadow-sm hover:shadow-md">
         View
     </button>
-
-    {{-- Edit Button (Admin Only) --}}
     @role('Admin')
         <a href="{{ route('budgets.edit', $budget) }}"
-           class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium
+           class="edit-budget-btn inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium
                   bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 
                   dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-700 
                   dark:hover:bg-blue-800/60 transition-all duration-200 shadow-sm hover:shadow-md">
@@ -300,103 +295,118 @@
         </div>
     </div>
 </div>
-<div id="editBudgetModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-        <div class="relative p-4 w-full max-w-2xl max-h-full">
-            <div class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
-                <div class="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Edit Budget</h3>
-                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="editBudgetModal">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                        <span class="sr-only">Close modal</span>
-                    </button>
-                </div>
-                <form id="editBudgetForm" method="POST">
+    <!-- Edit Budget Modal -->
+<div id="editBudgetModal" tabindex="-1" aria-hidden="true"
+     class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div class="relative w-full max-w-3xl mx-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden">
+
+            {{-- Header --}}
+            <div class="flex justify-between items-center p-6 border-b dark:border-gray-700">
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                              d="M12 8c-1.657 0-3 .895-3 2v4c0 1.105 1.343 2 3 2s3-.895 3-2v-4c0-1.105-1.343-2-3-2z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                              d="M5 8v8a7 7 0 0014 0V8" />
+                    </svg>
+                    Edit Budget
+                </h3>
+                <button type="button"
+                        class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                        data-modal-close>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none"
+                         viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            {{-- Body --}}
+            <div class="p-6 space-y-6">
+                <form id="editBudgetForm" method="POST" class="space-y-6">
                     @csrf
                     @method('PUT')
-                    <div class="grid gap-4 mb-4 sm:grid-cols-2">
+
+                    <div class="grid gap-4 sm:grid-cols-2">
                         <div>
-                            <label for="edit-department_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Department</label>
-                            <select id="edit-department_id" name="department_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required>
+                            <label for="edit-department_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                Department
+                            </label>
+                            <select id="edit-department_id" name="department_id"
+                                    class="w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 
+                                           dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    required>
                                 @foreach($departments as $department)
                                     <option value="{{ $department->id }}">{{ $department->name }}</option>
                                 @endforeach
                             </select>
                         </div>
+
                         <div>
-                            <label for="edit-total_amount" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Total Amount</label>
-                            <input type="number" name="total_amount" id="edit-total_amount" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600" required>
+                            <label for="edit-total_amount" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                Total Amount
+                            </label>
+                            <input type="number" name="total_amount" id="edit-total_amount"
+                                   class="w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 
+                                          dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                   required>
                         </div>
+
                         <div>
-                            <label for="edit-period_start" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Start Date</label>
-                            <input type="date" name="period_start" id="edit-period_start" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600" required>
+                            <label for="edit-period_start" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                Start Date
+                            </label>
+                            <input type="date" name="period_start" id="edit-period_start"
+                                   class="w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 
+                                          dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                   required>
                         </div>
+
                         <div>
-                            <label for="edit-period_end" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">End Date</label>
-                            <input type="date" name="period_end" id="edit-period_end" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600" required>
+                            <label for="edit-period_end" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                End Date
+                            </label>
+                            <input type="date" name="period_end" id="edit-period_end"
+                                   class="w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 
+                                          dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                   required>
                         </div>
+
                         <div class="sm:col-span-2">
-                            <label for="edit-status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status</label>
-                            <select id="edit-status" name="status" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600" required>
+                            <label for="edit-status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                Status
+                            </label>
+                            <select id="edit-status" name="status"
+                                    class="w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 
+                                           dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    required>
                                 <option value="active">Active</option>
                                 <option value="closed">Closed</option>
                             </select>
                         </div>
                     </div>
-                    <button type="submit" class="text-white inline-flex items-center bg-indigo-600 hover:bg-indigo-700 focus:ring-4 focus:outline-none focus:ring-indigo-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-                        Update Budget
-                    </button>
                 </form>
+            </div>
+
+            {{-- Footer --}}
+            <div class="flex justify-end items-center gap-3 p-6 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                <button type="button"
+                        class="px-4 py-2 rounded-lg text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white font-medium"
+                        data-modal-close>
+                    Cancel
+                </button>
+                <button type="submit" form="editBudgetForm"
+                        class="px-5 py-2.5 rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 
+                               focus:ring-4 focus:outline-none focus:ring-indigo-300 font-medium">
+                    Update Budget
+                </button>
             </div>
         </div>
     </div>
-    <div id="editBudgetModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-        <div class="relative p-4 w-full max-w-2xl max-h-full">
-            <div class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
-                <div class="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Edit Budget</h3>
-                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="editBudgetModal">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                        <span class="sr-only">Close modal</span>
-                    </button>
-                </div>
-                <form id="editBudgetForm" method="POST">
-                    @csrf
-                    @method('PUT')
-                    <div class="grid gap-4 mb-4 sm:grid-cols-2">
-                        <div>
-                            <label for="edit-department_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Department</label>
-                            <select id="edit-department_id" name="department_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required>
-                                @foreach($departments as $department)
-                                    <option value="{{ $department->id }}">{{ $department->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <label for="edit-total_amount" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Total Amount</label>
-                            <input type="number" name="total_amount" id="edit-total_amount" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600" required>
-                        </div>
-                        <div>
-                            <label for="edit-period_start" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Start Date</label>
-                            <input type="date" name="period_start" id="edit-period_start" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600" required>
-                        </div>
-                        <div>
-                            <label for="edit-period_end" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">End Date</label>
-                            <input type="date" name="period_end" id="edit-period_end" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600" required>
-                        </div>
-                        <div class="sm:col-span-2">
-                            <label for="edit-status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status</label>
-                            <select id="edit-status" name="status" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600" required>
-                                <option value="active">Active</option>
-                                <option value="closed">Closed</option>
-                            </select>
-                        </div>
-                    </div>
-                    <button type="submit" class="text-white inline-flex items-center bg-indigo-600 hover:bg-indigo-700 focus:ring-4 focus:outline-none focus:ring-indigo-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-                        Update Budget
-                    </button>
-                </form>
-            </div>
-        </div>
+</div>
+
 
 
 
@@ -442,8 +452,6 @@
                         }
                     }
                 });
-
-                // View Budget Modal
                 // View Budget Modal
 const viewBudgetButtons = document.querySelectorAll('.view-budget-btn');
 const viewBudgetModal = document.getElementById('viewBudgetModal');
@@ -550,7 +558,8 @@ viewBudgetButtons.forEach(button => {
                 openModal();
             });
     });
-});const editBudgetButtons = document.querySelectorAll('.edit-budget-btn');
+});
+                const editBudgetButtons = document.querySelectorAll('.edit-budget-btn');
                 const editBudgetModal = document.getElementById('editBudgetModal');
                 const editBudgetForm = document.getElementById('editBudgetForm');
                 const editModal = new Flowbite.Modal(editBudgetModal);
@@ -579,12 +588,10 @@ viewBudgetButtons.forEach(button => {
                     });
                 });
                 
-                // Handle closing edit modal
-                 const closeEditButton = editBudgetModal.querySelector('[data-modal-toggle="editBudgetModal"]');
-                 closeEditButton.addEventListener('click', function() {
-                     editModal.hide();
-                 });
-
+                const closeEditButton = editBudgetModal.querySelector('[data-modal-toggle="editBudgetModal"]');
+                closeEditButton.addEventListener('click', function() {
+                    editModal.hide();
+                });
             });
         </script>
     @endpush
