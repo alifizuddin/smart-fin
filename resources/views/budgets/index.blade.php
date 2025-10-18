@@ -10,12 +10,12 @@
                    class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
                     Print Report
                 </a>
-            @can('is-admin')
+            @hasanyrole('Admin|Manager')
                 <a href="{{ route('budgets.create') }}"
-                   class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-300 transition ease-in-out duration-150">
+                   class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
                     + Create Budget
                 </a>
-            @endcan
+            @endhasanyrole
         </div>
     </x-slot>
 
@@ -56,34 +56,51 @@
                 <div class="p-6 text-gray-900 dark:text-gray-100">
 
                     <form action="{{ route('budgets.index') }}" method="GET">
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-xl">
-                            <div>
-                                <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
-                                <select id="status" name="status" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                    <option value="">All</option>
-                                    <option value="active" @selected($filters['status'] ?? '' == 'active')>Active</option>
-                                    <option value="closed" @selected($filters['status'] ?? '' == 'closed')>Closed</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Start Date</label>
-                                <input type="date" name="start_date" id="start_date" value="{{ $filters['start_date'] ?? '' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                            </div>
-                            <div>
-                                <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">End Date</label>
-                                <input type="date" name="end_date" id="end_date" value="{{ $filters['end_date'] ?? '' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                            </div>
-                            <div class="flex items-end">
-                                <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">Filter</button>
-                            </div>
-                        </div>
-                    </form>
+    {{-- ** MODIFIED: Changed grid columns to 5 ** --}}
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-xl">
+        
+        {{-- ** NEW: Department Filter Dropdown ** --}}
+        @role('Admin')
+            <div>
+                <label for="department_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Department</label>
+                <select id="department_id" name="department_id" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <option value="">All</option>
+                    @foreach ($departments as $department)
+                        <option value="{{ $department->id }}" @selected(($filters['department_id'] ?? '') == $department->id)>
+                            {{ $department->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+        @endrole
+
+        <div>
+            <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+            <select id="status" name="status" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <option value="">All</option>
+                <option value="active" @selected(($filters['status'] ?? '') == 'active')>Active</option>
+                <option value="closed" @selected(($filters['status'] ?? '') == 'closed')>Closed</option>
+            </select>
+        </div>
+        <div>
+            <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Start Date</label>
+            <input type="date" name="start_date" id="start_date" value="{{ $filters['start_date'] ?? '' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+        </div>
+        <div>
+            <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">End Date</label>
+            <input type="date" name="end_date" id="end_date" value="{{ $filters['end_date'] ?? '' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+        </div>
+        <div class="flex items-end">
+            <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">Filter</button>
+        </div>
+    </div>
+</form>
 
                     <form action="{{ route('budgets.bulkAction') }}" method="POST" id="bulk-action-form">
                         @csrf
                         <input type="hidden" name="action" id="bulk-action-input">
                         
-                        <div class="flex items-center justify-between flex-wrap md:flex-nowrap gap-4 p-4 bg-gray-50 dark:bg-gray-900 border-y border-gray-200 dark:border-gray-700">
+                        <div class="rounded-xl flex items-center justify-between flex-wrap md:flex-nowrap gap-4 p-4 bg-gray-50 dark:bg-gray-900 border-y border-gray-200 dark:border-gray-700">
                             <div class="flex items-center gap-2">
                                 <button id="dropdownActionButton" data-dropdown-toggle="dropdownAction"
                                         class="inline-flex items-center text-gray-700 bg-white border border-gray-300 hover:bg-gray-100 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600">
@@ -99,54 +116,140 @@
                         </div>
 
                         {{-- Table --}}
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm text-left text-gray-600 dark:text-gray-300">
-                                <thead class="text-xs uppercase bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
-                                    <tr>
-                                        <th class="p-4"><input id="checkbox-all" type="checkbox" class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500"></th>
-                                        {{-- Tier 1: Sortable Headers --}}
-                                        @php
-                                            $linkClasses = 'px-6 py-3 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600';
-                                            $icon = ($filters['sort_order'] ?? 'desc') == 'desc' ? '&#9660;' : '&#9650;';
-                                        @endphp
-                                        <th class="{{ $linkClasses }}" onclick="window.location.href='{{ route('budgets.index', array_merge($filters, ['sort_by' => 'department', 'sort_order' => ($filters['sort_by'] ?? '') == 'department' && ($filters['sort_order'] ?? '') == 'asc' ? 'desc' : 'asc'])) }}'">Department {!! ($filters['sort_by'] ?? '') == 'department' ? $icon : '' !!}</th>
-                                        <th class="{{ $linkClasses }}" onclick="window.location.href='{{ route('budgets.index', array_merge($filters, ['sort_by' => 'total_amount', 'sort_order' => ($filters['sort_by'] ?? '') == 'total_amount' && ($filters['sort_order'] ?? '') == 'asc' ? 'desc' : 'asc'])) }}'">Total Amount {!! ($filters['sort_by'] ?? '') == 'total_amount' ? $icon : '' !!}</th>
-                                        <th class="px-6 py-3">Used / Remaining</th>
-                                        <th class="px-6 py-3">Period</th>
-                                        <th class="px-6 py-3">Created By</th>
-                                        <th class="px-6 py-3">Status</th>
-                                        <th class="px-6 py-3 text-right">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse ($budgets as $budget)
-                                        @php
-                                            $percentage = $budget->total_amount > 0 ? round(($budget->used_amount / $budget->total_amount) * 100, 1) : 0;
-                                            $remaining = $budget->total_amount - $budget->used_amount;
-                                        @endphp
-                                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-indigo-50 dark:hover:bg-gray-700">
-                                            <td class="p-4"><input type="checkbox" name="budget_ids[]" value="{{ $budget->id }}" class="budget-checkbox w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500"></td>
-                                            <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ $budget->department->name }}</td>
-                                            <td class="px-6 py-4 font-semibold text-gray-700 dark:text-gray-200">${{ number_format($budget->total_amount, 2) }}</td>
-                                            <td class="px-6 py-4">
-                                                <div class="w-full text-sm text-gray-600 dark:text-gray-400"><span>${{ number_format($remaining, 2) }}</span> left</div>
-                                                <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700"><div class="h-2.5 rounded-full @if($percentage < 70) bg-green-500 @elseif($percentage < 90) bg-yellow-500 @else bg-red-500 @endif" style="width: {{ $percentage }}%"></div></div>
-                                            </td>
-                                            {{-- Tier 1: New Context Columns --}}
-                                            <td class="px-6 py-4 text-sm">{{ \Carbon\Carbon::parse($budget->period_start)->format('M d, Y') }} - {{ \Carbon\Carbon::parse($budget->period_end)->format('M d, Y') }}</td>
-                                            <td class="px-6 py-4 text-sm">{{ $budget->creator->name ?? 'N/A' }}</td>
-                                            <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $budget->status === 'active' ? 'bg-green-100 text-white-800 dark:bg-green-900' : 'bg-red-100 text-red-800 dark:bg-red-900' }}">{{ ucfirst($budget->status) }}</span></td>
-                                            <td class="px-6 py-4 text-right">
-                                                <button type="button" class="view-budget-btn text-indigo-600 dark:text-indigo-400 hover:underline font-medium" data-budget-id="{{ $budget->id }}">View</button>
-                                                @can('is-admin')<a href="{{ route('budgets.edit', $budget) }}" class="ml-3 text-blue-600 dark:text-blue-400 hover:underline font-medium">Edit</a>@endcan
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr><td colspan="8" class="text-center py-8 text-gray-500">No budgets found.</td></tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
+                        <div class="overflow-x-auto rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+    <table class="w-full text-sm text-left text-gray-600 dark:text-gray-300">
+        {{-- ===== TABLE HEADER ===== --}}
+        <thead class="text-xs uppercase bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 sticky top-0 z-10">
+            <tr>
+                <th class="p-4">
+                    <input id="checkbox-all" type="checkbox" 
+                        class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500">
+                </th>
+
+                {{-- Sortable Headers --}}
+                @php
+                    $linkClasses = 'px-6 py-3 font-semibold cursor-pointer transition hover:bg-gray-200 dark:hover:bg-gray-700';
+                    $icon = ($filters['sort_order'] ?? 'desc') === 'desc' ? '▼' : '▲';
+                @endphp
+
+                <th class="{{ $linkClasses }}"
+                    onclick="window.location.href='{{ route('budgets.index', array_merge($filters, ['sort_by' => 'department', 'sort_order' => ($filters['sort_by'] ?? '') == 'department' && ($filters['sort_order'] ?? '') == 'asc' ? 'desc' : 'asc'])) }}'">
+                    Department {!! ($filters['sort_by'] ?? '') === 'department' ? "<span class='ml-1 text-xs'>$icon</span>" : '' !!}
+                </th>
+
+                <th class="{{ $linkClasses }}"
+                    onclick="window.location.href='{{ route('budgets.index', array_merge($filters, ['sort_by' => 'total_amount', 'sort_order' => ($filters['sort_by'] ?? '') == 'total_amount' && ($filters['sort_order'] ?? '') == 'asc' ? 'desc' : 'asc'])) }}'">
+                    Total Amount {!! ($filters['sort_by'] ?? '') === 'total_amount' ? "<span class='ml-1 text-xs'>$icon</span>" : '' !!}
+                </th>
+
+                <th class="px-6 py-3 font-semibold">Used / Remaining</th>
+                <th class="px-6 py-3 font-semibold">Period</th>
+                <th class="px-6 py-3 font-semibold">Created By</th>
+                <th class="px-6 py-3 font-semibold">Status</th>
+                <th class="px-6 py-3 font-semibold text-right">Action</th>
+            </tr>
+        </thead>
+
+        {{-- ===== TABLE BODY ===== --}}
+        <tbody>
+            @forelse ($budgets as $budget)
+                @php
+                    $percentage = $budget->total_amount > 0 ? round(($budget->used_amount / $budget->total_amount) * 100, 1) : 0;
+                    $remaining = $budget->total_amount - $budget->used_amount;
+                @endphp
+
+                <tr class="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700 hover:bg-indigo-50 dark:hover:bg-gray-800 transition">
+                    {{-- Checkbox --}}
+                    <td class="p-4">
+                        <input type="checkbox" name="budget_ids[]" value="{{ $budget->id }}"
+                            class="budget-checkbox w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500">
+                    </td>
+
+                    {{-- Department --}}
+                    <td class="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">
+                        {{ $budget->department->name }}
+                    </td>
+
+                    {{-- Total --}}
+                    <td class="px-6 py-4 font-semibold text-gray-700 dark:text-gray-200">
+                        ${{ number_format($budget->total_amount, 2) }}
+                    </td>
+
+                    {{-- Used / Remaining --}}
+                    <td class="px-6 py-4">
+                        <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
+                            <span>${{ number_format($budget->used_amount, 2) }} used</span>
+                            <span>${{ number_format($remaining, 2) }} left</span>
                         </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                            <div class="h-2 rounded-full transition-all duration-300 ease-in-out 
+                                @if($percentage < 70) bg-green-500 
+                                @elseif($percentage < 90) bg-yellow-500 
+                                @else bg-red-500 @endif"
+                                style="width: {{ $percentage }}%">
+                            </div>
+                        </div>
+                    </td>
+
+                    {{-- Period --}}
+                    <td class="px-6 py-4 text-sm whitespace-nowrap">
+                        {{ \Carbon\Carbon::parse($budget->period_start)->format('M d, Y') }}
+                        <span class="text-gray-400">→</span>
+                        {{ \Carbon\Carbon::parse($budget->period_end)->format('M d, Y') }}
+                    </td>
+
+                    {{-- Creator --}}
+                    <td class="px-6 py-4 text-sm">{{ $budget->creator->name ?? 'N/A' }}</td>
+
+                    {{-- Status --}}
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium
+                            @if($budget->status === 'active') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                            @else bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 @endif">
+                            <span class="w-2 h-2 rounded-full 
+                                @if($budget->status === 'active') bg-green-500 
+                                @else bg-red-500 @endif">
+                            </span>
+                            {{ ucfirst($budget->status) }}
+                        </span>
+                    </td>
+
+                    {{-- Actions --}}
+                    <td class="px-6 py-4 text-right space-x-2">
+    {{-- View Button --}}
+    <button type="button"
+        data-budget-id="{{ $budget->id }}"
+        class="view-budget-btn inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium
+               bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 
+               dark:bg-indigo-900/40 dark:text-indigo-300 dark:border-indigo-700 
+               dark:hover:bg-indigo-800/60 transition-all duration-200 shadow-sm hover:shadow-md">
+        View
+    </button>
+
+    {{-- Edit Button (Admin Only) --}}
+    @role('Admin')
+        <a href="{{ route('budgets.edit', $budget) }}"
+           class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium
+                  bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 
+                  dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-700 
+                  dark:hover:bg-blue-800/60 transition-all duration-200 shadow-sm hover:shadow-md">
+            Edit
+        </a>
+    @endrole
+</td>
+
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="8" class="text-center py-10 text-gray-500 dark:text-gray-400">
+                        No budgets found.
+                    </td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
+
                     </form> <div class="mt-4">{{ $budgets->links() }}</div>
                 </div>
             </div>
@@ -197,6 +300,103 @@
         </div>
     </div>
 </div>
+<div id="editBudgetModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <div class="relative p-4 w-full max-w-2xl max-h-full">
+            <div class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
+                <div class="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Edit Budget</h3>
+                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="editBudgetModal">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                </div>
+                <form id="editBudgetForm" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="grid gap-4 mb-4 sm:grid-cols-2">
+                        <div>
+                            <label for="edit-department_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Department</label>
+                            <select id="edit-department_id" name="department_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required>
+                                @foreach($departments as $department)
+                                    <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label for="edit-total_amount" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Total Amount</label>
+                            <input type="number" name="total_amount" id="edit-total_amount" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600" required>
+                        </div>
+                        <div>
+                            <label for="edit-period_start" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Start Date</label>
+                            <input type="date" name="period_start" id="edit-period_start" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600" required>
+                        </div>
+                        <div>
+                            <label for="edit-period_end" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">End Date</label>
+                            <input type="date" name="period_end" id="edit-period_end" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600" required>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label for="edit-status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status</label>
+                            <select id="edit-status" name="status" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600" required>
+                                <option value="active">Active</option>
+                                <option value="closed">Closed</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="text-white inline-flex items-center bg-indigo-600 hover:bg-indigo-700 focus:ring-4 focus:outline-none focus:ring-indigo-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                        Update Budget
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="editBudgetModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <div class="relative p-4 w-full max-w-2xl max-h-full">
+            <div class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
+                <div class="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Edit Budget</h3>
+                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="editBudgetModal">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                </div>
+                <form id="editBudgetForm" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="grid gap-4 mb-4 sm:grid-cols-2">
+                        <div>
+                            <label for="edit-department_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Department</label>
+                            <select id="edit-department_id" name="department_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required>
+                                @foreach($departments as $department)
+                                    <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label for="edit-total_amount" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Total Amount</label>
+                            <input type="number" name="total_amount" id="edit-total_amount" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600" required>
+                        </div>
+                        <div>
+                            <label for="edit-period_start" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Start Date</label>
+                            <input type="date" name="period_start" id="edit-period_start" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600" required>
+                        </div>
+                        <div>
+                            <label for="edit-period_end" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">End Date</label>
+                            <input type="date" name="period_end" id="edit-period_end" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600" required>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label for="edit-status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status</label>
+                            <select id="edit-status" name="status" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600" required>
+                                <option value="active">Active</option>
+                                <option value="closed">Closed</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="text-white inline-flex items-center bg-indigo-600 hover:bg-indigo-700 focus:ring-4 focus:outline-none focus:ring-indigo-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                        Update Budget
+                    </button>
+                </form>
+            </div>
+        </div>
 
 
 
@@ -350,7 +550,40 @@ viewBudgetButtons.forEach(button => {
                 openModal();
             });
     });
-});
+});const editBudgetButtons = document.querySelectorAll('.edit-budget-btn');
+                const editBudgetModal = document.getElementById('editBudgetModal');
+                const editBudgetForm = document.getElementById('editBudgetForm');
+                const editModal = new Flowbite.Modal(editBudgetModal);
+
+                editBudgetButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const budgetId = this.dataset.budgetId;
+                        
+                        // Set form action
+                        editBudgetForm.action = `/budgets/${budgetId}`;
+                        
+                        // Fetch budget data
+                        fetch(`/budgets/${budgetId}/json`)
+                            .then(response => response.json())
+                            .then(data => {
+                                // Populate form
+                                document.getElementById('edit-department_id').value = data.department_id;
+                                document.getElementById('edit-total_amount').value = data.total_amount;
+                                document.getElementById('edit-period_start').value = data.period_start.split('T')[0]; // Format for date input
+                                document.getElementById('edit-period_end').value = data.period_end.split('T')[0]; // Format for date input
+                                document.getElementById('edit-status').value = data.status;
+                                
+                                // Show modal
+                                editModal.show();
+                            });
+                    });
+                });
+                
+                // Handle closing edit modal
+                 const closeEditButton = editBudgetModal.querySelector('[data-modal-toggle="editBudgetModal"]');
+                 closeEditButton.addEventListener('click', function() {
+                     editModal.hide();
+                 });
 
             });
         </script>

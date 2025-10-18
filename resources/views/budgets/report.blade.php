@@ -41,6 +41,7 @@
         <div class="bg-white dark:bg-gray-800 shadow-xl sm:rounded-2xl p-10 border border-gray-200 dark:border-gray-700 print-container">
 
             {{-- Header --}}
+            
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center pb-8 border-b dark:border-gray-700">
                 <div>
                     <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white mb-1">Budget Performance Report</h1>

@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Models\Budget;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -26,18 +27,18 @@ class AuthServiceProvider extends ServiceProvider
             return $user->hasRole('Admin');
         });
 
-        Gate::define('is-manager', function (User $user) {
-            return $user->role === 'manager';
+        Gate::define('is-manager', function ($user) {
+            return $user->hasRole('Manager');
         });
 
-        Gate::define('is-staff', function (User $user) {
-            return $user->role === 'staff';
+        Gate::define('is-staff', function ($user) {
+            return $user->hasRole('Staff');
         });
         Gate::define('view-budget', function (User $user, Budget $budget) {
-            if ($user->role === 'admin') {
+            if ($user->hasRole('Admin')) {
                 return true;
             }
-            return $user->role === 'manager' && $user->department_id === $budget->department_id;
+            return $user->hasRole('Manager') && $user->department_id === $budget->department_id;
         });
     }
 }
