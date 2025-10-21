@@ -95,6 +95,9 @@
         </div>
     </div>
 </form>
+                    {{-- ========================================================== --}}
+                    {{-- START OF FIX: Bulk action form now ends BEFORE the table --}}
+                    {{-- ========================================================== --}}
                     <form action="{{ route('budgets.bulkAction') }}" method="POST" id="bulk-action-form">
                         @csrf
                         <input type="hidden" name="action" id="bulk-action-input">
@@ -113,6 +116,11 @@
                                 </div>
                             </div>
                         </div>
+                    </form>
+                    {{-- ========================================================== --}}
+                    {{-- END OF FIX: The form tag is now closed. --}}
+                    {{-- ========================================================== --}}
+
                         {{-- Table --}}
                         <div class="overflow-x-auto rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
     <table class="w-full text-sm text-left text-gray-600 dark:text-gray-300">
@@ -159,8 +167,15 @@
                 <tr class="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700 hover:bg-indigo-50 dark:hover:bg-gray-800 transition">
                     {{-- Checkbox --}}
                     <td class="p-4">
+                        {{-- ========================================================== --}}
+                        {{-- START OF FIX: Added form="bulk-action-form" --}}
+                        {{-- ========================================================== --}}
                         <input type="checkbox" name="budget_ids[]" value="{{ $budget->id }}"
-                            class="budget-checkbox w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500">
+                               form="bulk-action-form"
+                               class="budget-checkbox w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500">
+                        {{-- ========================================================== --}}
+                        {{-- END OF FIX --}}
+                        {{-- ========================================================== --}}
                     </td>
 
                     {{-- Department --}}
@@ -213,28 +228,66 @@
                             </span>
                     </td>
                     
-                    {{-- Actions --}}
-                    <td class="px-6 py-4 text-right space-x-2">
-    {{-- View Button --}}
+                    {{-- ========================================================== --}}
+                    {{-- START OF FIX: This is the updated Actions cell --}}
+                    {{-- ========================================================== --}}
+                    <td class="px-6 py-4 text-right space-x-2 whitespace-nowrap">
+                        {{-- View Button (Visible to all, policy handles logic) --}}
                         <button type="button"
-        data-budget-id="{{ $budget->id }}"
-        class="view-budget-btn inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium
-               bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 
-               dark:bg-indigo-900/40 dark:text-indigo-300 dark:border-indigo-700 
-               dark:hover:bg-indigo-800/60 transition-all duration-200 shadow-sm hover:shadow-md">
-        View
-    </button>
-@role('Admin')
-    <button type="button"
-            data-budget-id="{{ $budget->id }}"
-            class="edit-budget-btn inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium
-                   bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 
-                   dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-700 
-                   dark:hover:bg-blue-800/60 transition-all duration-200 shadow-sm hover:shadow-md">
-        Edit
-    </button>
-@endrole
-</td>
+                                data-budget-id="{{ $budget->id }}"
+                                class="view-budget-btn inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium
+                                       bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 
+                                       dark:bg-indigo-900/40 dark:text-indigo-300 dark:border-indigo-700 
+                                       dark:hover:bg-indigo-800/60 transition-all duration-200 shadow-sm hover:shadow-md">
+                            View
+                        </button>
+                        
+                        @role('Admin')
+                            {{-- Admin: Show Edit button if status is NOT pending --}}
+                            @if ($budget->status != 'pending')
+                                <button type="button"
+                                        data-budget-id="{{ $budget->id }}"
+                                        class="edit-budget-btn inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium
+                                               bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 
+                                               dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-700 
+                                               dark:hover:bg-blue-800/60 transition-all duration-200 shadow-sm hover:shadow-md">
+                                    Edit
+                                </button>
+                            @endif
+
+                            {{-- Admin: Show Approval/Rejection buttons ONLY for pending budgets --}}
+                            @if ($budget->status == 'pending')
+                                {{-- Approve Button --}}
+                                <form action="{{ route('budgets.approve', $budget) }}" method="POST" class="inline-flex">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit"
+                                            class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium
+                                                   bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 
+                                                   dark:bg-green-900/40 dark:text-green-300 dark:border-green-700 
+                                                   dark:hover:bg-green-800/60 transition-all duration-200 shadow-sm hover:shadow-md">
+                                        Approve
+                                    </button>
+                                </form>
+
+                                {{-- Reject Button --}}
+                                <form action="{{ route('budgets.reject', $budget) }}" method="POST" class="inline-flex" onsubmit="return confirm('Are you sure you want to reject and delete this budget?');">
+                                    @csrf
+                                    @method('PATCH') {{-- Route is defined as PATCH --}}
+                                    <button type="submit"
+                                            class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium
+                                                   bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 
+                                                   dark:bg-red-900/40 dark:text-red-300 dark:border-red-700 
+                                                   dark:hover:bg-red-800/60 transition-all duration-200 shadow-sm hover:shadow-md">
+                                        Reject
+                                    </button>
+                                </form>
+                            @endif
+                        @endrole
+                    </td>
+                    {{-- ========================================================== --}}
+                    {{-- END OF FIX --}}
+                    {{-- ========================================================== --}}
 
                 </tr>
             @empty
@@ -248,7 +301,13 @@
     </table>
 </div>
 
-                    </form> <div class="mt-4">{{ $budgets->links() }}</div>
+                    {{-- ========================================================== --}}
+                    {{-- START OF FIX: The <form> tag was removed from here. --}}
+                    {{-- ========================================================== --}}
+                    <div class="mt-4">{{ $budgets->links() }}</div>
+                    {{-- ========================================================== --}}
+                    {{-- END OF FIX --}}
+                    {{-- ========================================================== --}}
                 </div>
             </div>
         </div>
@@ -298,8 +357,7 @@
         </div>
     </div>
 </div>
-    <!-- Edit Budget Modal -->
-<div id="editBudgetModal" tabindex="-1" aria-hidden="true"
+    <div id="editBudgetModal" tabindex="-1" aria-hidden="true"
      class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
     <div class="relative w-full max-w-3xl mx-4">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden">
