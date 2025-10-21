@@ -5,11 +5,13 @@
                 {{ __('Budgets Dashboard') }}
             </h2>
             <div class="flex items-center gap-2">
+            @hasanyrole('Admin|Manager')
                 {{-- New Report Button --}}
                 <a href="{{ route('budgets.report', request()->query()) }}"
                    class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
                     Print Report
                 </a>
+            @endhasanyrole
             @hasanyrole('Admin|Manager')
                 <a href="{{ route('budgets.create') }}"
                    class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
@@ -616,7 +618,7 @@
                             <div class="flex flex-col justify-center">
                                 <div class="mb-2 flex justify-between text-sm text-gray-500"><span>Usage</span><span>${percentage}%</span></div>
                                 <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                                    <div class="h-3 rounded-full ${colorClass}" style="width: ${percentage}%"></div>
+                                    <div class="h-3 rounded-full ${colorClass}" style="width: ${Math.min(percentage, 100)}%"></div>
                                 </div>
                                 <div class="mt-4">
                                     <h4 class="text-gray-500 text-sm uppercase">Period</h4>
