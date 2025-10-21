@@ -10,7 +10,7 @@
                    class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
                     Print Report
                 </a>
-            @hasanyrole('Admin|Manager')
+            @hasanyrole('Admin')
                 <a href="{{ route('budgets.create') }}"
                    class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
                     + Create Budget
