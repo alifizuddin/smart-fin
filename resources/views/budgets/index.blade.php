@@ -222,15 +222,16 @@
                dark:hover:bg-indigo-800/60 transition-all duration-200 shadow-sm hover:shadow-md">
         View
     </button>
-    @role('Admin')
-        <a href="{{ route('budgets.edit', $budget) }}"
-           class="edit-budget-btn inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium
-                  bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 
-                  dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-700 
-                  dark:hover:bg-blue-800/60 transition-all duration-200 shadow-sm hover:shadow-md">
-            Edit
-        </a>
-    @endrole
+@role('Admin')
+    <button type="button"
+            data-budget-id="{{ $budget->id }}"
+            class="edit-budget-btn inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium
+                   bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 
+                   dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-700 
+                   dark:hover:bg-blue-800/60 transition-all duration-200 shadow-sm hover:shadow-md">
+        Edit
+    </button>
+@endrole
 </td>
 
                 </tr>
@@ -412,8 +413,9 @@
 
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
         <script>
-document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', () => {
     // =========================
     // ✅ Chart Initialization
     // =========================
@@ -507,7 +509,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === viewBudgetModal) closeModal();
     });
     document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') closeModal();
+        if (e.key === 'Escape') {
+            closeModal(); // Closes the view modal
+            
+            // This will close the edit modal (function defined in next step)
+            if (typeof closeEditModal === 'function') {
+                closeEditModal();
+            }
+        }
     });
 
     viewBudgetButtons.forEach(button => {
@@ -571,35 +580,55 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // =========================
-    // ✅ Edit Budget Modal (Flowbite)
+    // ✅ Edit Budget Modal (Custom, like View Modal)
     // =========================
     const editBudgetButtons = document.querySelectorAll('.edit-budget-btn');
     const editBudgetModal = document.getElementById('editBudgetModal');
     const editBudgetForm = document.getElementById('editBudgetForm');
+    const closeEditModalButtons = editBudgetModal?.querySelectorAll('[data-modal-close]') || [];
+
+    // Define the close function in a scope the 'Escape' listener can access
+    function closeEditModal() {
+        editBudgetModal?.classList.add('hidden');
+        editBudgetModal?.setAttribute('aria-hidden', 'true');
+    }
+
+    function openEditModal() {
+        editBudgetModal?.classList.remove('hidden');
+        editBudgetModal?.setAttribute('aria-hidden', 'false');
+    }
+
+    // Attach close events for 'X' button and 'Cancel' button
+    closeEditModalButtons.forEach(btn => btn.addEventListener('click', closeEditModal));
+    
+    // Attach close event for clicking on the background
+    editBudgetModal?.addEventListener('click', e => {
+        if (e.target === editBudgetModal) closeEditModal();
+    });
 
     if (editBudgetModal && editBudgetForm) {
-        const editModal = new Flowbite.Modal(editBudgetModal);
-
         editBudgetButtons.forEach(button => {
             button.addEventListener('click', () => {
                 const budgetId = button.dataset.budgetId;
+                if (!budgetId) return; // Safety check
+
                 editBudgetForm.action = `/budgets/${budgetId}`;
 
                 fetch(`/budgets/${budgetId}/json`)
                     .then(res => res.json())
                     .then(data => {
+                        // Populate the form fields
                         document.getElementById('edit-department_id').value = data.department_id;
                         document.getElementById('edit-total_amount').value = data.total_amount;
                         document.getElementById('edit-period_start').value = data.period_start.split('T')[0];
                         document.getElementById('edit-period_end').value = data.period_end.split('T')[0];
                         document.getElementById('edit-status').value = data.status;
-                        editModal.show();
+                        
+                        // Show the modal *after* data is populated
+                        openEditModal(); 
                     });
             });
         });
-
-        const closeEditButton = editBudgetModal.querySelector('[data-modal-toggle="editBudgetModal"]');
-        closeEditButton?.addEventListener('click', () => editModal.hide());
     }
 });
 </script>
