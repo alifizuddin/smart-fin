@@ -54,6 +54,18 @@
                                 placeholder="Enter total allocated amount" />
                             <x-input-error :messages="$errors->get('total_amount')" class="mt-2" />
                         </div>
+                        <div class="mt-4">
+                            <x-input-label for="project_id" :value="__('Project (Optional)')" />
+                            <select id="project_id" name="project_id" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                <option value="">None (General Budget)</option>
+                                @foreach ($projects as $project)
+                                    <option value="{{ $project->id }}" {{ old('project_id') == $project->id ? 'selected' : '' }}>
+                                        {{ $project->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <x-input-error :messages="$errors->get('project_id')" class="mt-2" />
+                        </div>
 
                         {{-- Period Start --}}
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

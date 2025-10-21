@@ -20,6 +20,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:Admin')->group(function () {
         // Route::resource already creates index, edit, update, etc.
         // The individual routes before it were redundant.
+        Route::patch('budgets/{budget}/approve', [BudgetController::class, 'approve'])
+        ->name('budgets.approve')
+        ->middleware('role:Admin'); // Only Admins can access
+
+        Route::patch('budgets/{budget}/reject', [BudgetController::class, 'reject'])
+        ->name('budgets.reject')
+        ->middleware('role:Admin'); // Only Admins can access
+        
         Route::resource('users', UserController::class);
 
         // This route is Admin-only, so it must be in this group

@@ -10,7 +10,7 @@
                    class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
                     Print Report
                 </a>
-            @hasanyrole('Admin')
+            @hasanyrole('Admin|Manager')
                 <a href="{{ route('budgets.create') }}"
                    class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
                     + Create Budget
@@ -201,20 +201,22 @@
 
                     {{-- Status --}}
                     <td class="px-6 py-4">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium
-                            @if($budget->status === 'active') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-                            @else bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 @endif">
-                            <span class="w-2 h-2 rounded-full 
-                                @if($budget->status === 'active') bg-green-500 
-                                @else bg-red-500 @endif">
-                            </span>
+                        @php
+                            $statusClass = [
+                            'pending' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+                            'active' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+                            'closed' => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+                        ][$budget->status] ?? 'bg-gray-100 text-gray-800';
+                        @endphp
+                            <span class="text-xs font-medium me-2 px-2.5 py-0.5 rounded {{ $statusClass }}">
                             {{ ucfirst($budget->status) }}
-                        </span>
+                            </span>
                     </td>
+                    
                     {{-- Actions --}}
                     <td class="px-6 py-4 text-right space-x-2">
     {{-- View Button --}}
-    <button type="button"
+                        <button type="button"
         data-budget-id="{{ $budget->id }}"
         class="view-budget-btn inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium
                bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 

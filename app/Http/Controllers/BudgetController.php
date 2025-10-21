@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Budget;
 use App\Models\Department;
+use App\Models\Projects;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -141,12 +142,13 @@ class BudgetController extends Controller
     // 2️⃣ Fetch Required Data
     // ============================================================
     $departments = Department::all();
+    $projects = Projects::orderBy('name')->get();
     // Retrieve all departments for the department dropdown list.
 
     // ============================================================
     // 3️⃣ Return View
     // ============================================================
-    return view('budgets.create', compact('departments'));
+    return view('budgets.create', compact('departments', 'projects'));
 }
 /**
  * Return budget details as JSON (for AJAX or API usage).
@@ -187,6 +189,7 @@ public function store(Request $request)
     // ============================================================
     $validated = $request->validate([
         'department_id' => 'required|exists:departments,id',
+        'project_id'    => 'nullable|exists:projects,id',
         'total_amount'  => 'required|numeric|min:0',
         'period_start'  => 'required|date',
         'period_end'    => 'required|date|after_or_equal:period_start',
@@ -196,6 +199,12 @@ public function store(Request $request)
     // 3️⃣ Create Budget Record
     // ============================================================
     Budget::create($validated + ['created_by' => Auth::id()]);
+    
+    $message = 'Budget submitted for approval.';
+    if (Auth::user()->hasRole('Admin')) {
+        $data['status'] = 'active'; // Admins can auto-approve
+        $message = 'Budget created and activated successfully.';
+    }
 
     // ============================================================
     // 4️⃣ Redirect with Success Message
@@ -260,7 +269,38 @@ public function edit(Budget $budget)
     // ============================================================
     return view('budgets.edit', compact('budget', 'departments'));
 }
+public function approve(Budget $budget)
+{
+    // ============================================================
+    // 1️⃣ Authorization
+    // ============================================================
+    $this->authorize('approve', $budget);
+    // ============================================================
+    // 2️⃣ Update Budget Status
+    // ============================================================
+    $budget->update(['status' => 'active']);
+    // ============================================================
+    // 3️⃣ Redirect with Success Message
+    // ============================================================
+    return redirect()
+        ->route('budgets.index')
+        ->with('success', 'Budget approved successfully.');
+}
+public function reject(Budget $budget)
+{
+    // You could also use a Policy check here
+    // $this->authorize('reject', $budget);
 
+    // We'll just delete the rejected budget.
+    // You could also set its status to 'rejected' if you prefer.
+    $budget->delete();
+
+    // Optional: Notify the manager who created it
+
+    return redirect()
+        ->route('budgets.index')
+        ->with('success', 'Budget rejected and removed.');
+}
 
 /**
  * Update the specified budget in the database.
@@ -284,7 +324,7 @@ public function update(Request $request, Budget $budget)
         'total_amount' => 'required|numeric|min:0',
         'period_start' => 'required|date',
         'period_end'   => 'required|date|after_or_equal:period_start',
-        'status'       => 'required|string|in:active,closed',
+        'status'       => 'required|string|in:active,closed,pending',
     ]);
 
     // ============================================================

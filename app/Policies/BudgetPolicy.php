@@ -58,7 +58,7 @@ class BudgetPolicy
     {
         // 'before' method handles Admin, so non-admins will
         // get a 'false' and be denied.
-        return false;
+        return $user->hasRole('Manager');
     }
 
     /**
