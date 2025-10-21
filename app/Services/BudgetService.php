@@ -89,10 +89,16 @@ class BudgetService
     /**
      * Helper to group a budget collection by department and sum amounts.
      */
+    /**
+     * Helper to group a budget collection by department and sum amounts.
+     */
     private function groupBudgetsByDepartment(SupportCollection $budgets): SupportCollection
     {
+        // ADD THIS LINE: Filter out pending budgets before calculating
+        $approvedBudgets = $budgets->whereIn('status', ['active', 'closed']);
+
         // We group by 'department.name' which was eager-loaded by the query
-        return $budgets->groupBy('department.name')
+        return $approvedBudgets->groupBy('department.name') // <-- Change this variable
             ->map(fn($group) => [
                 'total' => $group->sum('total_amount'),
                 'used'  => $group->sum('used_amount'),

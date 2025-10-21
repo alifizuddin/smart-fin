@@ -6,6 +6,7 @@ use App\Models\Budget;
 use App\Models\Department;
 use App\Models\Projects;
 use Illuminate\Http\Request;
+use App\Notifications\BudgetStatusUpdated;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use App\Services\BudgetService;
@@ -284,7 +285,7 @@ public function approve(Budget $budget)
     // 1️⃣ Authorization
     // ============================================================
     
-    // $this->authorize('approve', $budget); // <-- COMMENT OUT THIS LINE
+    $this->authorize('approve', $budget); // <-- COMMENT OUT THIS LINE
     
     // ============================================================
     // 2️⃣ Update Budget Status
@@ -293,6 +294,11 @@ public function approve(Budget $budget)
     // ============================================================
     // 3️⃣ Redirect with Success Message
     // ============================================================
+    $creator = $budget->creator; // Get the user who made the budget
+    if ($creator) {
+        $message = "Your budget submission for {$budget->department->name} has been approved.";
+        $creator->notify(new BudgetStatusUpdated($budget, $message, 'View Budgets'));
+    }
     return redirect()
         ->route('budgets.index')
         ->with('success', 'Budget approved successfully.');
@@ -300,11 +306,18 @@ public function approve(Budget $budget)
 public function reject(Budget $budget)
 {
     // You could also use a Policy check here
-    // $this->authorize('reject', $budget);
+    $this->authorize('reject', $budget);
 
     // We'll just delete the rejected budget.
     // You could also set its status to 'rejected' if you prefer.
-    $budget->delete();
+    $budget->update(['status' => 'rejected']);
+
+    $creator = $budget->creator;
+    if ($creator) {
+        $message = "Your budget submission for {$budget->department->name} has been rejected.";
+        // You could add a reason here later
+        $creator->notify(new BudgetStatusUpdated($budget, $message, 'View Budgets'));
+    }
 
     // Optional: Notify the manager who created it
 

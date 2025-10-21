@@ -80,6 +80,22 @@ class BudgetPolicy
         // 'before' method handles Admin
         return false;
     }
+    public function approve(User $user, Budget $budget): bool
+    {
+        // The 'before' method handles Admin logic.
+        // This will return false for everyone else.
+        return false;
+    }
+
+    /**
+     * Determine whether the user can reject a budget.
+     * (Only Admins)
+     */
+    public function reject(User $user, Budget $budget): bool
+    {
+        // The 'before' method handles Admin logic.
+        return false;
+    }
 
     /**
      * Determine whether the user can perform bulk actions (like delete).
