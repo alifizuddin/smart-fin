@@ -177,14 +177,14 @@
                     <td class="px-6 py-4">
                         <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
                             <span>${{ number_format($budget->used_amount, 2) }} used</span>
-                            <span>${{ number_format($remaining, 2) }} left</span>
+                            <span>${{ number_format(max($remaining, 0), 2) }} left</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
                             <div class="h-2 rounded-full transition-all duration-300 ease-in-out 
                                 @if($percentage < 70) bg-green-500 
                                 @elseif($percentage < 90) bg-yellow-500 
                                 @else bg-red-500 @endif"
-                                style="width: {{ $percentage }}%">
+                                style="width: {{ min($percentage, 100) }}%">
                             </div>
                         </div>
                     </td>
@@ -413,186 +413,196 @@
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                // Tier 2 Charts
-                const pieCtx = document.getElementById('departmentPieChart')?.getContext('2d');
-                if (pieCtx) {
-                    new Chart(pieCtx, { type: 'doughnut', data: { labels: Object.keys(@json($charts['pie'])), datasets: [{ data: Object.values(@json($charts['pie'])), backgroundColor: ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#6366F1'], hoverOffset: 4 }] }, options: { responsive: true, plugins: { legend: { position: 'bottom' } } } });
-                }
+document.addEventListener('DOMContentLoaded', () => {
+    // =========================
+    // ✅ Chart Initialization
+    // =========================
+    const pieData = @json($charts['pie']);
+    const barData = @json($charts['bar']);
 
-                const barCtx = document.getElementById('departmentBarChart')?.getContext('2d');
-                if (barCtx) {
-                    new Chart(barCtx, { type: 'bar', data: { labels: Object.keys(@json($charts['bar'])), datasets: [{ label: 'Total Budget', data: Object.values(@json($charts['bar'])).map(d => d.total), backgroundColor: '#60A5FA' }, { label: 'Amount Used', data: Object.values(@json($charts['bar'])).map(d => d.used), backgroundColor: '#F87171' }] }, options: { responsive: true, scales: { y: { beginAtZero: true } }, plugins: { legend: { position: 'top' } } } });
-                }
+    const pieCtx = document.getElementById('departmentPieChart')?.getContext('2d');
+    if (pieCtx) {
+        new Chart(pieCtx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(pieData),
+                datasets: [{
+                    data: Object.values(pieData),
+                    backgroundColor: ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#6366F1'],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    }
 
-                // Tier 1: Bulk Action JavaScript
-                const selectAllCheckbox = document.getElementById('checkbox-all');
-                const budgetCheckboxes = document.querySelectorAll('.budget-checkbox');
-                const bulkActionForm = document.getElementById('bulk-action-form');
-                
-                selectAllCheckbox.addEventListener('change', function() {
-                    budgetCheckboxes.forEach(checkbox => {
-                        checkbox.checked = this.checked;
-                    });
-                });
+    const barCtx = document.getElementById('departmentBarChart')?.getContext('2d');
+    if (barCtx) {
+        new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(barData),
+                datasets: [
+                    { label: 'Total Budget', data: Object.values(barData).map(d => d.total), backgroundColor: '#60A5FA' },
+                    { label: 'Amount Used', data: Object.values(barData).map(d => d.used), backgroundColor: '#F87171' }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true } },
+                plugins: { legend: { position: 'top' } }
+            }
+        });
+    }
 
-                bulkActionForm.addEventListener('submit', function(e) {
-                    // Prevent submission if no action is selected from the dropdown
-                    const action = e.submitter.value;
-                    if (!action) {
-                        e.preventDefault();
-                        alert('Please select a bulk action.');
-                        return;
-                    }
+    // =========================
+    // ✅ Bulk Action
+    // =========================
+    const selectAllCheckbox = document.getElementById('checkbox-all');
+    const budgetCheckboxes = document.querySelectorAll('.budget-checkbox');
+    const bulkActionForm = document.getElementById('bulk-action-form');
 
-                    // Confirm deletion
-                    if (action === 'delete') {
-                        if (!confirm('Are you sure you want to delete the selected budgets? This action cannot be undone.')) {
-                            e.preventDefault();
-                        }
-                    }
-                });
-                // View Budget Modal
-const viewBudgetButtons = document.querySelectorAll('.view-budget-btn');
-const viewBudgetModal = document.getElementById('viewBudgetModal');
-const modalBodyContent = document.getElementById('modal-body-content');
-const closeModalButtons = viewBudgetModal.querySelectorAll('[data-modal-close]');
+    if (selectAllCheckbox && bulkActionForm) {
+        selectAllCheckbox.addEventListener('change', function() {
+            budgetCheckboxes.forEach(cb => cb.checked = this.checked);
+        });
 
-// Function to open modal
-function openModal() {
-    viewBudgetModal.classList.remove('hidden');
-    viewBudgetModal.setAttribute('aria-hidden', 'false');
-}
+        bulkActionForm.addEventListener('submit', e => {
+            const action = e.submitter?.value;
+            if (!action) {
+                e.preventDefault();
+                alert('Please select a bulk action.');
+                return;
+            }
+            if (action === 'delete' && !confirm('Are you sure you want to delete the selected budgets?')) {
+                e.preventDefault();
+            }
+        });
+    }
 
-// Function to close modal
-function closeModal() {
-    viewBudgetModal.classList.add('hidden');
-    viewBudgetModal.setAttribute('aria-hidden', 'true');
-    modalBodyContent.innerHTML = '';
-}
+    // =========================
+    // ✅ View Budget Modal
+    // =========================
+    const viewBudgetButtons = document.querySelectorAll('.view-budget-btn');
+    const viewBudgetModal = document.getElementById('viewBudgetModal');
+    const modalBodyContent = document.getElementById('modal-body-content');
+    const closeModalButtons = viewBudgetModal?.querySelectorAll('[data-modal-close]') || [];
 
-// Event listeners for close
-closeModalButtons.forEach(btn => btn.addEventListener('click', closeModal));
-viewBudgetModal.addEventListener('click', (e) => {
-    if (e.target === viewBudgetModal) closeModal(); // close on overlay click
-});
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeModal(); // close on Esc
-});
+    function openModal() {
+        viewBudgetModal?.classList.remove('hidden');
+        viewBudgetModal?.setAttribute('aria-hidden', 'false');
+    }
 
-viewBudgetButtons.forEach(button => {
-    button.addEventListener('click', function () {
-        const budgetId = this.dataset.budgetId;
+    function closeModal() {
+        viewBudgetModal?.classList.add('hidden');
+        viewBudgetModal?.setAttribute('aria-hidden', 'true');
+        modalBodyContent.innerHTML = '';
+    }
 
-        modalBodyContent.innerHTML = `
-            <div class="flex justify-center py-8">
-                <div class="animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent"></div>
-            </div>
-        `;
-
-        fetch(`/budgets/${budgetId}/json`)
-            .then(response => response.json())
-            .then(data => {
-                const remaining = data.total_amount - data.used_amount;
-                const percentage = data.total_amount > 0
-                    ? Math.round((data.used_amount / data.total_amount) * 100)
-                    : 0;
-
-                const colorClass =
-                    percentage < 70 ? 'bg-green-500' :
-                    percentage < 90 ? 'bg-yellow-500' : 'bg-red-500';
-
-                modalBodyContent.innerHTML = `
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-3">
-                            <div>
-                                <h4 class="text-gray-500 text-sm uppercase dark:text-gray-400">Department</h4>
-                                <p class="text-lg font-semibold text-gray-900 dark:text-white">${data.department.name}</p>
-                            </div>
-                            <div>
-                                <h4 class="text-gray-500 text-sm uppercase dark:text-gray-400">Total Amount</h4>
-                                <p class="text-lg font-semibold text-gray-900 dark:text-white">$${Number(data.total_amount).toLocaleString()}</p>
-                            </div>
-                            <div>
-                                <h4 class="text-gray-500 text-sm uppercase dark:text-gray-400">Used Amount</h4>
-                                <p class="text-lg font-semibold text-gray-900 dark:text-white">$${Number(data.used_amount).toLocaleString()}</p>
-                            </div>
-                            <div>
-                                <h4 class="text-gray-500 text-sm uppercase dark:text-gray-400">Remaining</h4>
-                                <p class="text-lg font-semibold ${remaining >= 0 ? 'text-green-600' : 'text-red-600'}">
-                                    $${remaining.toLocaleString()}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-col justify-center">
-                            <div class="mb-2 flex justify-between text-sm text-gray-500 dark:text-gray-400">
-                                <span>Usage</span>
-                                <span>${percentage}%</span>
-                            </div>
-                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                                <div class="h-3 rounded-full ${colorClass}" style="width: ${percentage}%"></div>
-                            </div>
-
-                            <div class="mt-4">
-                                <h4 class="text-gray-500 text-sm uppercase dark:text-gray-400">Period</h4>
-                                <p class="text-sm text-gray-800 dark:text-gray-200">${new Date(data.period_start).toLocaleDateString()} - ${new Date(data.period_end).toLocaleDateString()}</p>
-                            </div>
-
-                            <div class="mt-4">
-                                <h4 class="text-gray-500 text-sm uppercase dark:text-gray-400">Status</h4>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${data.status === 'active'
-                                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}">
-                                    ${data.status.toUpperCase()}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                openModal();
-            })
-            .catch(() => {
-                modalBodyContent.innerHTML = `<p class="text-center text-red-500">Failed to load budget details.</p>`;
-                openModal();
-            });
+    closeModalButtons.forEach(btn => btn.addEventListener('click', closeModal));
+    viewBudgetModal?.addEventListener('click', e => {
+        if (e.target === viewBudgetModal) closeModal();
     });
-});
-                const editBudgetButtons = document.querySelectorAll('.edit-budget-btn');
-                const editBudgetModal = document.getElementById('editBudgetModal');
-                const editBudgetForm = document.getElementById('editBudgetForm');
-                const editModal = new Flowbite.Modal(editBudgetModal);
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeModal();
+    });
 
-                editBudgetButtons.forEach(button => {
-                    button.addEventListener('click', function() {
-                        const budgetId = this.dataset.budgetId;
-                        
-                        // Set form action
-                        editBudgetForm.action = `/budgets/${budgetId}`;
-                        
-                        // Fetch budget data
-                        fetch(`/budgets/${budgetId}/json`)
-                            .then(response => response.json())
-                            .then(data => {
-                                // Populate form
-                                document.getElementById('edit-department_id').value = data.department_id;
-                                document.getElementById('edit-total_amount').value = data.total_amount;
-                                document.getElementById('edit-period_start').value = data.period_start.split('T')[0]; // Format for date input
-                                document.getElementById('edit-period_end').value = data.period_end.split('T')[0]; // Format for date input
-                                document.getElementById('edit-status').value = data.status;
-                                
-                                // Show modal
-                                editModal.show();
-                            });
+    viewBudgetButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const budgetId = button.dataset.budgetId;
+            modalBodyContent.innerHTML = `
+                <div class="flex justify-center py-8">
+                    <div class="animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent"></div>
+                </div>
+            `;
+            openModal();
+
+            fetch(`/budgets/${budgetId}/json`)
+                .then(res => res.json())
+                .then(data => {
+                    const remaining = data.total_amount - data.used_amount;
+                    const percentage = data.total_amount > 0
+                        ? Math.round((data.used_amount / data.total_amount) * 100)
+                        : 0;
+                    const colorClass =
+                        percentage < 70 ? 'bg-green-500' :
+                        percentage < 90 ? 'bg-yellow-500' : 'bg-red-500';
+
+                    modalBodyContent.innerHTML = `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-3">
+                                <div><h4 class="text-gray-500 text-sm uppercase dark:text-gray-400">Department</h4>
+                                <p class="text-lg font-semibold">${data.department.name}</p></div>
+                                <div><h4 class="text-gray-500 text-sm uppercase dark:text-gray-400">Total Amount</h4>
+                                <p class="text-lg font-semibold">$${Number(data.total_amount).toLocaleString()}</p></div>
+                                <div><h4 class="text-gray-500 text-sm uppercase dark:text-gray-400">Used Amount</h4>
+                                <p class="text-lg font-semibold">$${Number(data.used_amount).toLocaleString()}</p></div>
+                                <div><h4 class="text-gray-500 text-sm uppercase dark:text-gray-400">Remaining</h4>
+                                <p class="text-lg font-semibold ${remaining >= 0 ? 'text-green-600' : 'text-red-600'}">$${remaining.toLocaleString()}</p></div>
+                            </div>
+
+                            <div class="flex flex-col justify-center">
+                                <div class="mb-2 flex justify-between text-sm text-gray-500"><span>Usage</span><span>${percentage}%</span></div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                                    <div class="h-3 rounded-full ${colorClass}" style="width: ${percentage}%"></div>
+                                </div>
+                                <div class="mt-4">
+                                    <h4 class="text-gray-500 text-sm uppercase">Period</h4>
+                                    <p class="text-sm">${new Date(data.period_start).toLocaleDateString()} - ${new Date(data.period_end).toLocaleDateString()}</p>
+                                </div>
+                                <div class="mt-4">
+                                    <h4 class="text-gray-500 text-sm uppercase">Status</h4>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                        data.status === 'active'
+                                            ? 'bg-green-100 text-green-800'
+                                            : 'bg-red-100 text-red-800'
+                                    }">${data.status.toUpperCase()}</span>
+                                </div>
+                            </div>
+                        </div>`;
+                })
+                .catch(() => {
+                    modalBodyContent.innerHTML = `<p class="text-center text-red-500">Failed to load budget details.</p>`;
+                });
+        });
+    });
+
+    // =========================
+    // ✅ Edit Budget Modal (Flowbite)
+    // =========================
+    const editBudgetButtons = document.querySelectorAll('.edit-budget-btn');
+    const editBudgetModal = document.getElementById('editBudgetModal');
+    const editBudgetForm = document.getElementById('editBudgetForm');
+
+    if (editBudgetModal && editBudgetForm) {
+        const editModal = new Flowbite.Modal(editBudgetModal);
+
+        editBudgetButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const budgetId = button.dataset.budgetId;
+                editBudgetForm.action = `/budgets/${budgetId}`;
+
+                fetch(`/budgets/${budgetId}/json`)
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById('edit-department_id').value = data.department_id;
+                        document.getElementById('edit-total_amount').value = data.total_amount;
+                        document.getElementById('edit-period_start').value = data.period_start.split('T')[0];
+                        document.getElementById('edit-period_end').value = data.period_end.split('T')[0];
+                        document.getElementById('edit-status').value = data.status;
+                        editModal.show();
                     });
-                });
-                
-                const closeEditButton = editBudgetModal.querySelector('[data-modal-toggle="editBudgetModal"]');
-                closeEditButton.addEventListener('click', function() {
-                    editModal.hide();
-                });
             });
-        </script>
+        });
+
+        const closeEditButton = editBudgetModal.querySelector('[data-modal-toggle="editBudgetModal"]');
+        closeEditButton?.addEventListener('click', () => editModal.hide());
+    }
+});
+</script>
+
     @endpush
 </x-app-layout>

@@ -14,6 +14,7 @@ class UserController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', User::class);
         $users = User::with('roles')->get();
         return view('admin.users.index', compact('users'));
     }
@@ -23,6 +24,7 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
+        $this->authorize('update', $user);
         $roles = Role::all();
         $departments = Department::all();
         return view('admin.users.edit', compact('user', 'roles', 'departments'));
@@ -33,6 +35,7 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
+        $this->authorize('update', $user);
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
@@ -56,10 +59,7 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        // Optional: Add a check to prevent admins from deleting themselves
-        if ($user->id === auth()->id()) {
-            return back()->with('error', 'You cannot delete your own account.');
-        }
+        $this->authorize('delete', $user);
 
         $user->delete();
         return redirect()->route('users.index')->with('success', 'User deleted successfully.');

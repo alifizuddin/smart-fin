@@ -16,24 +16,35 @@ Route::view('profile', 'profile')
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    Route::middleware('role:Admin')->group(function () { // Use role middleware
-        Route::get('/users', [UserController::class, 'index'])->name('users.index');
-        Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
-        Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+    // --- ADMIN-ONLY ROUTES ---
+    Route::middleware('role:Admin')->group(function () {
+        // Route::resource already creates index, edit, update, etc.
+        // The individual routes before it were redundant.
         Route::resource('users', UserController::class);
-        Route::get('/budgets/{budget}/json', [BudgetController::class, 'showJson'])->name('budgets.showJson');
-        Route::get('budgets/report', [BudgetController::class, 'report'])->name('budgets.report');
-    });
-    Route::resource('budgets', BudgetController::class);
-    Route::post('budgets-bulk-action', [BudgetController::class, 'bulkAction'])->name('budgets.bulkAction');
 
-    // You can add more role-specific routes here
+        // This route is Admin-only, so it must be in this group
+        Route::post('budgets/bulk-action', [BudgetController::class, 'bulkAction'])->name('budgets.bulkAction');
+    });
+
+    // --- ADMIN & MANAGER ROUTES ---
+    Route::middleware('role:Admin|Manager')->group(function () {
+        // This single definition now works for both roles
+        Route::get('budgets/report', [BudgetController::class, 'report'])->name('budgets.report');
+        Route::get('/budgets/{budget}/json', [BudgetController::class, 'showJson'])->name('budgets.showJson');
+    });
+
+    // --- ROUTES FOR ALL LOGGED-IN ROLES ---
+    // (Permissions are handled inside the BudgetController for each action)
+    Route::resource('budgets', BudgetController::class);
+
+    // --- OTHER ROLE GROUPS ---
     Route::middleware('role:Manager')->group(function () {
-        // Manager-specific routes
+        // Add any routes here that are ONLY for Managers (and not Admins)
     });
 
     Route::middleware('role:Staff')->group(function () {
         // Staff-specific routes
     });
 });
+
 require __DIR__.'/auth.php';

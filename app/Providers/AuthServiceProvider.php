@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Models\User;
 use App\Models\Budget;
+use App\Policies\BudgetPolicy; 
+use App\Policies\UserPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -15,7 +17,8 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        //
+        User::class => UserPolicy::class,
+        Budget::class => BudgetPolicy::class,
     ];
 
     public function boot(): void
