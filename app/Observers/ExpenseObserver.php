@@ -4,6 +4,8 @@ namespace App\Observers;
 
 use App\Models\Budget;
 use App\Models\Expense;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ExpenseObserver
 {
