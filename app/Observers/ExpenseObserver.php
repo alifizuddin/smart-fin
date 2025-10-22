@@ -6,6 +6,7 @@ use App\Models\Budget;
 use App\Models\Expense;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 class ExpenseObserver
 {
@@ -25,6 +26,22 @@ class ExpenseObserver
                     }
                 });
             }
+
+
+            try {
+
+                // 1. Get your n8n Production URL
+                $n8nWebhookUrl = 'http://localhost:5678/webhook/458722b2-c1ee-40b2-b933-7924c41cb5ff';
+
+                // 2. Send the new expense data to n8n as a package (JSON)
+                Http::timeout(3)->post($n8nWebhookUrl, $expense->toArray());
+
+            } catch (\Exception $e) {
+                // 3. Log an error if n8n fails
+                Log::error("Failed to send expense to n8n: " . $e->getMessage());
+            }
+            // --- [END] n8n AUTOMATION TRIGGER ---
+
         } catch (\Exception $e) {
             // Log any errors to prevent failures
             Log::error("Failed to update budget amount for expense ID: {$expense->id}", [
@@ -68,7 +85,7 @@ class ExpenseObserver
      */
     public function deleted(Expense $expense): void
     {
-         try {
+        try {
             if ($expense->budget_id && $expense->amount > 0) {
                 DB::transaction(function () use ($expense) {
                     $budget = $expense->budget()->lockForUpdate()->first();
@@ -84,13 +101,13 @@ class ExpenseObserver
             ]);
         }
     }
-    
+
     /**
      * Handle the Expense "restored" event.
      */
     public function restored(Expense $expense): void
     {
-         if ($expense->budget) {
+        if ($expense->budget) {
             $this->recalculateBudget($expense->budget);
         }
     }
@@ -100,7 +117,7 @@ class ExpenseObserver
      */
     public function forceDeleted(Expense $expense): void
     {
-         if ($expense->budget) {
+        if ($expense->budget) {
             $this->recalculateBudget($expense->budget);
         }
     }
@@ -112,7 +129,7 @@ class ExpenseObserver
     {
         // Sum all expenses for this budget
         $totalUsed = $budget->expenses()->sum('amount');
-        
+
         // Update the budget's 'used_amount'
         $budget->used_amount = $totalUsed;
         $budget->saveQuietly(); // saveQuietly prevents triggering other events
