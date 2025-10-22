@@ -244,6 +244,124 @@
         </template>
     </main>
     @endhasrole
+
+    @hasrole('Manager')
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+    <!-- Action Required: Approvals -->
+    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow md:col-span-2">
+        <div class="flex items-center mb-4">
+            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h2 class="ml-3 text-lg font-semibold text-gray-900">Action Required: Approvals</h2>
+        </div>
+        <div class="space-y-4">
+            {{-- @foreach($approvals as $approval)
+                <div class="flex justify-between items-center p-4 bg-gray-50 rounded-md">
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-900">{{ $approval['title'] }}</h3>
+                        <p class="text-xs text-gray-600">Employee: {{ $approval['employee'] }} | Amount: ${{ number_format($approval['amount'], 2) }}</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="bg-green-600 text-white px-3 py-1 rounded-md text-xs hover:bg-green-700">Approve</button>
+                        <button class="bg-red-600 text-white px-3 py-1 rounded-md text-xs hover:bg-red-700">Reject</button>
+                    </div>
+                </div>
+            @endforeach --}}
+
+            <!-- Example 1 -->
+            <div class="flex justify-between items-center p-4 bg-gray-50 rounded-md">
+                <div>
+                    <h3 class="text-sm font-medium text-gray-900">Travel Reimbursement</h3>
+                    <p class="text-xs text-gray-600">Employee: Aina Zulkifli | Amount: RM 230.00</p>
+                </div>
+                <div class="flex space-x-2">
+                    <button class="bg-green-600 text-white px-3 py-1 rounded-md text-xs hover:bg-green-700">Approve</button>
+                    <button class="bg-red-600 text-white px-3 py-1 rounded-md text-xs hover:bg-red-700">Reject</button>
+                </div>
+            </div>  
+        </div>
+    </div>
+
+    <!-- AI Anomaly/Overspending Alerts -->
+    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+        <div class="flex items-center mb-4">
+            <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+                <h2 class="ml-3 text-lg font-semibold text-gray-900">AI Alerts</h2>
+        </div>
+            <ul class="space-y-2">
+                {{--@foreach($anomalyAlerts as $alert)
+                    <li class="text-sm text-gray-600 bg-red-50 p-2 rounded-md">{{ $alert }}</li>
+                 @endforeach--}}
+            </ul>
+    </div>
+
+    <!-- AI Expense Forecasting -->
+            <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div class="flex items-center mb-4">
+                    <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <h2 class="ml-3 text-lg font-semibold text-gray-900">AI Forecasting</h2>
+                </div>
+                {{--<div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-sm text-gray-600">Next Month Prediction:</span>
+                        <span class="text-sm font-medium">${{ number_format($forecasting['next_month_prediction'], 2) }}</span>
+                    </div>
+                    <p class="text-sm text-gray-600">{{ $forecasting['trend'] }}</p>
+                </div>--}}
+            </div>
+
+    <!-- Spending by Category Chart -->
+    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow md:col-span-2">
+        <div class="flex items-center mb-4">
+            <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+            <h2 class="ml-3 text-lg font-semibold text-gray-900">Spending by Category</h2>
+            </div>
+        <canvas id="spendingChart" width="400" height="200"></canvas>
+    </div>
+
+    <!-- JavaScript for Chart -->
+    <script>
+        {{--const ctx = document.getElementById('spendingChart').getContext('2d');
+        const spendingData = @json($spendingByCategory); // Pass data from Blade to JS
+        const labels = spendingData.map(item => item.category);
+        const data = spendingData.map(item => item.amount); --}}
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Spending ($)',
+                    data: data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+	</div>
+    </main>
+    @endhasrole
+    
 </x-app-layout>
 
 <script>
