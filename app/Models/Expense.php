@@ -20,6 +20,8 @@ class Expense extends Model
         'description',
         'status',
         'receipt_path',
+        'transaction_date',
+        'payment_method',
     ];
 
     public function user(): BelongsTo
@@ -30,5 +32,9 @@ class Expense extends Model
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
+    }
+    public function budget(): BelongsTo
+    {
+        return $this->belongsTo(Budget::class);
     }
 }

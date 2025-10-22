@@ -6,7 +6,10 @@
     </x-slot>
 
     @hasrole('Staff')
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+    <main
+        x-data="dashboardComponent('{{ route('expenses.quickStore') }}', '{{ csrf_token() }}')"
+        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8"
+    >
 
         <!-- GRID -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -21,8 +24,15 @@
                     </div>
                     <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Quick Action</h2>
                 </div>
-                <p class="text-gray-600 dark:text-gray-400 mb-6 text-sm">Easily submit a new expense with just one click.</p>
-                <button class="w-full bg-blue-600 text-white py-2.5 rounded-md font-medium hover:bg-blue-700 transition">Submit Expense</button>
+                <p class="text-gray-600 dark:text-gray-400 mb-6 text-sm">Submit a new expense in seconds.</p>
+
+                <button
+                    type="button"
+                    @click="showModal = true"
+                    class="w-full bg-blue-600 text-white py-2.5 rounded-md font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-700 transition"
+                >
+                    Submit Expense
+                </button>
             </div>
 
             <!-- My Expense Submissions -->
@@ -35,6 +45,7 @@
                     </div>
                     <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">My Expense Submissions</h2>
                 </div>
+
                 <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
                     <table class="min-w-full text-sm">
                         <thead class="bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
@@ -46,18 +57,31 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            {{-- @foreach($expenseSubmissions as $submission)
+                            @forelse($expenseSubmissions ?? [] as $submission)
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition">
-                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ $submission['title'] }}</td>
-                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100">${{ number_format($submission['amount'], 2) }}</td>
+                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ $submission->category }}</td>
+                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100">${{ number_format($submission->amount, 2) }}</td>
                                     <td class="px-4 py-3">
-                                        <span class="px-2 py-1 rounded-full text-xs font-medium {{ $submission['status'] == 'Approved' ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300' }}">
-                                            {{ $submission['status'] }}
+                                        @php
+                                            $statusColors = [
+                                                'pending' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
+                                                'approved' => 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
+                                                'rejected' => 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
+                                            ];
+                                        @endphp
+                                        <span class="px-2 py-1 rounded-full text-xs font-medium {{ $statusColors[$submission->status] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' }}">
+                                            {{ ucfirst($submission->status) }}
                                         </span>
                                     </td>
-                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ $submission['date'] }}</td>
+                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ $submission->created_at->format('M d, Y') }}</td>
                                 </tr>
-                            @endforeach --}}
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
+                                        You have no expense submissions yet.
+                                    </td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -74,9 +98,13 @@
                     <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">AI Suggestions</h2>
                 </div>
                 <ul class="space-y-2">
-                    {{-- @foreach($aiSuggestions as $suggestion)
-                        <li class="text-sm text-gray-700 dark:text-gray-300 bg-yellow-50 dark:bg-yellow-900/30 p-3 rounded-md shadow-sm border border-yellow-100 dark:border-yellow-800/40">{{ $suggestion }}</li>
-                    @endforeach --}}
+                    @forelse($aiSuggestions ?? [] as $suggestion)
+                        <li class="text-sm text-gray-700 dark:text-gray-300 bg-yellow-50 dark:bg-yellow-900/30 p-3 rounded-md shadow-sm border border-yellow-100 dark:border-yellow-800/40">
+                            {{ $suggestion }}
+                        </li>
+                    @empty
+                        <li class="text-sm text-gray-500 dark:text-gray-400 italic">No suggestions available.</li>
+                    @endforelse
                 </ul>
             </div>
 
@@ -91,23 +119,30 @@
                     <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Budget Overview</h2>
                 </div>
 
+                @php
+                    $total = $budgetOverview['total_budget'] ?? 0;
+                    $spent = $budgetOverview['spent'] ?? 0;
+                    $remaining = max($total - $spent, 0);
+                    $percent = $total > 0 ? round(($spent / $total) * 100, 2) : 0;
+                @endphp
+
                 <div class="space-y-3 text-sm">
                     <div class="flex justify-between">
                         <span class="text-gray-600 dark:text-gray-400">Total Budget:</span>
-                        {{-- <span class="font-semibold text-gray-900 dark:text-gray-100">${{ number_format($budgetOverview['total_budget'], 2) }}</span> --}}
+                        <span class="font-semibold text-gray-900 dark:text-gray-100">${{ number_format($total, 2) }}</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-600 dark:text-gray-400">Spent:</span>
-                        {{-- <span class="font-semibold text-red-600 dark:text-red-400">${{ number_format($budgetOverview['spent'], 2) }}</span> --}}
+                        <span class="font-semibold text-red-600 dark:text-red-400">${{ number_format($spent, 2) }}</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-600 dark:text-gray-400">Remaining:</span>
-                        {{-- <span class="font-semibold text-green-600 dark:text-green-400">${{ number_format($budgetOverview['remaining'], 2) }}</span> --}}
+                        <span class="font-semibold text-green-600 dark:text-green-400">${{ number_format($remaining, 2) }}</span>
                     </div>
                 </div>
 
                 <div class="mt-4 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-                    {{-- <div class="bg-blue-600 dark:bg-blue-400 h-2 rounded-full transition-all duration-700" style="width: {{ ($budgetOverview['spent'] / $budgetOverview['total_budget']) * 100 }}%"></div> --}}
+                    <div class="bg-blue-600 dark:bg-blue-400 h-2 rounded-full transition-all duration-700" style="width: {{ $percent }}%"></div>
                 </div>
             </div>
 
@@ -122,7 +157,7 @@
                     <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Approval Follow-Ups</h2>
                 </div>
                 <div class="space-y-4">
-                    {{-- @foreach($approvalFollowUps as $followUp)
+                    @forelse($approvalFollowUps ?? [] as $followUp)
                         <div class="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-700/40 rounded-lg border border-gray-100 dark:border-gray-700">
                             <div>
                                 <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $followUp['title'] }}</h3>
@@ -132,11 +167,115 @@
                                 {{ $followUp['status'] }}
                             </span>
                         </div>
-                    @endforeach --}}
+                    @empty
+                        <p class="text-sm text-gray-500 dark:text-gray-400 italic">No approval items pending.</p>
+                    @endforelse
                 </div>
             </div>
-
         </div>
+
+        <!-- Quick Expense Modal -->
+        <template x-if="showModal">
+            <div class="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-lg shadow-2xl border border-gray-100 dark:border-gray-700">
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Quick Expense Submission</h2>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Fill in your expense details below.</p>
+
+                    <!-- Alerts -->
+                    <template x-if="successMessage">
+                        <div class="mt-3 text-sm text-green-600 dark:text-green-400 p-3 bg-green-50 dark:bg-green-900/30 rounded-md border border-green-200 dark:border-green-700" x-text="successMessage"></div>
+                    </template>
+                    <template x-if="errorMessage">
+                        <div class="mt-3 text-sm text-red-600 dark:text-red-400 p-3 bg-red-50 dark:bg-red-900/30 rounded-md border border-red-200 dark:border-red-700" x-text="errorMessage"></div>
+                    </template>
+
+                    <form @submit.prevent="handleSubmit" class="mt-4 space-y-4">
+                        <div>
+                            <x-input-label for="amount" value="Amount ($)" />
+                            <x-text-input id="amount" type="number" x-model="form.amount" step="0.01" required class="w-full mt-1" />
+                        </div>
+
+                        <div class="mb-6">
+        <label for="receipt" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Upload Receipt
+        </label>
+        <input type="file" id="receipt" name="receipt" accept="image/*,.pdf"
+               class="mt-1 block w-full text-sm text-gray-700 dark:text-gray-300 
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded-md file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-indigo-600 file:text-white
+                      hover:file:bg-indigo-700
+                      dark:file:bg-indigo-500 dark:hover:file:bg-indigo-600"
+               required>
+        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Accepted formats: JPG, PNG, or PDF (max 5MB)
+        </p>
+    </div>
+
+                        <div>
+                            <x-input-label for="description" value="Description (Optional)" />
+                            <textarea id="description" x-model="form.description" rows="3" class="w-full mt-1 rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300" placeholder="e.g. Team lunch at restaurant"></textarea>
+                        </div>
+
+                        <div class="mt-6 flex justify-end items-center">
+    <x-secondary-button type="button" @click="showModal = false">
+        Cancel
+    </x-secondary-button>
+
+    <x-primary-button 
+        type="submit" 
+        class="ms-3" 
+        x-bind:disabled="loading"
+    >
+        <span x-show="!loading">Submit Expense</span>
+        <span x-show="loading" class="flex items-center">
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Submitting...
+        </span>
+    </x-primary-button>
+</div>
+                    </form>
+                </div>
+            </div>
+        </template>
     </main>
     @endhasrole
 </x-app-layout>
+
+<script>
+    function dashboardComponent(postUrl, token) {
+        return {
+            showModal: false,
+            loading: false,
+            successMessage: '',
+            errorMessage: '',
+            form: { amount: '', category: '', description: '' },
+            resetForm() { this.form = { amount: '', category: '', description: '' }; },
+            async handleSubmit() {
+                this.loading = true;
+                this.successMessage = '';
+                this.errorMessage = '';
+                try {
+                    const response = await fetch(postUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token, 'Accept': 'application/json' },
+                        body: JSON.stringify(this.form)
+                    });
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.message || 'Submission failed.');
+                    this.successMessage = data.message;
+                    this.resetForm();
+                    setTimeout(() => location.reload(), 1500);
+                } catch (err) {
+                    this.errorMessage = err.message;
+                } finally {
+                    this.loading = false;
+                }
+            }
+        };
+    }
+</script>

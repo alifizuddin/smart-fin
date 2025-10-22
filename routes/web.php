@@ -2,11 +2,13 @@
 
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome');
 
-Route::view('dashboard', 'dashboard')
+Route::get('dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
@@ -15,6 +17,10 @@ Route::view('profile', 'profile')
     ->name('profile');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+
+        Route::post('expenses/quick-store', [ExpenseController::class, 'quickStore'])
+         ->name('expenses.quickStore')
+         ->middleware('role:Staff');
 
     // --- ADMIN-ONLY ROUTES ---
     Route::middleware('role:Admin')->group(function () {
@@ -44,6 +50,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // --- ROUTES FOR ALL LOGGED-IN ROLES ---
     // (Permissions are handled inside the BudgetController for each action)
     Route::resource('budgets', BudgetController::class);
+    Route::resource('expenses', ExpenseController::class);
 
     // --- OTHER ROLE GROUPS ---
     Route::middleware('role:Manager')->group(function () {

@@ -12,8 +12,22 @@ class ExpenseObserver
      */
     public function created(Expense $expense): void
     {
-        if ($expense->budget) {
-            $this->recalculateBudget($expense->budget);
+        try {
+            if ($expense->budget_id && $expense->amount > 0) {
+                // Use a database transaction to ensure this update is atomic
+                DB::transaction(function () use ($expense) {
+                    $budget = $expense->budget()->lockForUpdate()->first();
+                    if ($budget) {
+                        // Increment the used_amount by the expense amount
+                        $budget->increment('used_amount', $expense->amount);
+                    }
+                });
+            }
+        } catch (\Exception $e) {
+            // Log any errors to prevent failures
+            Log::error("Failed to update budget amount for expense ID: {$expense->id}", [
+                'error' => $e->getMessage()
+            ]);
         }
     }
 
@@ -22,24 +36,27 @@ class ExpenseObserver
      */
     public function updated(Expense $expense): void
     {
-        // Get the budget ID before the update
-        $originalBudgetId = $expense->getOriginal('budget_id');
-        
-        // Get the new budget ID
-        $newBudgetId = $expense->budget_id;
+        // Check if the amount has changed
+        if ($expense->isDirty('amount')) {
+            try {
+                // Get the original amount before the update
+                $originalAmount = $expense->getOriginal('amount', 0);
+                $newAmount = $expense->amount;
+                $difference = $newAmount - $originalAmount;
 
-        // If the budget was changed (or amount changed), update the new budget
-        if ($expense->wasChanged('budget_id') || $expense->wasChanged('amount')) {
-            if ($expense->budget) {
-                $this->recalculateBudget($expense->budget);
-            }
-        }
-
-        // If the budget was changed, we must ALSO update the *old* budget
-        if ($expense->wasChanged('budget_id') && $originalBudgetId) {
-            $oldBudget = Budget::find($originalBudgetId);
-            if ($oldBudget) {
-                $this->recalculateBudget($oldBudget);
+                if ($expense->budget_id && $difference != 0) {
+                    DB::transaction(function () use ($expense, $difference) {
+                        $budget = $expense->budget()->lockForUpdate()->first();
+                        if ($budget) {
+                            // Update the budget by the difference
+                            $budget->increment('used_amount', $difference);
+                        }
+                    });
+                }
+            } catch (\Exception $e) {
+                Log::error("Failed to update budget (on update) for expense ID: {$expense->id}", [
+                    'error' => $e->getMessage()
+                ]);
             }
         }
     }
@@ -49,8 +66,20 @@ class ExpenseObserver
      */
     public function deleted(Expense $expense): void
     {
-        if ($expense->budget) {
-            $this->recalculateBudget($expense->budget);
+         try {
+            if ($expense->budget_id && $expense->amount > 0) {
+                DB::transaction(function () use ($expense) {
+                    $budget = $expense->budget()->lockForUpdate()->first();
+                    if ($budget) {
+                        // Decrement the used_amount (refund)
+                        $budget->decrement('used_amount', $expense->amount);
+                    }
+                });
+            }
+        } catch (\Exception $e) {
+            Log::error("Failed to refund budget for deleted expense ID: {$expense->id}", [
+                'error' => $e->getMessage()
+            ]);
         }
     }
     

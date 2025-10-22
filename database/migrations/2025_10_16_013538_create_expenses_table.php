@@ -18,6 +18,8 @@ return new class extends Migration
             $table->decimal('amount', 15, 2);
             $table->string('category');
             $table->text('description')->nullable();
+            $table->date('transaction_date'); // For the date of the transaction
+            $table->string('payment_method')->nullable(); 
             $table->string('status')->default('pending');
             $table->string('receipt_path')->nullable();
             $table->timestamps();

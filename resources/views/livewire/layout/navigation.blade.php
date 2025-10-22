@@ -33,12 +33,16 @@ new class extends Component
                     <x-nav-link :href="route('budgets.index')" :active="request()->routeIs('budgets.*')" wire:navigate>
                         {{ __('Budgets') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('expenses.create')" :active="request()->routeIs('expenses.*')">
+                        {{ __('Submit Expense') }}
+                    </x-nav-link>
                     @role('Admin')
                         <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')" wire:navigate>
                             {{ __('User Management') }}
                         </x-nav-link>
                     @endrole
                 </div>
+                
             </div>
 
             <div class="hidden sm:flex sm:items-center sm:ms-6">
@@ -95,6 +99,7 @@ new class extends Component
                 </x-responsive-nav-link>
             @endrole
         </div>
+        
 
         <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
             <div class="flex items-center px-4">
