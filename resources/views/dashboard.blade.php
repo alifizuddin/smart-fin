@@ -54,6 +54,7 @@
                                 <th class="px-4 py-3 text-left font-semibold">Amount</th>
                                 <th class="px-4 py-3 text-left font-semibold">Status</th>
                                 <th class="px-4 py-3 text-left font-semibold">Date</th>
+                                <th class="px-4 py-3 text-left font-semibold">Action</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -74,6 +75,15 @@
                                         </span>
                                     </td>
                                     <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ $submission->created_at->format('M d, Y') }}</td>
+                                    <td class="px-4 py-3">
+                                        <form action="{{ route('expenses.delete', $submission->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this expense?');" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 dark:text-red-400 hover:underline text-sm">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>

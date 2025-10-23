@@ -18,9 +18,11 @@ Route::view('profile', 'profile')
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
-        Route::post('expenses/quick-store', [ExpenseController::class, 'quickStore'])
-         ->name('expenses.quickStore')
-         ->middleware('role:Staff');
+    Route::post('expenses/quick-store', [ExpenseController::class, 'quickStore'])
+        ->name('expenses.quickStore')
+        ->middleware('role:Staff');
+        
+    Route::delete('/expenses/{id}', [ExpenseController::class, 'destroy'])->name('expenses.delete');
 
     // --- ADMIN-ONLY ROUTES ---
     Route::middleware('role:Admin')->group(function () {

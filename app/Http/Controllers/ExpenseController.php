@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Budget;
+use App\Services\ExpenseCategorizationService;
 use App\Models\Expense;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\Process\Process;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 use Carbon\Carbon;
-use App\Services\ExpenseCategorizationService;
 
 class ExpenseController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         //
@@ -32,7 +32,7 @@ class ExpenseController extends Controller
         // 2. Validate the input
         $validator = Validator::make($request->all(), [
             'amount' => 'required|numeric|min:0.01',
-            'category' => 'required|string|max:255',
+            'receipt'          => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
             'description' => 'nullable|string|max:1000',
         ]);
 
@@ -80,9 +80,6 @@ class ExpenseController extends Controller
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         // Get active budgets from the user's department to show in a dropdown
@@ -95,9 +92,6 @@ class ExpenseController extends Controller
         return view('expenses.create', compact('budgets'));
     }
 
-    /**
-     * Store a newly created expense in storage.
-     */
     public function store(Request $request, ExpenseCategorizationService $categorizationService)
     {
         // 1. Validate the incoming request
@@ -163,8 +157,38 @@ class ExpenseController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
+{
+    $expense = Expense::findOrFail($id);
+    $expense->delete();
+
+    return redirect()->back()->with('success', 'Expense deleted successfully.');
+}
+    private function getCategoryFromImage(string $imageAbsolutePath): string
     {
-        //
+        // IMPORTANT: Use absolute paths for your Python script and model
+        // e.g., base_path('ml/predict_from_image.py')
+        $pythonScriptPath = base_path('ml/predict_from_image.py');
+
+        // Set the working directory to where the model is, so the script can find it
+        $process = new Process(['python', $pythonScriptPath, $imageAbsolutePath]);
+        $process->setWorkingDirectory(base_path('ml')); // Run from the 'ml' folder
+        
+        try {
+            $process->run();
+
+            if (!$process->isSuccessful()) {
+                // Get error output from stderr
+                throw new \Exception($process->getErrorOutput());
+            }
+
+            $predictedCategory = trim($process->getOutput());
+            
+            return $predictedCategory ?: 'Uncategorized (Script Error)';
+
+        } catch (ProcessFailedException $exception) {
+            \Log::error('NLP/OCR Prediction Failed: ' . $exception->getMessage());
+            return 'Uncategorized (Process Failed)';
+        }
     }
 }
