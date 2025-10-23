@@ -8,6 +8,7 @@ use App\Models\Expense;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
@@ -92,6 +93,9 @@ class ExpenseController extends Controller
         return view('expenses.create', compact('budgets'));
     }
 
+    /**
+     * Store a newly created expense in storage.
+     */
     public function store(Request $request, ExpenseCategorizationService $categorizationService)
     {
         // 1. Validate the incoming request
@@ -99,28 +103,60 @@ class ExpenseController extends Controller
             // ... (all your validation rules)
             'budget_id'        => 'required|exists:budgets,id',
             'amount'           => 'required|numeric|min:0.01',
-            'description'      => 'required|string|max:1000',
+            'description'      => 'required|string|max:1000', // We can now use this as a "note"
             'transaction_date' => 'required|date',
             'payment_method'   => 'required|string|max:100',
             'receipt'          => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 
-        // 2. Handle the file upload
+        // 2. Handle the file upload (store it first)
         $path = $request->file('receipt')->store('receipts', 'public');
         
-        // 3. --- NEW AI CATEGORIZATION STEP ---
-        $category = $categorizationService->categorizeWithKeywords($validated['description']);
-        
+        // 3. --- NEW PYTHON API CATEGORIZATION STEP ---
+        $category = 'Uncategorized'; // Default
+        $ai_description = $validated['description']; // Fallback
+
+        try {
+            $response = Http::timeout(20) // Give it 20 seconds
+                ->attach(
+                    'receipt', // This must match the name in app.py
+                    file_get_contents($request->file('receipt')),
+                    $request->file('receipt')->getClientOriginalName()
+                )->post('http://127.0.0.1:5010/process-receipt'); // Call your Python API
+
+            if ($response->successful()) {
+                $ai_data = $response->json();
+                $category = $ai_data['category'] ?? 'Uncategorized';
+                
+                // We use the extracted text as the main description,
+                // and append the user's manual note.
+                $ai_description = $ai_data['description'] . "\n\nNote: " . $validated['description'];
+
+            } else {
+                // If API fails, log it and use the manual description
+                logger()->error('Python OCR API call failed', ['response' => $response->body()]);
+                $category = $categorizationService->categorizeWithKeywords($validated['description']);
+            }
+        } catch (\Exception $e) {
+            // If connection fails, log it and use manual description
+            logger()->error('Python OCR API connection error', ['error' => $e->getMessage()]);
+            $category = $categorizationService->categorizeWithKeywords($validated['description']);
+        }
         // -------------------------------------
 
         // 4. Prepare data array for creation
         $user = Auth::user();
-        $data = $validated + [
-            'user_id'       => $user->id,
-            'department_id' => $user->department_id,
-            'receipt_path'  => $path,
-            'status'        => 'pending',
-            'category'      => $category, // --- USE THE AI-GENERATED CATEGORY ---
+        $data = [
+            'budget_id'        => $validated['budget_id'],
+            'amount'           => $validated['amount'],
+            'transaction_date' => $validated['transaction_date'],
+            'payment_method'   => $validated['payment_method'],
+            'user_id'          => $user->id,
+            'department_id'    => $user->department_id,
+            'receipt_path'     => $path,
+            'status'           => 'pending',
+            'category'         => $category, // --- USE THE AI-GENERATED CATEGORY ---
+            'description'      => $ai_description, // --- USE THE AI-GENERATED DESCRIPTION ---
         ];
 
         // 5. Create the expense
