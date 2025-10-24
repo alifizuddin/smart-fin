@@ -1,6 +1,7 @@
 import os
 import pytesseract
 from flask import Flask, request, jsonify
+import json
 from PIL import Image
 import cv2
 import numpy as np
@@ -56,41 +57,83 @@ def categorize_with_keywords(description):
                 return category
     return 'Uncategorized' # Fallback
 
-def categorize_with_ai(description):
-    """Categorizes description using the Gemini AI."""
-    
+def analyze_receipt_with_ai(description):
+    """Analyzes receipt text using Gemini AI to extract key information and categorize.
+
+    Returns a tuple: (category, summary, data_dict)
+    data_dict will contain keys: amount, payment_method, date, merchant, items
+    """
+
     # --- NEW DEBUGGING CHECKS ---
     if not model:
         print("--- AI check failed: API key is not set (model is None). ---")
-        return 'Uncategorized'
-    
+        return 'Uncategorized', '', {}
+
     if not description.strip():
         print("--- AI check failed: Extracted text is empty. ---")
-        return 'Uncategorized'
+        return 'Uncategorized', '', {}
     # ----------------------------
-        
-    # --- PROMPT (Copied directly from ExpenseCategorizationService.php) ---
+
+    # --- Enhanced AI PROMPT (request JSON output) ---
     category_list = ", ".join(CATEGORIES)
-    prompt = (
-        f"Please classify the following expense description into one of these categories: [{category_list}].\n"
-        f"Respond with only the category name and nothing else.\n"
-        f"Description: \"{description}\"\n"
-        f"Category:"
-    )
+    prompt = f'''You are a helpful assistant that reads OCR'd receipt text and returns structured JSON.
+Output ONLY a single JSON object (no extra text) with this shape:
+{{
+  "category": "<one of: {category_list} or 'Uncategorized'>",
+  "description": "<1-2 sentence human-readable summary>",
+  "data": {{
+    "amount": "<numeric amount, e.g. 123.45>",
+    "payment_method": "<cash|credit card|debit card|bank transfer|not specified>",
+    "date": "<YYYY-MM-DD if available>",
+    "merchant": "<merchant name if available>",
+    "items": "<short list of important items or services>"
+  }}
+}}
+
+Receipt Text:
+"""{description}"""
+
+If a field cannot be determined, output an empty string for it. Keep the JSON valid and compact.'''
 
     try:
         response = model.generate_content(prompt)
-        category = response.text.strip()
-        
-        # Ensure AI gives a valid category
-        if category in CATEGORIES:
-            return category
+        result = response.text.strip()
+
+        # Try to load JSON directly
+        try:
+            payload = json.loads(result)
+        except Exception:
+            # Attempt to extract JSON substring if model included extra text
+            start = result.find('{')
+            end = result.rfind('}')
+            if start != -1 and end != -1 and end > start:
+                try:
+                    payload = json.loads(result[start:end+1])
+                except Exception as e:
+                    print(f"--- JSON parse failed: {e} ---")
+                    return 'Uncategorized', '', {}
+            else:
+                print("--- No JSON found in AI response ---")
+                return 'Uncategorized', '', {}
+
+        category = payload.get('category', 'Uncategorized')
+        description_summary = payload.get('description', '')
+        data = payload.get('data', {}) if isinstance(payload.get('data', {}), dict) else {}
+
+        # Normalize amount to numeric-ish string
+        amount = data.get('amount', '')
+        if isinstance(amount, (int, float)):
+            data['amount'] = float(amount)
         else:
-            print(f"--- AI Warning: AI returned an invalid category: {category} ---")
-            return 'Uncategorized' # AI gave a weird response
+            # try to strip non-numeric characters
+            import re
+            m = re.search(r"[0-9]+(?:\.[0-9]{1,2})?", str(amount))
+            data['amount'] = float(m.group(0)) if m else None
+
+        return category, description_summary, data
     except Exception as e:
         print(f"--- AI ERROR: Error calling Gemini API: {e} ---")
-        return 'Uncategorized'
+        return 'Uncategorized', '', {}
 
 @app.route('/process-receipt', methods=['POST'])
 def process_receipt():
@@ -118,21 +161,27 @@ def process_receipt():
         if not extracted_text:
             extracted_text = "Could not read receipt image."
             category = "Uncategorized"
+            summary = "Receipt text could not be extracted from image."
         else:
-            # --- 3. AI Categorization (Level 3) ---
-            print("--- Calling AI for categorization... ---")
-            category = categorize_with_ai(extracted_text)
-            
-            # If AI fails or returns 'Uncategorized', try keywords as a backup
-            if category == 'Uncategorized':
-                print("--- AI failed or uncategorized, falling back to keywords... ---")
-                category = categorize_with_keywords(extracted_text)
+            # --- 3. Enhanced AI Analysis ---
+            print("--- Calling AI for analysis... ---")
+            category, summary, data = analyze_receipt_with_ai(extracted_text)
 
-        # 4. Return the data as JSON
+            # If AI categorization fails, try keywords as a backup
+            if category == 'Uncategorized':
+                print("--- AI categorization failed, falling back to keywords... ---")
+                keyword_category = categorize_with_keywords(extracted_text)
+                if keyword_category != 'Uncategorized':
+                    category = keyword_category
+
+        # 4. Return the enhanced data as JSON
         print(f"--- Final Category: {category} ---")
+        print(f"--- AI Summary: {summary} ---")
         return jsonify({
             'category': category,
-            'description': extracted_text
+            'description': summary if summary else extracted_text,
+            'data': data if 'data' in locals() else {},
+            'raw_text': extracted_text,  # Include original text for reference
         })
 
     except Exception as e:
