@@ -1,4 +1,4 @@
-# Project Name
+# Smart Finance 360
 
 ## Prerequisites
 - PHP >= 8.x
@@ -6,6 +6,8 @@
 - Node.js >= 14.x
 - MySQL or other database
 - Laravel 12
+- Python 3.8+
+- Pip (Python package manager)
 
 ## Installation Guide
 1. Clone the repository:
@@ -57,4 +59,31 @@
     admin@example.com, pw: password
     manager@example.com, pw: password
     user@example.com, pw: password
-``` 
+```
+11.  Download and Install tesseract OCR:
+```bash
+    https://github.com/UB-Mannheim/tesseract/wiki
+```
+12.  Set Up a Python Virtual Environment
+In your project folder
+```bash
+    cd path\to\your\project
+    python -m venv venv
+```
+13.  Set Up a Python Virtual Environment
+In your project folder
+```bash
+    cd path\to\your\project
+    python -m venv venv
+    venv\Scripts\activate
+```
+14.  Install All Required Python Packages
+```bash
+    pip install flask pytesseract pillow opencv-python-headless numpy google-generativeai
+```
+15. Run Flask API
+```bash
+    python app.py
+```
+
+
