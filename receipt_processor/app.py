@@ -17,7 +17,7 @@ app = Flask(__name__)
 # --- AI CONFIG ---
 # Load the API key you set in the terminal
 # API_KEY = os.getenv('GEMINI_API_KEY')
-API_KEY = "AIzaSyCkC5_Gjj-9Mtk9RqozeCxsZy75KzOzR78"
+API_KEY = "AIzaSyBdIcaiFPxv4TySvxwCmExLqyRejW0-Yx4"
 
 model = None
 if API_KEY:

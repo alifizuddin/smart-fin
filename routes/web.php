@@ -45,6 +45,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // --- ADMIN & MANAGER ROUTES ---
     Route::middleware('role:Admin|Manager')->group(function () {
         // This single definition now works for both roles
+        Route::patch('expenses/{expense}/approve', [ExpenseController::class, 'approve'])
+        ->name('expenses.approve')
+        ->middleware('role:Manager');
+
+        Route::patch('expenses/{expense}/reject', [ExpenseController::class, 'reject'])
+        ->name('expenses.reject')
+        
+        ->middleware('role:Manager');
         Route::get('budgets/report', [BudgetController::class, 'report'])->name('budgets.report');
         Route::get('/budgets/{budget}/json', [BudgetController::class, 'showJson'])->name('budgets.showJson');
     });

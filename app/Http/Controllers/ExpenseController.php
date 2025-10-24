@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Carbon\Carbon;
@@ -79,6 +80,69 @@ class ExpenseController extends Controller
             return response()->json([
                 'message' => 'An unexpected error occurred. Please try again later.'
             ], 500);
+        }
+    }
+
+    public function approve(Expense $expense)
+    {
+        // 1. Authorize: Ensure manager is in the same department
+        if (Auth::user()->department_id !== $expense->department_id) {
+            abort(403, 'You can only manage expenses for your own department.');
+        }
+
+        // 2. Check if already approved
+        if ($expense->status === 'approved') {
+            return redirect()->back()->with('info', 'Expense is already approved.');
+        }
+
+        $budget = $expense->budget;
+
+        if (!$budget) {
+            return redirect()->back()->with('error', 'Associated budget could not be found.');
+        }
+
+        try {
+            // 3. Use a transaction to ensure data integrity
+            DB::transaction(function () use ($expense, $budget) {
+                // 4. Update expense status
+                $expense->update(['status' => 'approved']);
+
+                // 5. Deduct amount from the budget
+                $budget->increment('used_amount', $expense->amount);
+            });
+
+            return redirect()->back()->with('success', 'Expense approved and budget updated.');
+        } catch (\Exception $e) {
+            logger()->error('Expense approval failed', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'An error occurred while approving the expense.');
+        }
+    }
+    public function reject(Expense $expense)
+    {
+        // 1. Authorize: Ensure manager is in the same department
+        if (Auth::user()->department_id !== $expense->department_id) {
+            abort(403, 'You can only manage expenses for your own department.');
+        }
+
+        $originalStatus = $expense->status;
+        $budget = $expense->budget;
+
+        try {
+            // 2. Use a transaction
+            DB::transaction(function () use ($expense, $budget, $originalStatus) {
+                // 3. Update expense status
+                $expense->update(['status' => 'rejected']);
+
+                // 4. If it was *previously* approved, refund the budget
+                if ($originalStatus === 'approved' && $budget) {
+                    $budget->decrement('used_amount', $expense->amount);
+                }
+            });
+
+            return redirect()->back()->with('success', 'Expense rejected.');
+        } catch (\Exception $e) {
+            logger()->error('Expense rejection failed', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'An error occurred while rejecting the expense.');
         }
     }
 

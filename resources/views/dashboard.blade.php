@@ -53,15 +53,15 @@
                                 <th class="px-4 py-3 text-left font-semibold">Category</th>
                                 <th class="px-4 py-3 text-left font-semibold">Amount</th>
                                 <th class="px-4 py-3 text-left font-semibold">Status</th>
-                                <th class="px-4 py-3 text-left font-semibold">Date</th>
+                                <th class="px-4 py-3 text-left font-semibold">Date Submitted</th>
                                 <th class="px-4 py-3 text-left font-semibold">Action</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            @forelse($expenseSubmissions ?? [] as $submission)
+                            @forelse($userExpenses as $expense)
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition">
-                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ $submission->category }}</td>
-                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100">${{ number_format($submission->amount, 2) }}</td>
+                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ $expense->category }}</td>
+                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100">${{ number_format($expense->amount, 2) }}</td>
                                     <td class="px-4 py-3">
                                         @php
                                             $statusColors = [
@@ -70,13 +70,13 @@
                                                 'rejected' => 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
                                             ];
                                         @endphp
-                                        <span class="px-2 py-1 rounded-full text-xs font-medium {{ $statusColors[$submission->status] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' }}">
-                                            {{ ucfirst($submission->status) }}
+                                        <span class="px-2 py-1 rounded-full text-xs font-medium {{ $statusColors[$expense->status] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' }}">
+                                            {{ ucfirst($expense->status) }}
                                         </span>
                                     </td>
-                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ $submission->created_at->format('M d, Y') }}</td>
+                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ $expense->created_at->format('M d, Y') }}</td>
                                     <td class="px-4 py-3">
-                                        <form action="{{ route('expenses.delete', $submission->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this expense?');" class="inline">
+                                        <form action="{{ route('expenses.delete', $expense->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this expense?');" class="inline">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="text-red-600 dark:text-red-400 hover:underline text-sm">
@@ -256,95 +256,139 @@
     @endhasrole
 
     @hasrole('Manager')
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
 
-    <!-- Action Required: Approvals -->
-    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow md:col-span-2">
-        <div class="flex items-center mb-4">
-            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <h2 class="ml-3 text-lg font-semibold text-gray-900">Action Required: Approvals</h2>
-        </div>
-        <div class="space-y-4">
-            {{-- @foreach($approvals as $approval)
-                <div class="flex justify-between items-center p-4 bg-gray-50 rounded-md">
-                    <div>
-                        <h3 class="text-sm font-medium text-gray-900">{{ $approval['title'] }}</h3>
-                        <p class="text-xs text-gray-600">Employee: {{ $approval['employee'] }} | Amount: ${{ number_format($approval['amount'], 2) }}</p>
-                    </div>
-                    <div class="flex space-x-2">
-                        <button class="bg-green-600 text-white px-3 py-1 rounded-md text-xs hover:bg-green-700">Approve</button>
-                        <button class="bg-red-600 text-white px-3 py-1 rounded-md text-xs hover:bg-red-700">Reject</button>
-                    </div>
-                </div>
-            @endforeach --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
-            <!-- Example 1 -->
-            <div class="flex justify-between items-center p-4 bg-gray-50 rounded-md">
-                <div>
-                    <h3 class="text-sm font-medium text-gray-900">Travel Reimbursement</h3>
-                    <p class="text-xs text-gray-600">Employee: Aina Zulkifli | Amount: RM 230.00</p>
+        <!-- Action Required: Approvals -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl transition duration-300 border border-gray-100 dark:border-gray-700 md:col-span-2">
+            <div class="flex items-center mb-4">
+                <div class="bg-blue-100 dark:bg-blue-900/40 p-3 rounded-full">
+                    <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
                 </div>
-                <div class="flex space-x-2">
-                    <button class="bg-green-600 text-white px-3 py-1 rounded-md text-xs hover:bg-green-700">Approve</button>
-                    <button class="bg-red-600 text-white px-3 py-1 rounded-md text-xs hover:bg-red-700">Reject</button>
-                </div>
-            </div>  
-        </div>
-    </div>
+                <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Action Required: Approvals</h2>
+            </div>
 
-    <!-- AI Anomaly/Overspending Alerts -->
-    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-        <div class="flex items-center mb-4">
-            <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-            </svg>
-                <h2 class="ml-3 text-lg font-semibold text-gray-900">AI Alerts</h2>
+            <p class="text-gray-600 dark:text-gray-400 mb-6 text-sm">
+                Review and approve or reject expenses submitted by your department staff.
+            </p>
+
+            @if($pendingExpenses->count() > 0)
+                <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
+                            <tr>
+                                <th class="px-4 py-3 text-left font-semibold">Staff</th>
+                                <th class="px-4 py-3 text-left font-semibold">Amount</th>
+                                <th class="px-4 py-3 text-left font-semibold">Category</th>
+                                <th class="px-4 py-3 text-left font-semibold">Date</th>
+                                <th class="px-4 py-3 text-left font-semibold">Receipt</th>
+                                <th class="px-4 py-3 text-left font-semibold">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                            @foreach($pendingExpenses as $expense)
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition">
+                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ $expense->user->name }}</td>
+                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100">${{ number_format($expense->amount, 2) }}</td>
+                                    <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ $expense->category }}</td>
+                                    <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ \Carbon\Carbon::parse($expense->transaction_date)->format('M d, Y') }}</td>
+                                    <td class="px-4 py-3">
+                                        @if($expense->receipt_path)
+                                            <a href="{{ asset('storage/' . $expense->receipt_path) }}" target="_blank" class="text-indigo-600 dark:text-indigo-400 hover:underline">View</a>
+                                        @else
+                                            <span class="text-gray-400 italic">N/A</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-4 py-3 space-x-2">
+                                        <form action="{{ route('expenses.approve', $expense) }}" method="POST" class="inline-block">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="text-green-600 dark:text-green-400 hover:underline">Approve</button>
+                                        </form>
+                                        <form action="{{ route('expenses.reject', $expense) }}" method="POST" class="inline-block">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">Reject</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <div class="p-6 text-center text-gray-500 dark:text-gray-400 italic">
+                    No pending expenses for your department.
+                </div>
+            @endif
         </div>
+
+        <!-- AI Alerts -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl transition duration-300 border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center mb-4">
+                <div class="bg-orange-100 dark:bg-orange-900/40 p-3 rounded-full">
+                    <svg class="w-6 h-6 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M6 20h12l-6-16z"/>
+                    </svg>
+                </div>
+                <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">AI Alerts</h2>
+            </div>
+
             <ul class="space-y-2">
                 {{--@foreach($anomalyAlerts as $alert)
-                    <li class="text-sm text-gray-600 bg-red-50 p-2 rounded-md">{{ $alert }}</li>
-                 @endforeach--}}
+                    <li class="text-sm text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 p-3 rounded-md border border-red-100 dark:border-red-800/40 shadow-sm">
+                        {{ $alert }}
+                    </li>
+                @endforeach--}}
+                <li class="text-sm text-gray-500 dark:text-gray-400 italic">No current anomalies detected.</li>
             </ul>
-    </div>
+        </div>
 
-    <!-- AI Expense Forecasting -->
-            <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                <div class="flex items-center mb-4">
-                    <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        <!-- AI Expense Forecasting -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl transition duration-300 border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center mb-4">
+                <div class="bg-indigo-100 dark:bg-indigo-900/40 p-3 rounded-full">
+                    <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    <h2 class="ml-3 text-lg font-semibold text-gray-900">AI Forecasting</h2>
                 </div>
-                {{--<div class="space-y-2">
-                    <div class="flex justify-between">
-                        <span class="text-sm text-gray-600">Next Month Prediction:</span>
-                        <span class="text-sm font-medium">${{ number_format($forecasting['next_month_prediction'], 2) }}</span>
-                    </div>
-                    <p class="text-sm text-gray-600">{{ $forecasting['trend'] }}</p>
-                </div>--}}
+                <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">AI Forecasting</h2>
             </div>
 
-    <!-- Spending by Category Chart -->
-    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow md:col-span-2">
-        <div class="flex items-center mb-4">
-            <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-            </svg>
-            <h2 class="ml-3 text-lg font-semibold text-gray-900">Spending by Category</h2>
+            {{--<div class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                <div class="flex justify-between">
+                    <span>Next Month Prediction:</span>
+                    <span class="font-semibold">${{ number_format($forecasting['next_month_prediction'], 2) }}</span>
+                </div>
+                <p class="italic">{{ $forecasting['trend'] }}</p>
+            </div>--}}
+            <p class="text-sm text-gray-500 dark:text-gray-400 italic">Forecasting data not available yet.</p>
+        </div>
+
+        <!-- Spending by Category Chart -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl transition duration-300 border border-gray-100 dark:border-gray-700 md:col-span-2">
+            <div class="flex items-center mb-4">
+                <div class="bg-purple-100 dark:bg-purple-900/40 p-3 rounded-full">
+                    <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m6 0V9a2 2 0 012-2h2a2 2 0 012 2v10m6 0V5a2 2 0 012-2h2a2 2 0 012 2v14"/>
+                    </svg>
+                </div>
+                <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Spending by Category</h2>
             </div>
-        <canvas id="spendingChart" width="400" height="200"></canvas>
+
+            <canvas id="spendingChart" width="400" height="200"></canvas>
+        </div>
     </div>
 
-    <!-- JavaScript for Chart -->
+    <!-- Chart Script -->
     <script>
         {{--const ctx = document.getElementById('spendingChart').getContext('2d');
-        const spendingData = @json($spendingByCategory); // Pass data from Blade to JS
+        const spendingData = @json($spendingByCategory);
         const labels = spendingData.map(item => item.category);
-        const data = spendingData.map(item => item.amount); --}}
+        const data = spendingData.map(item => item.amount);--}}
 
         new Chart(ctx, {
             type: 'bar',
@@ -353,24 +397,28 @@
                 datasets: [{
                     label: 'Spending ($)',
                     data: data,
-                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
+                    backgroundColor: 'rgba(99, 102, 241, 0.6)',
+                    borderColor: 'rgba(99, 102, 241, 1)',
+                    borderWidth: 1,
+                    borderRadius: 6,
                 }]
             },
             options: {
                 responsive: true,
                 scales: {
-                    y: {
-                        beginAtZero: true
-                    }
+                    y: { beginAtZero: true }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { backgroundColor: '#1f2937' }
                 }
             }
         });
     </script>
-	</div>
-    </main>
-    @endhasrole
+</main>
+@endhasrole
+
+
     
 </x-app-layout>
 

@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Expense; // <-- Import the Expense model
+use App\Models\Expense; 
+use App\Models\Budget;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -12,28 +13,41 @@ class DashboardController extends Controller
     /**
      * Display the user's dashboard.
      */
-    public function index(): View
+    public function index()
     {
         $user = Auth::user();
-        $data = []; // Initialize an empty array for data
+        $pendingExpenses = collect(); // Default to empty collection
+        $activeBudget = null;
 
-        // Check if the user has the 'Staff' role
-        if ($user->hasRole('Staff')) {
-            
-            // Fetch expenses for the current user
-            // We'll get the 10 most recent submissions
-            $data['expenseSubmissions'] = Expense::where('user_id', $user->id)
-                                                ->orderBy('created_at', 'desc')
-                                                ->take(10) 
-                                                ->get();
-            
-            // You can also pass data for the other cards here if needed
-            // $data['aiSuggestions'] = [];
-            // $data['budgetOverview'] = [];
-            // $data['approvalFollowUps'] = [];
+        // 2. Fetch data based on user role
+        if ($user->hasRole('Manager')) {
+            // Managers see pending expenses for their department
+            $pendingExpenses = Expense::where('department_id', $user->department_id)
+                ->where('status', 'pending')
+                ->with('user', 'budget') // Load relations
+                ->latest()
+                ->get();
         }
 
-        // Pass all collected data to the view
-        return view('dashboard', $data);
+        if ($user->hasRole('Staff')) {
+            // Staff see their own active budget
+            $activeBudget = Budget::where('department_id', $user->department_id)
+                ->where('status', 'active')
+                ->where('period_start', '<=', now())
+                ->where('period_end', '>=', now())
+                ->first();
+                
+            $userExpenses = Expense::where('user_id', $user->id)
+                ->with('budget')
+                ->latest()
+                ->get();
+        }
+
+        // 3. Pass data to the view
+        return view('dashboard', [
+            'pendingExpenses' => $pendingExpenses,
+            'activeBudget' => $activeBudget,
+            'userExpenses' => $userExpenses ?? collect()
+        ]);
     }
 }
