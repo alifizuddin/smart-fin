@@ -1,0 +1,271 @@
+{
+  "name": "Send email if expense>150",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "49564aed-9e4a-41f4-a6be-927ec0025fe2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        336,
+        -96
+      ],
+      "id": "6e32c8b7-c7f3-417f-9504-4c82bbe91cfb",
+      "name": "Webhook",
+      "webhookId": "49564aed-9e4a-41f4-a6be-927ec0025fe2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1c58827-aad0-489d-ab24-e5e6d9bbb9ba",
+              "leftValue": "={{ $json.Amount }}",
+              "rightValue": 100,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        -96
+      ],
+      "id": "78822659-4b36-4ba2-b4ca-b4be1b2337ef",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1ljXXFnMtt8WqrJ6sVmZfCUXs_JLeCAsT88w-e6nRYow",
+          "mode": "list",
+          "cachedResultName": "smart-fin logbook",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ljXXFnMtt8WqrJ6sVmZfCUXs_JLeCAsT88w-e6nRYow/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ljXXFnMtt8WqrJ6sVmZfCUXs_JLeCAsT88w-e6nRYow/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now }}",
+            "Amount": "={{ $json.body.amount }}",
+            "Description": "={{ $('Webhook').item.json.body.description }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        656,
+        -96
+      ],
+      "id": "3706efcb-d0e7-4f09-acb1-2fc00e30c962",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "s3ZqWtifcvMwh1gy",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "amanulhakimtest@gmail.com",
+        "toEmail": "staff@example.com",
+        "subject": "=ALERT: New High Expense - {{ $('Append row in sheet1').item.json.Description }}",
+        "emailFormat": "text",
+        "text": "=A new expense has been submitted that is over $100.\n\nDescription: {{ $('Append row in sheet1').item.json.Description }} \nAmount: RM{{ $('Append row in sheet1').item.json.Amount }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1120,
+        -208
+      ],
+      "id": "1ab35656-a721-4dc3-a934-8d7f1638ffca",
+      "name": "Send email",
+      "webhookId": "94b637ef-bc2f-4831-87d8-c0a9ebb81c66",
+      "credentials": {
+        "smtp": {
+          "id": "i85X4SduxUHbzBDf",
+          "name": "Mailtrap Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "amanulhakimtest@gmail.com",
+        "subject": "=ALERT: New High Expense - {{ $('Append row in sheet1').item.json.Description }}",
+        "emailType": "text",
+        "message": "=A new expense has been submitted that is over $100.  Description: {{ $('Append row in sheet1').item.json.Description }}  Amount: RM{{ $('Webhook').item.json.body.amount }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        992,
+        -208
+      ],
+      "id": "c3293fd6-07be-46aa-9201-0cfd20cbcde1",
+      "name": "Send a message",
+      "webhookId": "99e467ae-e18f-45a4-9cf7-2d90efa20ef5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "WUjZs0MQEAGyIylC",
+          "name": "Gmail account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "24d3237c-1fbb-4ec6-9af1-d5365bce2f37",
+              "name": "body.amount",
+              "value": "={{ $json.body.amount }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        496,
+        -96
+      ],
+      "id": "b3ed21cd-12e0-4c68-80a6-20605e8e6f33",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Append row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "971cfef8-1511-46c5-a74a-64862815a9af",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "38295d55606a739217b0797b412d00cc274e362c52bda9dc76510367839142cb"
+  },
+  "id": "KJbdtxJR6739w9e4",
+  "tags": []
+}
