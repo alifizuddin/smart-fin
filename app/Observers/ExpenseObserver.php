@@ -31,8 +31,7 @@ class ExpenseObserver
             try {
 
                 // 1. Get your n8n Production URL
-                // $n8nWebhookUrl = 'http://localhost:5678/webhook/458722b2-c1ee-40b2-b933-7924c41cb5ff'; //test workflow
-                $n8nWebhookUrl = 'http://localhost:5678/webhook/49564aed-9e4a-41f4-a6be-927ec0025fe2';
+                $n8nWebhookUrl = env('N8N_WEBHOOK_URL');
 
                 // 2. Send the new expense data to n8n as a package (JSON)
                 Http::timeout(3)->post($n8nWebhookUrl, $expense->toArray());
