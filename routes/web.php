@@ -18,9 +18,11 @@ Route::view('profile', 'profile')
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
-        Route::post('expenses/quick-store', [ExpenseController::class, 'quickStore'])
-         ->name('expenses.quickStore')
-         ->middleware('role:Staff');
+    Route::post('expenses/quick-store', [ExpenseController::class, 'quickStore'])
+        ->name('expenses.quickStore')
+        ->middleware('role:Staff');
+        
+    Route::delete('/expenses/{id}', [ExpenseController::class, 'destroy'])->name('expenses.delete');
 
     // --- ADMIN-ONLY ROUTES ---
     Route::middleware('role:Admin')->group(function () {
@@ -43,6 +45,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // --- ADMIN & MANAGER ROUTES ---
     Route::middleware('role:Admin|Manager')->group(function () {
         // This single definition now works for both roles
+        Route::patch('expenses/{expense}/approve', [ExpenseController::class, 'approve'])
+        ->name('expenses.approve')
+        ->middleware('role:Manager');
+
+        Route::patch('expenses/{expense}/reject', [ExpenseController::class, 'reject'])
+        ->name('expenses.reject')
+        
+        ->middleware('role:Manager');
         Route::get('budgets/report', [BudgetController::class, 'report'])->name('budgets.report');
         Route::get('/budgets/{budget}/json', [BudgetController::class, 'showJson'])->name('budgets.showJson');
     });

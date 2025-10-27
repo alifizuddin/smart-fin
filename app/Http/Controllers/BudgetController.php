@@ -5,10 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Budget;
 use App\Models\Department;
 use App\Models\Projects;
+use App\Models\Expense;
 use Illuminate\Http\Request;
 use App\Notifications\BudgetStatusUpdated;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Gate;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
 use App\Services\BudgetService;
 
 class BudgetController extends Controller
@@ -151,25 +155,86 @@ class BudgetController extends Controller
     // ============================================================
     return view('budgets.create', compact('departments', 'projects'));
 }
-/**
- * Return budget details as JSON (for AJAX or API usage).
- *
- * @param  \App\Models\Budget  $budget
- * @return \Illuminate\Http\JsonResponse
- */
-public function showJson(Budget $budget)
-{
-    // ============================================================
-    // 1️⃣ Eager Load Relationships
-    // ============================================================
-    $budget->load('department');
-    // Prevent N+1 query issues by preloading the related department.
 
-    // ============================================================
-    // 2️⃣ Return JSON Response
-    // ============================================================
-    return response()->json($budget);
-}
+public function storeExpense(Request $request)
+    {
+        $request->validate([
+            'amount' => 'required|numeric',
+            'receipt_image' => 'required|image|mimes:jpeg,png,jpg|max:2048', // Validate the image
+            'description' => 'nullable|string',
+        ]);
+
+        // 1. Store the uploaded image temporarily
+        // This saves it in 'storage/app/temp_receipts/some_random_name.jpg'
+        $path = $request->file('receipt_image')->store('temp_receipts', 'local');
+        $absolutePath = storage_path('app/' . $path);
+
+        $description = $request->input('description');
+        $predictedCategory = 'Uncategorized';
+
+        try {
+            // 2. Call the Python script to get the category
+            $predictedCategory = $this->getCategoryFromImage($absolutePath);
+            
+            // If the user didn't provide a description,
+            // you could try to get the first line of the receipt as a description
+            if (empty($description)) {
+                 // This is a simple (and optional) improvement
+                 $description = "Receipt " . $request->file('receipt_image')->getClientOriginalName();
+            }
+
+        } catch (\Exception $e) {
+            // Log the error
+            \Log::error('Receipt prediction failed: ' . $e->getMessage());
+        }
+
+        // 3. Clean up the temporary file
+        Storage::disk('local')->delete($path);
+        
+        // 4. Create the expense in the database
+        Expense::create([
+            'description' => $description,
+            'amount' => $request->input('amount'),
+            'category' => $predictedCategory, // Use the predicted category!
+            'user_id' => auth()->id(),
+            // ... other fields ...
+        ]);
+
+        return redirect()->back()->with('success', 'Expense added with category: ' . $predictedCategory);
+    }
+    /**
+     * Calls the Python script to predict a category from an image file.
+     *
+     * @param string $imageAbsolutePath
+     * @return string
+     */
+    private function getCategoryFromImage(string $imageAbsolutePath): string
+    {
+        // IMPORTANT: Use absolute paths for your Python script and model
+        // e.g., base_path('ml/predict_from_image.py')
+        $pythonScriptPath = base_path('ml/predict_from_image.py');
+
+        // Set the working directory to where the model is, so the script can find it
+        $process = new Process(['python', $pythonScriptPath, $imageAbsolutePath]);
+        $process->setWorkingDirectory(base_path('ml')); // Run from the 'ml' folder
+        
+        try {
+            $process->run();
+
+            if (!$process->isSuccessful()) {
+                // Get error output from stderr
+                throw new \Exception($process->getErrorOutput());
+            }
+
+            $predictedCategory = trim($process->getOutput());
+            
+            return $predictedCategory ?: 'Uncategorized (Script Error)';
+
+        } catch (ProcessFailedException $exception) {
+            \Log::error('NLP/OCR Prediction Failed: ' . $exception->getMessage());
+            return 'Uncategorized (Process Failed)';
+        }
+    }
 
   /**
  * Store a newly created budget in the database.
