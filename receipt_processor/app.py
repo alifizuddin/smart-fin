@@ -9,8 +9,8 @@ import google.generativeai as genai
 
 # --- TESSERACT CONFIG (Your fix) ---
 # This ensures Python can find your Tesseract installation
-os.environ['TESSDATA_PREFIX'] = r'C:\Program Files\Tesseract-OCR\tessdata'
-pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+# os.environ['TESSDATA_PREFIX'] = r'C:\Program Files\Tesseract-OCR\tessdata'
+# pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 app = Flask(__name__)
 

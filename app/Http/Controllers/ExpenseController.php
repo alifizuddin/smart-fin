@@ -185,7 +185,7 @@ class ExpenseController extends Controller
                     'receipt',
                     file_get_contents($request->file('receipt')),
                     $request->file('receipt')->getClientOriginalName()
-                )->post('http://127.0.0.1:5010/process-receipt');
+                )->post('http://python_api:5010/process-receipt');
 
             if (!$response->successful()) {
                 logger()->error('Receipt processing failed', ['response' => $response->body()]);

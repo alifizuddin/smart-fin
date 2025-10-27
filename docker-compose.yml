@@ -1,0 +1,70 @@
+
+services:
+  # 1. Laravel Application Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    container_name: smartfin-app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - db
+    networks:
+      - smartfin-net
+
+  # 2. Nginx Web Server Service
+  web:
+    image: nginx:alpine
+    container_name: smartfin-web
+    restart: unless-stopped
+    ports:
+      - "8000:80" # Access the app at http://localhost:8000
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - smartfin-net
+    depends_on:
+      - app
+
+  # 3. MySQL Database Service
+  db:
+    image: mysql:8.0
+    container_name: smartfin-db
+    restart: unless-stopped
+    ports:
+      - "3306:3306" # Expose MySQL to your host machine (optional)
+    environment:
+      MYSQL_DATABASE: smartfin
+      MYSQL_USER: smartfin_user
+      MYSQL_PASSWORD: 12345
+      MYSQL_ROOT_PASSWORD: 12345
+    volumes:
+      - smartfin-db-data:/var/lib/mysql
+    networks:
+      - smartfin-net
+
+  # 4. Python Flask API Service
+  python_api:
+    build:
+      context: ./receipt_processor # Assumes app.py is in this folder
+      dockerfile: Dockerfile.python
+    container_name: smartfin-python-api
+    restart: unless-stopped
+    ports:
+      - "5010:5010" # Expose the Python API at http://localhost:5000
+    networks:
+      - smartfin-net
+
+# Define the network
+networks:
+  smartfin-net:
+    driver: bridge
+
+# Define the persistent volume for the database
+volumes:
+  smartfin-db-data:
+    driver: local
