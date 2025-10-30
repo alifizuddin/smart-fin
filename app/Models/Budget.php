@@ -12,6 +12,7 @@ class Budget extends Model
     use HasFactory;
 
     protected $fillable = [
+        'name',
         'department_id',
         'project_id',
         'total_amount',

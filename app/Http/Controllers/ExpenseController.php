@@ -34,7 +34,7 @@ class ExpenseController extends Controller
         // 2. Validate the input
         $validator = Validator::make($request->all(), [
             'amount' => 'required|numeric|min:0.01',
-            'receipt'         => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'receipt' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120', // 5MB max
             'description' => 'nullable|string|max:1000',
         ]);
 
@@ -44,35 +44,64 @@ class ExpenseController extends Controller
 
         $validated = $validator->validated();
 
-        // 3. Find an active budget for the user's department
-        $activeBudget = Budget::where('department_id', $user->department_id)
+        // 3. Find all active budgets for the user's department
+        $activeBudgets = Budget::where('department_id', $user->department_id)
             ->where('status', 'active')
             ->where('period_start', '<=', Carbon::now())
             ->where('period_end', '>=', Carbon::now())
-            ->first();
+            ->get();
 
-        if (!$activeBudget) {
+        if ($activeBudgets->isEmpty()) {
             return response()->json([
                 'message' => 'No active budget found for your department at this time. Please contact your manager.'
             ], 422);
         }
 
-        // 4. Create the expense
+        // 4. Find a budget with sufficient remaining balance
+        $selectedBudget = null;
+        $expenseAmount = $validated['amount'];
+
+        foreach ($activeBudgets as $budget) {
+            // Calculate total spent (approved + pending)
+            $totalSpent = Expense::where('budget_id', $budget->id)
+                ->whereIn('status', ['approved', 'pending'])
+                ->sum('amount');
+            
+            $remainingBalance = $budget->amount - $totalSpent;
+
+            // Check if this budget has enough remaining balance
+            if ($remainingBalance >= $expenseAmount) {
+                $selectedBudget = $budget;
+                break;
+            }
+        }
+
+        if (!$selectedBudget) {
+            return response()->json([
+                'message' => 'No budget with sufficient remaining balance found. Please contact your manager or reduce the expense amount.'
+            ], 422);
+        }
+
+        // 5. Handle file upload
         try {
-            // **FIXED RUNTIME BUG**: Added a default 'Uncategorized' value.
-            // You were calling $validated['category'] but 'category' was not in your validator.
+            $path = $request->file('receipt')->store('receipts', 'public');
+
+            // 6. Create the expense
             Expense::create([
                 'user_id' => $user->id,
                 'department_id' => $user->department_id,
-                'budget_id' => $activeBudget->id,
+                'budget_id' => $selectedBudget->id,
                 'amount' => $validated['amount'],
-                'category' => 'Uncategorized', // <-- FIX
+                'category' => 'Uncategorized',
                 'description' => $validated['description'],
-                'status' => 'pending', // Default status
+                'receipt_path' => $path,
+                'transaction_date' => Carbon::now()->format('Y-m-d'),
+                'payment_method' => 'Not specified',
+                'status' => 'pending',
             ]);
 
             return response()->json([
-                'message' => 'Expense submitted successfully!'
+                'message' => 'Expense submitted successfully! Automatically assigned to Budget #' . $selectedBudget->id
             ], 201);
         } catch (\Exception $e) {
             // Log the error
@@ -160,8 +189,16 @@ class ExpenseController extends Controller
             return redirect()->route('dashboard')
                 ->with('error', 'No active budget found for your department. Please contact your manager.');
         }
+        $allActiveBudgets = Budget::where('department_id', $user->department_id)    
+            ->where('status', 'active')
+            ->where('period_end', '>=', now())
+            ->with(['expenses' => function ($query) {
+                $query->whereIn('status', ['approved', 'pending']);
+            }])
+            ->orderBy('period_end', 'asc')
+            ->get();
 
-        return view('expenses.create', compact('activeBudget'));
+        return view('expenses.create', compact('activeBudget', 'allActiveBudgets'));
     }
 
     /**
@@ -171,8 +208,18 @@ class ExpenseController extends Controller
     {
         // 1. Validate only the required fields
         $validated = $request->validate([
-            'budget_id' => 'required|exists:budgets,id',
-            'receipt'   => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'budget_id' => [
+                'required',
+                'exists:budgets,id',
+                // This rule ensures the user belongs to the budget's department
+                function ($attribute, $value, $fail) use ($user) {
+                    $budget = Budget::find($value);
+                    if (!$budget || $budget->department_id !== $user->department_id) {
+                        $fail('You are not authorized to use this budget.');
+                    }
+                },
+            ],
+            'receipt' => 'required|file|mimes:jpg,png,pdf|max:2048', // Max 2MB as per your blade file
         ]);
 
         // 2. Handle the file upload

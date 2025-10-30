@@ -36,16 +36,37 @@
 
                         {{-- Budget Info --}}
                         <div class="mb-6">
-                            <x-input-label :value="__('Active Budget')" />
-                            <div class="mt-2 p-4 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg">
-                                <p class="text-gray-700 dark:text-gray-300 text-sm">
-                                    <span class="font-semibold">Budget #{{ $activeBudget->id }}</span><br>
-                                    <span class="text-gray-500 dark:text-gray-400 text-sm">
-                                        Period: {{ $activeBudget->period_start }} — {{ $activeBudget->period_end }}
-                                    </span>
+                            <x-input-label for="budget_id" :value="__('Select Budget')" />
+                            <select id="budget_id" name="budget_id" required 
+                                    class="block mt-2 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-lg shadow-sm">
+                                
+                                <option value="" disabled {{ old('budget_id') ? '' : 'selected' }}>-- Please choose a budget --</option>
+                                
+                                {{-- Inside the <select> element for 'budget_id' --}}
+
+@forelse($allActiveBudgets as $budget)
+    @php
+        // Calculate the total spent (approved + pending expenses)
+        $totalSpent = $budget->expenses->sum('total_amount');
+        // Calculate the remaining amount
+        $remaining = $budget->total_amount - $totalSpent;
+    @endphp
+    
+    <option value="{{ $budget->id }}">
+    {{ $budget->name }}, (Remaining: ${{ number_format($remaining, 2) }})
+</option>
+
+@empty
+    <option value="" disabled>You have no active budgets.</option>
+@endforelse
+                            </select>
+                            <x-input-error :messages="$errors->get('budget_id')" class="mt-2" />
+                            
+                            @if($allActiveBudgets->isEmpty())
+                                <p class="mt-2 text-sm text-red-600 dark:text-red-400">
+                                    You cannot submit an expense because you have no active budgets. Please contact your manager.
                                 </p>
-                            </div>
-                            <input type="hidden" name="budget_id" value="{{ $activeBudget->id }}">
+                            @endif
                         </div>
 
                         {{-- AI Info Section --}}

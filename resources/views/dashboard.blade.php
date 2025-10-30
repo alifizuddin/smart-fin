@@ -129,31 +129,60 @@
                     <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Budget Overview</h2>
                 </div>
 
-                @php
-                    $total = $budgetOverview['total_budget'] ?? 0;
-                    $spent = $budgetOverview['spent'] ?? 0;
-                    $remaining = max($total - $spent, 0);
-                    $percent = $total > 0 ? round(($spent / $total) * 100, 2) : 0;
-                @endphp
+                @if($activeBudget)
+                    @php
+                        // --- Data Calculation ---
+                        $total = $activeBudget->amount;
+                        $spent_approved = $userExpenses->where('status', 'approved')->sum('amount');
+                        $spent_pending = $userExpenses->where('status', 'pending')->sum('amount');
+                        
+                        $effective_spent = $spent_approved + $spent_pending;
+                        $remaining = max($total - $effective_spent, 0);
+                        
+                        // Use effective_spent for the progress bar percentage
+                        $percent = $total > 0 ? round(($effective_spent / $total) * 100, 2) : 0;
 
-                <div class="space-y-3 text-sm">
-                    <div class="flex justify-between">
-                        <span class="text-gray-600 dark:text-gray-400">Total Budget:</span>
-                        <span class="font-semibold text-gray-900 dark:text-gray-100">${{ number_format($total, 2) }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600 dark:text-gray-400">Spent:</span>
-                        <span class="font-semibold text-red-600 dark:text-red-400">${{ number_format($spent, 2) }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600 dark:text-gray-400">Remaining:</span>
-                        <span class="font-semibold text-green-600 dark:text-green-400">${{ number_format($remaining, 2) }}</span>
-                    </div>
-                </div>
+                        // --- Dynamic Progress Bar Colors ---
+                        $progressBarColor = 'bg-green-600 dark:bg-green-400'; // Default (Green)
+                        if ($percent >= 90) {
+                            $progressBarColor = 'bg-red-600 dark:bg-red-400'; // Danger (Red)
+                        } elseif ($percent >= 75) {
+                            $progressBarColor = 'bg-yellow-500 dark:bg-yellow-400'; // Warning (Yellow)
+                        }
+                    @endphp
 
-                <div class="mt-4 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-                    <div class="bg-blue-600 dark:bg-blue-400 h-2 rounded-full transition-all duration-700" style="width: {{ $percent }}%"></div>
-                </div>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Total Budget:</span>
+                            <span class="font-semibold text-gray-900 dark:text-gray-100">${{ number_format($total, 2) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Approved:</span>
+                            <span class="font-semibold text-red-600 dark:text-red-400">(${!! number_format($spent_approved, 2) !!})</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Pending:</span>
+                            <span class="font-semibold text-yellow-600 dark:text-yellow-400">(${!! number_format($spent_pending, 2) !!})</span>
+                        </div>
+                        <hr class="dark:border-gray-600">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Remaining:</span>
+                            <span class="font-semibold text-green-600 dark:text-green-400">${{ number_format($remaining, 2) }}</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden" title="{{ $percent }}% Used">
+                        <div class="h-2 rounded-full transition-all duration-700 {{ $progressBarColor }}" style="width: {{ $percent }}%"></div>
+                    </div>
+                    <div class="mt-2 text-xs text-gray-500 dark:text-gray-400 text-right">
+                        Valid until: {{ \Carbon\Carbon::parse($activeBudget->period_end)->format('M d, Y') }}
+                    </div>
+
+                @else
+                    <p class="text-sm text-gray-500 dark:text-gray-400 italic">
+                        You do not have an active budget at this time.
+                    </p>
+                @endif
             </div>
 
             <!-- Approval Follow-Ups -->
@@ -189,7 +218,7 @@
             <div class="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
                 <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-lg shadow-2xl border border-gray-100 dark:border-gray-700">
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Quick Expense Submission</h2>
-                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Fill in your expense details below.</p>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Fill in your expense details below. The system will automatically assign your expense to a budget with sufficient remaining balance.</p>
 
                     <!-- Alerts -->
                     <template x-if="successMessage">
@@ -206,22 +235,23 @@
                         </div>
 
                         <div class="mb-6">
-        <label for="receipt" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Upload Receipt
-        </label>
-        <input type="file" id="receipt" name="receipt" accept="image/*,.pdf"
-               class="mt-1 block w-full text-sm text-gray-700 dark:text-gray-300 
-                      file:mr-4 file:py-2 file:px-4
-                      file:rounded-md file:border-0
-                      file:text-sm file:font-semibold
-                      file:bg-indigo-600 file:text-white
-                      hover:file:bg-indigo-700
-                      dark:file:bg-indigo-500 dark:hover:file:bg-indigo-600"
-               required>
-        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            Accepted formats: JPG, PNG, or PDF (max 5MB)
-        </p>
-    </div>
+                            <label for="receipt" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Upload Receipt
+                            </label>
+                            <input type="file" id="receipt" name="receipt" accept="image/*,.pdf"
+                                   @change="form.receipt = $event.target.files[0]"
+                                   class="mt-1 block w-full text-sm text-gray-700 dark:text-gray-300 
+                                          file:mr-4 file:py-2 file:px-4
+                                          file:rounded-md file:border-0
+                                          file:text-sm file:font-semibold
+                                          file:bg-indigo-600 file:text-white
+                                          hover:file:bg-indigo-700
+                                          dark:file:bg-indigo-500 dark:hover:file:bg-indigo-600"
+                                   required>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Accepted formats: JPG, PNG, or PDF (max 5MB)
+                            </p>
+                        </div>
 
                         <div>
                             <x-input-label for="description" value="Description (Optional)" />
@@ -229,25 +259,25 @@
                         </div>
 
                         <div class="mt-6 flex justify-end items-center">
-    <x-secondary-button type="button" @click="showModal = false">
-        Cancel
-    </x-secondary-button>
+                            <x-secondary-button type="button" @click="showModal = false">
+                                Cancel
+                            </x-secondary-button>
 
-    <x-primary-button 
-        type="submit" 
-        class="ms-3" 
-        x-bind:disabled="loading"
-    >
-        <span x-show="!loading">Submit Expense</span>
-        <span x-show="loading" class="flex items-center">
-            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Submitting...
-        </span>
-    </x-primary-button>
-</div>
+                            <x-primary-button 
+                                type="submit" 
+                                class="ms-3" 
+                                x-bind:disabled="loading"
+                            >
+                                <span x-show="!loading">Submit Expense</span>
+                                <span x-show="loading" class="flex items-center">
+                                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Submitting...
+                                </span>
+                            </x-primary-button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -429,20 +459,50 @@
             loading: false,
             successMessage: '',
             errorMessage: '',
-            form: { amount: '', category: '', description: '' },
-            resetForm() { this.form = { amount: '', category: '', description: '' }; },
+            form: { amount: '', description: '', receipt: null },
+            resetForm() { 
+                this.form = { amount: '', description: '', receipt: null };
+                // Reset file input
+                const fileInput = document.getElementById('receipt');
+                if (fileInput) fileInput.value = '';
+            },
             async handleSubmit() {
                 this.loading = true;
                 this.successMessage = '';
                 this.errorMessage = '';
+                
                 try {
+                    // Validate receipt file
+                    if (!this.form.receipt) {
+                        throw new Error('Please upload a receipt.');
+                    }
+
+                    // Create FormData for file upload
+                    const formData = new FormData();
+                    formData.append('amount', this.form.amount);
+                    formData.append('description', this.form.description || '');
+                    formData.append('receipt', this.form.receipt);
+
                     const response = await fetch(postUrl, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token, 'Accept': 'application/json' },
-                        body: JSON.stringify(this.form)
+                        headers: { 
+                            'X-CSRF-TOKEN': token, 
+                            'Accept': 'application/json' 
+                        },
+                        body: formData
                     });
+                    
                     const data = await response.json();
-                    if (!response.ok) throw new Error(data.message || 'Submission failed.');
+                    
+                    if (!response.ok) {
+                        // Handle validation errors
+                        if (data.errors) {
+                            const errorMessages = Object.values(data.errors).flat().join(' ');
+                            throw new Error(errorMessages);
+                        }
+                        throw new Error(data.message || 'Submission failed.');
+                    }
+                    
                     this.successMessage = data.message;
                     this.resetForm();
                     setTimeout(() => location.reload(), 1500);

@@ -260,6 +260,7 @@ public function store(Request $request)
     // 2️⃣ Validation
     // ============================================================
     $validated = $request->validate([
+        'name' => 'required|string',
         'department_id' => 'required|exists:departments,id',
         'project_id'    => 'nullable|exists:projects,id',
         'total_amount'  => 'required|numeric|min:0',

@@ -22,7 +22,7 @@
                 <div class="p-8 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-indigo-50 via-white to-transparent dark:from-indigo-950/40 dark:via-gray-800">
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Budget Setup</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                        Define the department, budget amount, and the active period for this budget entry.
+                        Define the budget name, department, amount, and active period for this budget entry.
                     </p>
                 </div>
 
@@ -30,6 +30,15 @@
                 <div class="p-8">
                     <form method="POST" action="{{ route('budgets.store') }}" class="space-y-6">
                         @csrf
+
+                        {{-- 🔹 Budget Name --}}
+                        <div>
+                            <x-input-label for="name" :value="__('Budget Name')" />
+                            <x-text-input id="name" class="block mt-1 w-full" 
+                                type="text" name="name" :value="old('name')" 
+                                placeholder="e.g., Q4 Department Budget, Marketing 2025, etc." required />
+                            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                        </div>
 
                         {{-- Department --}}
                         <div>
@@ -45,7 +54,7 @@
                             </select>
                             <x-input-error :messages="$errors->get('department_id')" class="mt-2" />
                         </div>
-
+                        
                         {{-- Total Amount --}}
                         <div>
                             <x-input-label for="total_amount" :value="__('Total Amount ($)')" />
@@ -54,6 +63,8 @@
                                 placeholder="Enter total allocated amount" />
                             <x-input-error :messages="$errors->get('total_amount')" class="mt-2" />
                         </div>
+
+                        {{-- Project (Optional) --}}
                         <div class="mt-4">
                             <x-input-label for="project_id" :value="__('Project (Optional)')" />
                             <select id="project_id" name="project_id" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
@@ -67,7 +78,7 @@
                             <x-input-error :messages="$errors->get('project_id')" class="mt-2" />
                         </div>
 
-                        {{-- Period Start --}}
+                        {{-- Period Start & End --}}
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <x-input-label for="period_start" :value="__('Period Start Date')" />
@@ -76,7 +87,6 @@
                                 <x-input-error :messages="$errors->get('period_start')" class="mt-2" />
                             </div>
 
-                            {{-- Period End --}}
                             <div>
                                 <x-input-label for="period_end" :value="__('Period End Date')" />
                                 <x-text-input id="period_end" class="block mt-1 w-full" 

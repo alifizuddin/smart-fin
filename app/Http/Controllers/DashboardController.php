@@ -22,6 +22,7 @@ class DashboardController extends Controller
         $activeBudget = null;
         $userExpenses = collect();
         $aiSuggestions = [];
+        $userBudgets = collect();
 
         // 2. Fetch data based on user role
         if ($user->hasRole('Manager')) {
@@ -44,6 +45,12 @@ class DashboardController extends Controller
             $userExpenses = Expense::where('user_id', $user->id)
                 ->with('budget')
                 ->latest()
+                ->get();
+            
+                $userBudgets = Budget::where('department_id', $user->department_id)
+                ->where('status', 'active')
+                ->where('period_end', '>=', now())
+                ->orderBy('period_end', 'asc')
                 ->get();
             
             // --- AI Logic should be INSIDE the Staff block ---
@@ -94,7 +101,8 @@ class DashboardController extends Controller
             'pendingExpenses' => $pendingExpenses,
             'activeBudget' => $activeBudget,
             'userExpenses' => $userExpenses, // Changed from 'userExpenses ?? collect()'
-            'aiSuggestions' => $aiSuggestions
+            'aiSuggestions' => $aiSuggestions,
+            'userBudgets' => $userBudgets
         ]);
     }
 }
