@@ -360,14 +360,17 @@
     </div>
 </div>
     <div id="editBudgetModal" tabindex="-1" aria-hidden="true"
-     class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-    <div class="relative w-full max-w-3xl mx-4">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden">
+     class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm 
+            transition-opacity duration-300 ease-out opacity-0 data-[active=true]:opacity-100 data-[active=true]:flex">
+
+    <div class="relative w-full max-w-3xl mx-4 scale-95 transform transition-all duration-300 ease-out data-[active=true]:scale-100">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
 
             {{-- Header --}}
-            <div class="flex justify-between items-center p-6 border-b dark:border-gray-700">
+            <div class="flex justify-between items-center p-6 border-b dark:border-gray-700 bg-gradient-to-r from-indigo-50 to-transparent dark:from-indigo-900/20">
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-indigo-600 dark:text-indigo-400 animate-pulse-slow"
+                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
                               d="M12 8c-1.657 0-3 .895-3 2v4c0 1.105 1.343 2 3 2s3-.895 3-2v-4c0-1.105-1.343-2-3-2z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
@@ -375,10 +378,10 @@
                     </svg>
                     Edit Budget
                 </h3>
-                <button type="button"
-                        class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-                        data-modal-close>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none"
+                <button type="button" data-modal-close
+                        class="rounded-full p-2 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white 
+                               hover:bg-gray-200/50 dark:hover:bg-gray-700/50 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
                          viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M6 18L18 6M6 6l12 12" />
@@ -393,13 +396,15 @@
                     @method('PUT')
 
                     <div class="grid gap-4 sm:grid-cols-2">
+                        {{-- Department --}}
                         <div>
                             <label for="edit-department_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                 Department
                             </label>
                             <select id="edit-department_id" name="department_id"
                                     class="w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 
-                                           dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                           focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+                                           dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-all"
                                     required>
                                 @foreach($departments as $department)
                                     <option value="{{ $department->id }}">{{ $department->name }}</option>
@@ -407,43 +412,51 @@
                             </select>
                         </div>
 
+                        {{-- Total Amount --}}
                         <div>
                             <label for="edit-total_amount" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                 Total Amount
                             </label>
                             <input type="number" name="total_amount" id="edit-total_amount"
                                    class="w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 
-                                          dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                          focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+                                          dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-all"
                                    required>
                         </div>
 
+                        {{-- Start Date --}}
                         <div>
                             <label for="edit-period_start" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                 Start Date
                             </label>
                             <input type="date" name="period_start" id="edit-period_start"
                                    class="w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 
-                                          dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                          focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+                                          dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-all"
                                    required>
                         </div>
 
+                        {{-- End Date --}}
                         <div>
                             <label for="edit-period_end" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                 End Date
                             </label>
                             <input type="date" name="period_end" id="edit-period_end"
                                    class="w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 
-                                          dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                          focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+                                          dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-all"
                                    required>
                         </div>
 
+                        {{-- Status --}}
                         <div class="sm:col-span-2">
                             <label for="edit-status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                 Status
                             </label>
                             <select id="edit-status" name="status"
                                     class="w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 
-                                           dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                           focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+                                           dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-all"
                                     required>
                                 <option value="active">Active</option>
                                 <option value="closed">Closed</option>
@@ -455,15 +468,24 @@
 
             {{-- Footer --}}
             <div class="flex justify-end items-center gap-3 p-6 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-                <button type="button"
-                        class="px-4 py-2 rounded-lg text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white font-medium"
-                        data-modal-close>
+                <button type="button" data-modal-close
+                        class="px-4 py-2 rounded-lg text-gray-600 hover:text-gray-900 
+                               hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700 
+                               font-medium transition">
                     Cancel
                 </button>
                 <button type="submit" form="editBudgetForm"
                         class="px-5 py-2.5 rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 
-                               focus:ring-4 focus:outline-none focus:ring-indigo-300 font-medium">
-                    Update Budget
+                               focus:ring-4 focus:outline-none focus:ring-indigo-300 font-medium 
+                               shadow-md hover:shadow-lg transition-all">
+                    <span class="inline-flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
+                             viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                  d="M5 13l4 4L19 7" />
+                        </svg>
+                        Update Budget
+                    </span>
                 </button>
             </div>
         </div>

@@ -1,5 +1,6 @@
 
 services:
+ 
   # 1. Laravel Application Service
   app:
     build:
@@ -14,6 +15,23 @@ services:
       - db
     networks:
       - smartfin-net
+    
+  n8n:
+    image: n8nio/n8n
+    container_name: n8n_local
+    restart: unless-stopped
+    ports:
+      # Connects your computer's port 5678 to the container's port 5678
+      - "5678:5678"
+    volumes:
+      # Creates a persistent "thermos" to save your workflows
+      - n8n_data_local:/home/node/.n8n
+    environment:
+      # Tells n8n to use the free and simple built-in database
+      - DB_TYPE=sqlite
+    networks:
+      - smartfin-net
+
 
   # 2. Nginx Web Server Service
   web:
@@ -68,3 +86,5 @@ networks:
 volumes:
   smartfin-db-data:
     driver: local
+  n8n_data_local:
+

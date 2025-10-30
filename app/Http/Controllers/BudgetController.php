@@ -68,6 +68,12 @@ class BudgetController extends Controller
         return view('budgets.index', $viewData);
     }
     
+    public function showJson(Budget $budget)
+    {
+    
+        return response()->json($budget->load('department'));
+    }
+    
     public function report(Request $request)
     {
         $this->authorize('viewAny', Budget::class);

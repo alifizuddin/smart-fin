@@ -25,22 +25,7 @@ class ExpenseObserver
                         $budget->increment('used_amount', $expense->amount);
                     }
                 });
-            }
-
-
-            try {
-
-                // 1. Get your n8n Production URL
-                $n8nWebhookUrl = env('N8N_WEBHOOK_URL');
-
-                // 2. Send the new expense data to n8n as a package (JSON)
-                Http::timeout(3)->post($n8nWebhookUrl, $expense->toArray());
-
-            } catch (\Exception $e) {
-                // 3. Log an error if n8n fails
-                Log::error("Failed to send expense to n8n: " . $e->getMessage());
-            }
-            // --- [END] n8n AUTOMATION TRIGGER ---
+            }       
 
         } catch (\Exception $e) {
             // Log any errors to prevent failures
