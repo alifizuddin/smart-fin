@@ -51,10 +51,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::patch('expenses/{expense}/reject', [ExpenseController::class, 'reject'])
         ->name('expenses.reject')
-
-        
         ->middleware('role:Manager');
+        
         Route::get('budgets/report', [BudgetController::class, 'report'])->name('budgets.report');
+    });
+
+    Route::middleware('role:Manager')->group(function () {
+        // Add any routes here that are ONLY for Managers (and not Admins)
+        Route::get('expenses/approvals', [ExpenseController::class, 'approvalsIndex'])
+            ->name('expenses.approvals.index');
+    });
+    Route::middleware('role:Staff')->group(function () {
+        // Staff-specific routes
     });
 
     // --- ROUTES FOR ALL LOGGED-IN ROLES ---
@@ -63,16 +71,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('expenses', ExpenseController::class);
     Route::get('/budgets/{budget}/json', [BudgetController::class, 'showJson'])->name('budgets.showJson');
 
-    // --- OTHER ROLE GROUPS ---
-    Route::middleware('role:Manager')->group(function () {
-        // Add any routes here that are ONLY for Managers (and not Admins)
-        Route::get('expenses/approvals', [ExpenseController::class, 'approvalsIndex'])
-            ->name('expenses.approvals.index');
-    });
-
-    Route::middleware('role:Staff')->group(function () {
-        // Staff-specific routes
-    });
 });
 
 require __DIR__.'/auth.php';

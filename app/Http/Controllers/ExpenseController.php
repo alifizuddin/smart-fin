@@ -111,20 +111,31 @@ class ExpenseController extends Controller
             ], 500);
         }
     }
-    public function approvalsIndex()
+    public function approvalsIndex(Request $request)
     {
         $user = Auth::user();
 
         if (!$user->department_id) {
             return redirect()->route('dashboard')
-            ->with('error', 'You must be associated with a department to view expense approvals.');
+                ->with('error', 'You must be associated with a department to view expense approvals.');
         }
 
-        $pendingExpenses = Expense::where('department_id', $user->department_id)
-        ->where('status', 'pending')
-        ->with(['user', 'budget'])
-        ->orderBy('created_at', 'asc')
-        ->paginate(10);
+        $query = Expense::where('department_id', $user->department_id)
+            ->where('status', 'pending')
+            ->with(['user', 'budget']);
+
+        // Handle search
+        if ($request->filled('search')) {
+            $searchTerm = $request->input('search');
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('category', 'like', "%{$searchTerm}%")
+                  ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
+                      $userQuery->where('name', 'like', "%{$searchTerm}%");
+                  });
+            });
+        }
+
+        $pendingExpenses = $query->orderBy('created_at', 'asc')->paginate(10);
 
         return view('expenses.approval-index', compact('pendingExpenses'));
     }

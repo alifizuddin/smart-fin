@@ -337,40 +337,21 @@
                     <table class="min-w-full text-sm">
                         <thead class="bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
                             <tr>
+                                <th class="px-4 py-3 text-left font-semibold">Budget Name</th>
                                 <th class="px-4 py-3 text-left font-semibold">Staff</th>
                                 <th class="px-4 py-3 text-left font-semibold">Amount</th>
                                 <th class="px-4 py-3 text-left font-semibold">Category</th>
-                                <th class="px-4 py-3 text-left font-semibold">Date</th>
-                                <th class="px-4 py-3 text-left font-semibold">Receipt</th>
-                                <th class="px-4 py-3 text-left font-semibold">Action</th>
+                                <th class="px-4 py-3 text-left font-semibold">Date Submitted</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             @foreach($pendingExpenses as $expense)
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition">
+                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ $expense->budget->name }}</td>
                                     <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ $expense->user->name }}</td>
                                     <td class="px-4 py-3 text-gray-900 dark:text-gray-100">${{ number_format($expense->amount, 2) }}</td>
                                     <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ $expense->category }}</td>
-                                    <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ \Carbon\Carbon::parse($expense->transaction_date)->format('M d, Y') }}</td>
-                                    <td class="px-4 py-3">
-                                        @if($expense->receipt_path)
-                                            <a href="{{ asset('storage/' . $expense->receipt_path) }}" target="_blank" class="text-indigo-600 dark:text-indigo-400 hover:underline">View</a>
-                                        @else
-                                            <span class="text-gray-400 italic">N/A</span>
-                                        @endif
-                                    </td>
-                                    <td class="px-4 py-3 space-x-2">
-                                        <form action="{{ route('expenses.approve', $expense) }}" method="POST" class="inline-block">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit" class="text-green-600 dark:text-green-400 hover:underline">Approve</button>
-                                        </form>
-                                        <form action="{{ route('expenses.reject', $expense) }}" method="POST" class="inline-block">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">Reject</button>
-                                        </form>
-                                    </td>
+                                    <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ \Carbon\Carbon::parse($expense->created_at)->format('M d, Y') }}</td>
                                 </tr>
                             @endforeach
                         </tbody>

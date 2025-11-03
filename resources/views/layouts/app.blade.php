@@ -34,5 +34,6 @@
         @stack('scripts')
         @yield('content')
         @yield('scripts')
+        <script src="{{ asset('js/confirmation-modal.js') }}"></script>
     </body>
 </html>
