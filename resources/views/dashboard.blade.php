@@ -129,14 +129,45 @@
                     <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Budget Overview</h2>
                 </div>
 
+                <!-- Budget Selector Dropdown -->
+                @if($userBudgets->count() > 1)
+                <div class="mb-4">
+                    <form action="{{ route('dashboard') }}" method="GET" id="budgetSelectorForm">
+                        <select 
+                            name="budget_id" 
+                            class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            onchange="document.getElementById('budgetSelectorForm').submit()"
+                        >
+                            @foreach($userBudgets as $budget)
+                                <option value="{{ $budget->id }}" {{ $activeBudget && $activeBudget->id == $budget->id ? 'selected' : '' }}>
+                                    {{ $budget->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </form>
+                </div>
+                @endif
+
+                <div class="mb-4">
+                    <div class="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-700/40 rounded-lg border border-gray-100 dark:border-gray-700">
+                        <div>
+                            <span class="text-gray-600 dark:text-gray-400 font-medium">Total Department Budget</span>
+                            <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">${{ number_format($totalDepartmentBudget, 2) }}</p>
+                        </div>
+                        <div class="text-purple-600 dark:text-purple-400">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-5M3 4h5v5m0 0L3 4m14 0l-5 5M3 20l5-5"></path></svg>
+                        </div>
+                    </div>
+                </div>
+
                 @if($activeBudget)
                     @php
                         // --- Data Calculation ---
-                        $total = $activeBudget->amount;
+                        $total = $activeBudget->total_amount;
                         $spent_approved = $userExpenses->where('status', 'approved')->sum('amount');
                         $spent_pending = $userExpenses->where('status', 'pending')->sum('amount');
                         
-                        $effective_spent = $spent_approved + $spent_pending;
+                        $effective_spent = $spent_approved;
                         $remaining = max($total - $effective_spent, 0);
                         
                         // Use effective_spent for the progress bar percentage
@@ -153,15 +184,11 @@
 
                     <div class="space-y-3 text-sm">
                         <div class="flex justify-between">
-                            <span class="text-gray-600 dark:text-gray-400">Total Budget:</span>
-                            <span class="font-semibold text-gray-900 dark:text-gray-100">${{ number_format($total, 2) }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600 dark:text-gray-400">Approved:</span>
+                            <span class="text-gray-600 dark:text-gray-400">Total Approved Expenses:</span>
                             <span class="font-semibold text-red-600 dark:text-red-400">(${!! number_format($spent_approved, 2) !!})</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-600 dark:text-gray-400">Pending:</span>
+                            <span class="text-gray-600 dark:text-gray-400">Total Pending Expenses:</span>
                             <span class="font-semibold text-yellow-600 dark:text-yellow-400">(${!! number_format($spent_pending, 2) !!})</span>
                         </div>
                         <hr class="dark:border-gray-600">

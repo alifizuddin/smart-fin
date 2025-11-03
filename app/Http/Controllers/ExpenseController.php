@@ -64,7 +64,7 @@ class ExpenseController extends Controller
         foreach ($activeBudgets as $budget) {
             // Calculate total spent (approved + pending)
             $totalSpent = Expense::where('budget_id', $budget->id)
-                ->whereIn('status', ['approved', 'pending'])
+                ->where('status', 'approved')
                 ->sum('amount');
             
             $remainingBalance = $budget->amount - $totalSpent;
@@ -206,6 +206,7 @@ class ExpenseController extends Controller
      */
     public function store(Request $request)
     {
+        $user = Auth::user();
         // 1. Validate only the required fields
         $validated = $request->validate([
             'budget_id' => [

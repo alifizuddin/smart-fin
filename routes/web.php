@@ -54,13 +54,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         
         ->middleware('role:Manager');
         Route::get('budgets/report', [BudgetController::class, 'report'])->name('budgets.report');
-        Route::get('/budgets/{budget}/json', [BudgetController::class, 'showJson'])->name('budgets.showJson');
     });
 
     // --- ROUTES FOR ALL LOGGED-IN ROLES ---
     // (Permissions are handled inside the BudgetController for each action)
     Route::resource('budgets', BudgetController::class);
     Route::resource('expenses', ExpenseController::class);
+    Route::get('/budgets/{budget}/json', [BudgetController::class, 'showJson'])->name('budgets.showJson');
 
     // --- OTHER ROLE GROUPS ---
     Route::middleware('role:Manager')->group(function () {

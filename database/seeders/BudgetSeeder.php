@@ -15,26 +15,46 @@ class BudgetSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get some departments and users to associate with the budgets
         $departments = Department::all();
         $users = User::all();
 
-        // Check if there are departments and users
         if ($departments->isEmpty() || $users->isEmpty()) {
             $this->command->info('Please seed departments and users first.');
             return;
         }
 
-        // Create a few budgets
+        // Possible random words for naming
+        $projectNames = ['Apollo', 'Zenith', 'Nova', 'Aurora', 'Pioneer', 'Vertex', 'Odyssey', 'Nimbus', 'Horizon', 'Atlas'];
+        $budgetTypes = ['Budget', 'Project', 'Initiative', 'Campaign', 'Fund'];
+        $months = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+
         for ($i = 0; $i < 10; $i++) {
+            $department = $departments->random();
+            $creator = $users->random();
+
+            // Randomly choose between a "Project" or "Budget" style name
+            $type = $budgetTypes[array_rand($budgetTypes)];
+            $word = $projectNames[array_rand($projectNames)];
+            $year = rand(2023, 2026);
+            $month = $months[array_rand($months)];
+
+            // Generate name like "Aurora Project 2025" or "Zenith Budget September 2024"
+            $name = rand(0, 1)
+                ? "{$word} {$type} {$year}"
+                : "{$word} {$type} {$month} {$year}";
+
             Budget::create([
-                'department_id' => $departments->random()->id,
+                'name' => $name,
+                'department_id' => $department->id,
                 'total_amount' => rand(10000, 100000),
                 'used_amount' => rand(1000, 10000),
                 'period_start' => Carbon::now()->startOfMonth(),
                 'period_end' => Carbon::now()->endOfMonth(),
                 'status' => 'active',
-                'created_by' => $users->random()->id,
+                'created_by' => $creator->id,
             ]);
         }
     }

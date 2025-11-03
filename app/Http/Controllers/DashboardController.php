@@ -15,7 +15,7 @@ class DashboardController extends Controller
     /**
      * Display the user's dashboard.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
         $pendingExpenses = collect(); // Default to empty collection
@@ -23,6 +23,7 @@ class DashboardController extends Controller
         $userExpenses = collect();
         $aiSuggestions = [];
         $userBudgets = collect();
+        $totalDepartmentBudget = 0;
 
         // 2. Fetch data based on user role
         if ($user->hasRole('Manager')) {
@@ -35,23 +36,32 @@ class DashboardController extends Controller
         }
 
         if ($user->hasRole('Staff')) {
-            // Staff see their own active budget
-            $activeBudget = Budget::where('department_id', $user->department_id)
-                ->where('status', 'active')
-                ->where('period_start', '<=', now())
-                ->where('period_end', '>=', now())
-                ->first();
-                
             $userExpenses = Expense::where('user_id', $user->id)
                 ->with('budget')
                 ->latest()
                 ->get();
-            
-                $userBudgets = Budget::where('department_id', $user->department_id)
+
+            $userBudgets = Budget::where('department_id', $user->department_id)
                 ->where('status', 'active')
                 ->where('period_end', '>=', now())
                 ->orderBy('period_end', 'asc')
                 ->get();
+
+            // Check for a specific budget from the request
+            $requestedBudgetId = $request->query('budget_id');
+            $activeBudget = null;
+
+            if ($requestedBudgetId) {
+                // Find the requested budget within the user's accessible budgets
+                $activeBudget = $userBudgets->firstWhere('id', $requestedBudgetId);
+            }
+
+            // If no budget was requested, or the requested one wasn't found, default to the first one.
+            if (!$activeBudget && $userBudgets->isNotEmpty()) {
+                $activeBudget = $userBudgets->first();
+            }
+
+            $totalDepartmentBudget = $userBudgets->sum('total_amount');
             
             // --- AI Logic should be INSIDE the Staff block ---
             $aiServiceUrl = config('services.ai_suggester.url'); 
@@ -60,7 +70,7 @@ class DashboardController extends Controller
                 try {
                     // 2. Prepare data for the AI
                     $budgetData = [
-                        'total_budget' => $activeBudget->amount ?? 0,
+                        'total_budget' => $activeBudget->total_amount ?? 0,
                         'spent' => $userExpenses->where('status', 'approved')->sum('amount'),
                     ];
 
@@ -102,7 +112,8 @@ class DashboardController extends Controller
             'activeBudget' => $activeBudget,
             'userExpenses' => $userExpenses, // Changed from 'userExpenses ?? collect()'
             'aiSuggestions' => $aiSuggestions,
-            'userBudgets' => $userBudgets
+            'userBudgets' => $userBudgets,
+            'totalDepartmentBudget' => $totalDepartmentBudget
         ]);
     }
 }
