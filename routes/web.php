@@ -51,6 +51,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::patch('expenses/{expense}/reject', [ExpenseController::class, 'reject'])
         ->name('expenses.reject')
+
         
         ->middleware('role:Manager');
         Route::get('budgets/report', [BudgetController::class, 'report'])->name('budgets.report');
@@ -65,6 +66,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // --- OTHER ROLE GROUPS ---
     Route::middleware('role:Manager')->group(function () {
         // Add any routes here that are ONLY for Managers (and not Admins)
+        Route::get('expenses/approvals', [ExpenseController::class, 'approvalsIndex'])
+            ->name('expenses.approvals.index');
     });
 
     Route::middleware('role:Staff')->group(function () {

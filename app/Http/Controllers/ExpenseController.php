@@ -111,6 +111,23 @@ class ExpenseController extends Controller
             ], 500);
         }
     }
+    public function approvalsIndex()
+    {
+        $user = Auth::user();
+
+        if (!$user->department_id) {
+            return redirect()->route('dashboard')
+            ->with('error', 'You must be associated with a department to view expense approvals.');
+        }
+
+        $pendingExpenses = Expense::where('department_id', $user->department_id)
+        ->where('status', 'pending')
+        ->with(['user', 'budget'])
+        ->orderBy('created_at', 'asc')
+        ->paginate(10);
+
+        return view('expenses.approval-index', compact('pendingExpenses'));
+    }
 
     public function approve(Expense $expense)
     {

@@ -38,6 +38,11 @@ new class extends Component
                         {{ __('Submit Expense') }}
                     </x-nav-link>
                     @endrole
+                    @role('Manager')
+                    <x-nav-link :href="route('expenses.approvals.index')" :active="request()->routeIs('expenses.approvals.index')">
+                        {{ __('Approvals') }}
+                    </x-nav-link>
+                    @endrole
                     @role('Admin')
                         <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')" wire:navigate>
                             {{ __('User Management') }}
@@ -95,6 +100,11 @@ new class extends Component
             <x-responsive-nav-link :href="route('budgets.index')" :active="request()->routeIs('budgets.*')" wire:navigate>
                 {{ __('Budgets') }}
             </x-responsive-nav-link>
+            @role('Manager')
+            <x-responsive-nav-link :href="route('expenses.approvals.index')" :active="request()->routeIs('expenses.approvals.index')" wire:navigate>
+                {{ __('Approvals') }}
+            </x-responsive-nav-link>
+            @endrole
             @role('Admin')
                 <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')" wire:navigate>
                     {{ __('User Management') }}
