@@ -50,7 +50,6 @@ class BudgetSeeder extends Seeder
                 'name' => $name,
                 'department_id' => $department->id,
                 'total_amount' => rand(10000, 100000),
-                'used_amount' => rand(1000, 10000),
                 'period_start' => Carbon::now()->startOfMonth(),
                 'period_end' => Carbon::now()->endOfMonth(),
                 'status' => 'active',

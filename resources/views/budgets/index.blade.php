@@ -162,8 +162,10 @@
         <tbody>
             @forelse ($budgets as $budget)
                 @php
-                    $percentage = $budget->total_amount > 0 ? round(($budget->used_amount / $budget->total_amount) * 100, 1) : 0;
-                    $remaining = $budget->total_amount - $budget->used_amount;
+                    // Calculate used amount on the fly to ensure accuracy
+                    $usedAmount = $budget->expenses->where('status', 'approved')->sum('amount');
+                    $percentage = $budget->total_amount > 0 ? round(($usedAmount / $budget->total_amount) * 100, 1) : 0;
+                    $remaining = $budget->total_amount - $usedAmount;
                 @endphp
 
                 <tr class="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700 hover:bg-indigo-50 dark:hover:bg-gray-800 transition">
@@ -193,7 +195,7 @@
                     {{-- Used / Remaining --}}
                     <td class="px-6 py-4">
                         <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
-                            <span>${{ number_format($budget->used_amount, 2) }} used</span>
+                            <span>${{ number_format($usedAmount, 2) }} used</span>
                             <span>${{ number_format(max($remaining, 0), 2) }} left</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">

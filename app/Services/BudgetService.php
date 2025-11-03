@@ -94,15 +94,20 @@ class BudgetService
      */
     private function groupBudgetsByDepartment(SupportCollection $budgets): SupportCollection
     {
-        // ADD THIS LINE: Filter out pending budgets before calculating
         $approvedBudgets = $budgets->whereIn('status', ['active', 'closed']);
 
-        // We group by 'department.name' which was eager-loaded by the query
-        return $approvedBudgets->groupBy('department.name') // <-- Change this variable
-            ->map(fn($group) => [
-                'total' => $group->sum('total_amount'),
-                'used'  => $group->sum('used_amount'),
-            ]);
+        return $approvedBudgets->groupBy('department.name')
+            ->map(function ($group) {
+                $totalUsed = $group->reduce(function ($carry, $budget) {
+                    // Sum only the 'approved' expenses for each budget
+                    return $carry + $budget->expenses->where('status', 'approved')->sum('amount');
+                }, 0);
+
+                return [
+                    'total' => $group->sum('total_amount'),
+                    'used'  => $totalUsed,
+                ];
+            });
     }
 
     /**
@@ -111,7 +116,7 @@ class BudgetService
      */
     private function buildFilteredQuery(Request $request): Builder
     {
-        $query = Budget::with(['department', 'creator']);
+        $query = Budget::with(['department', 'creator', 'expenses']);
 
         // Apply filters from the request
         $query->when($request->filled('department_id'), function ($q) use ($request) {
