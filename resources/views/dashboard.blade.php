@@ -376,11 +376,11 @@
             </div>
 
             <ul class="space-y-2">
-                {{--@foreach($anomalyAlerts as $alert)
+                @foreach($anomalyAlerts as $alert)
                     <li class="text-sm text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 p-3 rounded-md border border-red-100 dark:border-red-800/40 shadow-sm">
-                        {{ $alert }}
+                        {{ $alert['message'] ?? 'No message provided' }}
                     </li>
-                @endforeach--}}
+                @endforeach
                 <li class="text-sm text-gray-500 dark:text-gray-400 italic">No current anomalies detected.</li>
             </ul>
         </div>

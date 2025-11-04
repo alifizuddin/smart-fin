@@ -34,6 +34,9 @@ return [
     'ai_suggester' => [
         'url' => env('N8N_WEBHOOK_URL'),
     ],
+    'n8n' => [
+        'anomaly_url' => env('N8N_ANOMALY_WEBHOOK_URL'),
+    ],
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

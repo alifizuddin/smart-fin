@@ -80,7 +80,7 @@ def analyze_receipt_with_ai(description):
 Output ONLY a single JSON object (no extra text) with this shape:
 {{
   "category": "<one of: {category_list} or 'Uncategorized'>",
-  "description": "<1-2 sentence human-readable summary>",
+  "description": "<1-2 sentence human-readable summary, short to medium length>",
   "data": {{
     "amount": "<numeric amount, e.g. 123.45>",
     "payment_method": "<cash|credit card|debit card|bank transfer|not specified>",

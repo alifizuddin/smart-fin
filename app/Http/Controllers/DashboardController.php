@@ -26,6 +26,7 @@ class DashboardController extends Controller
         $userBudgets = collect();
         $totalDepartmentBudget = 0;
         $spendingByCategory = collect();
+        $anomalyAlerts = collect();
 
         // 2. Fetch data based on user role
         if ($user->hasRole('Manager')) {
@@ -42,12 +43,40 @@ class DashboardController extends Controller
                 ->select('category', DB::raw('SUM(amount) as total_amount'))
                 ->orderBy('total_amount', 'desc')
                 ->get();
+
+            $webhookUrl = config('services.n8n.anomaly_url');
+            if ($webhookUrl) {
+                $departmentExpenses = Expense::where('department_id', $user->department_id)
+                    ->whereIn('status', ['approved', 'pending'])
+                    ->with('user:id,name')
+                    ->latest('created_at')
+                    ->take(100)
+                    ->get();
+                try {
+                    $response = Http::timeout(10)-> post($webhookUrl, [
+                        'department_id' => $user->department_id,
+                        'department_name' => $user->department->name,
+                        'expenses' => $departmentExpenses,
+                        'spending_by_category' => $spendingByCategory,
+                    ]);
+                    if ($response->successful()) {
+                        $anomalyAlerts = collect($response->json('alerts',[]));
+                    }
+                    else {
+                        Log::error('N8N Anomaly Detection failed: ', ['status' => $response->status(), 'body' => $response->body()]);
+                    }
+                } catch (\Exception $e) {
+                    Log::error('N8N Anomaly call exception: ' . $e->getMessage());
+                }
+
+                
         }
 
         if ($user->hasRole('Staff')) {
             $userExpenses = Expense::where('user_id', $user->id)
                 ->with('budget')
                 ->latest()
+                ->take(5)
                 ->get();
 
             $userBudgets = Budget::where('department_id', $user->department_id)
@@ -104,7 +133,7 @@ class DashboardController extends Controller
                     if (!empty($suggestionText) && strcasecmp($suggestionText, 'All clear.') !== 0) {
                         $aiSuggestions[] = $suggestionText;
                     }
-                }
+                    }
 
                 } catch (\Exception $e) {
                     // 5. If AI fails, log the error and do nothing
@@ -123,7 +152,9 @@ class DashboardController extends Controller
             'aiSuggestions' => $aiSuggestions,
             'userBudgets' => $userBudgets,
             'totalDepartmentBudget' => $totalDepartmentBudget,
-            'spendingByCategory' => $spendingByCategory
+            'spendingByCategory' => $spendingByCategory,
+            'anomalyAlerts' => $anomalyAlerts,
         ]);
     }
+}
 }
