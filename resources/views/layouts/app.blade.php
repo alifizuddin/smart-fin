@@ -31,6 +31,7 @@
             </main>
         </div>
         @livewireScripts
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         @stack('scripts')
         @yield('content')
         @yield('scripts')

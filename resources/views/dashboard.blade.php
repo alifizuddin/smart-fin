@@ -407,6 +407,7 @@
         </div>
 
         <!-- Spending by Category Chart -->
+
         <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl transition duration-300 border border-gray-100 dark:border-gray-700 md:col-span-2">
             <div class="flex items-center mb-4">
                 <div class="bg-purple-100 dark:bg-purple-900/40 p-3 rounded-full">
@@ -416,47 +417,12 @@
                 </div>
                 <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Spending by Category</h2>
             </div>
-
+            
             <canvas id="spendingChart" width="400" height="200"></canvas>
         </div>
     </div>
-
-    <!-- Chart Script -->
-    <script>
-        {{--const ctx = document.getElementById('spendingChart').getContext('2d');
-        const spendingData = @json($spendingByCategory);
-        const labels = spendingData.map(item => item.category);
-        const data = spendingData.map(item => item.amount);--}}
-
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Spending ($)',
-                    data: data,
-                    backgroundColor: 'rgba(99, 102, 241, 0.6)',
-                    borderColor: 'rgba(99, 102, 241, 1)',
-                    borderWidth: 1,
-                    borderRadius: 6,
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: { beginAtZero: true }
-                },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { backgroundColor: '#1f2937' }
-                }
-            }
-        });
-    </script>
 </main>
 @endhasrole
-
-
     
 </x-app-layout>
 
@@ -522,4 +488,63 @@
             }
         };
     }
+    document.addEventListener('DOMContentLoaded', (event) => {
+            const spendingCanvas = document.getElementById('spendingChart');
+            
+            if (spendingCanvas) {
+                // --- THIS IS THE FIX ---
+                // These lines were incorrectly commented out.
+                const ctx = spendingCanvas.getContext('2d');
+                const spendingData = @json($spendingByCategory);
+                
+                if (spendingData && spendingData.length > 0) {
+                    const labels = spendingData.map(item => item.category);
+                    const data = spendingData.map(item => item.total_amount);
+                    // --- END OF FIX ---
+
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Spending ($)',
+                                data: data,
+                                backgroundColor: 'rgba(99, 102, 241, 0.6)',
+                                borderColor: 'rgba(99, 102, 241, 1)',
+                                borderWidth: 1,
+                                borderRadius: 6,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: { 
+                                    beginAtZero: true,
+                                    ticks: {
+                                        color: document.documentElement.classList.contains('dark') ? '#9CA3AF' : '#6B7280'
+                                    }
+                                },
+                                x: {
+                                    ticks: {
+                                        color: document.documentElement.classList.contains('dark') ? '#9CA3AF' : '#6B7280'
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: { 
+                                    backgroundColor: '#1f2937',
+                                    titleColor: '#ffffff',
+                                    bodyColor: '#ffffff'
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    const parent = spendingCanvas.parentElement;
+                    spendingCanvas.remove();
+                    parent.innerHTML += '<p class="text-sm text-center text-gray-500 dark:text-gray-400 italic">No approved spending data available to display.</p>';
+                }
+            }
+        });
 </script>

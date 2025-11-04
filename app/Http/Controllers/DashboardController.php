@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Http;
 use App\Models\Expense; 
 use App\Models\Budget;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -24,6 +25,7 @@ class DashboardController extends Controller
         $aiSuggestions = [];
         $userBudgets = collect();
         $totalDepartmentBudget = 0;
+        $spendingByCategory = collect();
 
         // 2. Fetch data based on user role
         if ($user->hasRole('Manager')) {
@@ -32,6 +34,13 @@ class DashboardController extends Controller
                 ->where('status', 'pending')
                 ->with('user', 'budget') // Load relations
                 ->latest()
+                ->take(5)
+                ->get();
+            $spendingByCategory = Expense::where('department_id', $user->department_id)
+                ->where('status', 'approved')
+                ->groupBy('category')
+                ->select('category', DB::raw('SUM(amount) as total_amount'))
+                ->orderBy('total_amount', 'desc')
                 ->get();
         }
 
@@ -110,10 +119,11 @@ class DashboardController extends Controller
         return view('dashboard', [
             'pendingExpenses' => $pendingExpenses,
             'activeBudget' => $activeBudget,
-            'userExpenses' => $userExpenses, // Changed from 'userExpenses ?? collect()'
+            'userExpenses' => $userExpenses,
             'aiSuggestions' => $aiSuggestions,
             'userBudgets' => $userBudgets,
-            'totalDepartmentBudget' => $totalDepartmentBudget
+            'totalDepartmentBudget' => $totalDepartmentBudget,
+            'spendingByCategory' => $spendingByCategory
         ]);
     }
 }
