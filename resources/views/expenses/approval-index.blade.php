@@ -90,12 +90,88 @@
                             </tbody>
                         </table>
                     </div>
+                    
 
                     <div class="mt-5">
                         {{ $pendingExpenses->links() }}
                     </div>
                 @endif
             </div>
+            <!-- Approved Expenses Section -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl transition duration-300 border border-gray-100 dark:border-gray-700 mt-8">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center">
+                        <div class="bg-green-100 dark:bg-green-900/40 p-3 rounded-full">
+                            <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <h2 class="ml-3 text-xl font-semibold text-gray-900 dark:text-gray-100">Approved Expenses</h2>
+                    </div>
+                </div>
+
+                @if(isset($approvedExpenses) && $approvedExpenses->count() > 0)
+                <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs uppercase font-medium">
+                            <tr>
+                                <th class="px-6 py-3 text-left">Submitted By</th>
+                                <th class="px-6 py-3 text-left">Amount</th>
+                                <th class="px-6 py-3 text-left">Category</th>
+                                <th class="px-6 py-3 text-left">Budget</th>
+                                <th class="px-6 py-3 text-left">Transaction Date</th>
+                                <th class="px-6 py-3 text-left">Status</th>
+                                <th class="px-6 py-3 text-left">Details</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            @foreach($approvedExpenses as $expense)
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition">
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
+                                        {{ $expense->user->name }}
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                                        ${{ number_format($expense->amount, 2) }}
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                                        {{ ucfirst($expense->category) }}
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                                        {{ $expense->budget->name }}
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                                        {{ \Carbon\Carbon::parse($expense->transaction_date)->format('M d, Y') }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">
+                                            Approved
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm">
+                                        <button type="button" 
+                                            onclick='showDetailsModal(@json($expense))'
+                                            class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition">
+                                            View Details
+                                        </button>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-4 text-right">
+                    <a href="{{ route('expenses.approvals.index') }}"
+                       class="text-sm text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300">
+                        View all approved expenses →
+                    </a>
+                </div>
+            @else
+                <p class="text-gray-500 dark:text-gray-400 text-center py-4">
+                    No approved expenses to display.
+                </p>
+            @endif
+        </div>
         </div>
     </div>
     <!-- Modals -->

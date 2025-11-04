@@ -114,6 +114,14 @@ class ExpenseController extends Controller
     public function approvalsIndex(Request $request)
     {
         $user = Auth::user();
+        if ($user->hasRole('Manager')) {
+            $approvedExpenses = Expense::where('department_id', $user->department_id)
+                ->where('status', 'approved')
+                ->with('user', 'budget')
+                ->latest()
+                ->take(10) // Show last 10 approved expenses
+                ->get();
+        }
 
         if (!$user->department_id) {
             return redirect()->route('dashboard')
@@ -137,7 +145,7 @@ class ExpenseController extends Controller
 
         $pendingExpenses = $query->orderBy('created_at', 'asc')->paginate(10);
 
-        return view('expenses.approval-index', compact('pendingExpenses'));
+        return view('expenses.approval-index', compact('pendingExpenses','approvedExpenses'));
     }
 
     public function approve(Expense $expense)
