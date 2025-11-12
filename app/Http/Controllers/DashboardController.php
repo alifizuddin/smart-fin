@@ -68,8 +68,7 @@ class DashboardController extends Controller
                 } catch (\Exception $e) {
                     Log::error('N8N Anomaly call exception: ' . $e->getMessage());
                 }
-
-                
+            }
         }
 
         if ($user->hasRole('Staff')) {
@@ -156,5 +155,4 @@ class DashboardController extends Controller
             'anomalyAlerts' => $anomalyAlerts,
         ]);
     }
-}
 }
