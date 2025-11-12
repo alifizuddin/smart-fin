@@ -323,19 +323,20 @@
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden">
             
             {{-- Header --}}
-            <div class="flex justify-between items-center p-6 border-b dark:border-gray-700">
+            <div class="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
                               d="M12 8c-1.657 0-3 .895-3 2v4c0 1.105 1.343 2 3 2s3-.895 3-2v-4c0-1.105-1.343-2-3-2z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
                               d="M5 8v8a7 7 0 0014 0V8" />
                     </svg>
-                    Budget Details
+                    <span class="text-gray-900 dark:text-white">Budget Details</span>
                 </h3>
                 <button type="button"
-                        class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-                        data-modal-close>
+                        class="text-gray-400 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                        data-modal-close
+                        aria-label="Close">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none"
                          viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -345,18 +346,28 @@
             </div>
 
             {{-- Body --}}
-            <div id="modal-body-content" class="p-6 space-y-6">
+            <div id="modal-body-content" class="p-6 space-y-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
                 {{-- Dynamic content will be injected here --}}
                 <div class="flex justify-center py-10">
-                    <span class="text-gray-400 dark:text-gray-500 text-sm">Loading details...</span>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">
+                        <span class="inline-flex items-center">
+                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Loading details...
+                        </span>
+                    </span>
                 </div>
             </div>
 
             {{-- Footer --}}
-            <div class="flex justify-end items-center gap-3 p-6 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+            <div class="flex justify-end items-center gap-3 p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
                 <button type="button"
-                        class="px-4 py-2 rounded-lg text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white font-medium"
-                        data-modal-close>Close</button>
+                        class="px-4 py-2 rounded-lg text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white font-medium transition-colors"
+                        data-modal-close>
+                    Close
+                </button>
             </div>
         </div>
     </div>
