@@ -373,28 +373,24 @@
     </div>
 </div>
     <div id="editBudgetModal" tabindex="-1" aria-hidden="true"
-     class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm 
-            transition-opacity duration-300 ease-out opacity-0 data-[active=true]:opacity-100 data-[active=true]:flex">
-
-    <div class="relative w-full max-w-3xl mx-4 scale-95 transform transition-all duration-300 ease-out data-[active=true]:scale-100">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-
+     class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div class="relative w-full max-w-3xl mx-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden">
+            
             {{-- Header --}}
-            <div class="flex justify-between items-center p-6 border-b dark:border-gray-700 bg-gradient-to-r from-indigo-50 to-transparent dark:from-indigo-900/20">
+            <div class="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-indigo-600 dark:text-indigo-400 animate-pulse-slow"
-                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
-                              d="M12 8c-1.657 0-3 .895-3 2v4c0 1.105 1.343 2 3 2s3-.895 3-2v-4c0-1.105-1.343-2-3-2z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
-                              d="M5 8v8a7 7 0 0014 0V8" />
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
-                    Edit Budget
+                    <span class="text-gray-900 dark:text-white">Edit Budget</span>
                 </h3>
-                <button type="button" data-modal-close
-                        class="rounded-full p-2 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white 
-                               hover:bg-gray-200/50 dark:hover:bg-gray-700/50 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
+                <button type="button"
+                        class="text-gray-400 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                        data-modal-close
+                        aria-label="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none"
                          viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M6 18L18 6M6 6l12 12" />
@@ -403,7 +399,7 @@
             </div>
 
             {{-- Body --}}
-            <div class="p-6 space-y-6">
+            <div class="p-6 space-y-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
                 <form id="editBudgetForm" method="POST" class="space-y-6">
                     @csrf
                     @method('PUT')
@@ -480,17 +476,13 @@
             </div>
 
             {{-- Footer --}}
-            <div class="flex justify-end items-center gap-3 p-6 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+            <div class="flex justify-end items-center gap-3 p-6 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                 <button type="button" data-modal-close
-                        class="px-4 py-2 rounded-lg text-gray-600 hover:text-gray-900 
-                               hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700 
-                               font-medium transition">
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600">
                     Cancel
                 </button>
-                <button type="submit" form="editBudgetForm"
-                        class="px-5 py-2.5 rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 
-                               focus:ring-4 focus:outline-none focus:ring-indigo-300 font-medium 
-                               shadow-md hover:shadow-lg transition-all">
+                <button type="submit"
+                        class="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                     <span class="inline-flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
                              viewBox="0 0 24 24" stroke="currentColor">
@@ -686,13 +678,15 @@
 
     // Define the close function in a scope the 'Escape' listener can access
     function closeEditModal() {
-        editBudgetModal?.classList.add('hidden');
-        editBudgetModal?.setAttribute('aria-hidden', 'true');
+        if (!editBudgetModal) return;
+        editBudgetModal.classList.add('hidden');
+        editBudgetModal.setAttribute('aria-hidden', 'true');
     }
 
     function openEditModal() {
-        editBudgetModal?.classList.remove('hidden');
-        editBudgetModal?.setAttribute('aria-hidden', 'false');
+        if (!editBudgetModal) return;
+        editBudgetModal.classList.remove('hidden');
+        editBudgetModal.setAttribute('aria-hidden', 'false');
     }
 
     // Attach close events for 'X' button and 'Cancel' button
