@@ -1,4 +1,3 @@
-{{-- resources/views/layouts/guest.blade.php --}}
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
@@ -6,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>SmartFin360</title>
+        <title>{{ config('app.name', 'SmartFin360') }}</title>
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600&display=swap" rel="stylesheet" />
@@ -14,47 +13,48 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans text-gray-900 antialiased">
-        <div class="relative min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900">
-            <main class="flex items-center justify-center w-full p-4">
-                <div class="w-full max-w-5xl mx-auto flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden">
+        <div class="min-h-screen w-full flex items-center justify-center py-10 px-4 sm:px-6 lg:px-8" style="background-color: #4494f0;">
+            
+            <div class="w-full max-w-5xl">
+                <div class="bg-white rounded-[1rem] shadow-2xl overflow-hidden flex flex-col md:flex-row">
                     
-                    {{-- Left-side image --}}
-                    <div class="hidden md:block md:w-1/2">
-                        <img class="h-full w-full object-cover" 
-                             src="https://images.unsplash.com/photo-1664575602276-acd073f104c1?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8YnVzaW5lc3N8ZW58MHx8MHx8fDA%3D&fm=jpg&q=60&w=3000" 
-                             alt="Financial Planning Meeting">
+                    <div class="hidden md:block md:w-5/12 lg:w-5/12 bg-gray-200">
+                        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/img3.webp"
+                             alt="login form" 
+                             class="w-full h-full object-cover rounded-l-[1rem]" />
                     </div>
 
-                    {{-- Right-side content --}}
-                    <div class="w-full md:w-1/2 flex flex-col items-center justify-center p-8 sm:p-12">
-                        <div class="w-full">
-                            <div class="flex justify-center mb-6">
-                                @if (request()->routeIs('password.request'))
-                                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center">
-                                        Forgot Password
-                                    </h1>
-                                @elseif (request()->routeIs('register'))
-                                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center">
-                                        Sign Up
-                                    </h1>
-                                @elseif (request()->routeIs('login'))
-                                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center">
-                                        Log In
-                                    </h1>
-                                @else
-                                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center">
-                                        Log In
-                                    </h1>
-                                    {{-- Default: Show app logo (e.g. for login page) --}}
-                                @endif
+                    <div class="w-full md:w-7/12 lg:w-7/12 flex items-center">
+                        <div class="w-full p-8 md:p-12 lg:p-16 text-black">
+
+                            <div class="flex items-center mb-6 pb-1">
+                                <svg class="w-8 h-8 mr-3" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: #ff6219;">
+                                    <path d="M21 7.5L12 2.5L3 7.5M21 7.5V16.5L12 21.5M21 7.5L12 12.5M3 7.5V16.5L12 21.5M3 7.5L12 12.5M12 12.5V21.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span class="text-2xl font-bold tracking-tight">SmartFin360</span>
                             </div>
 
+                            <h5 class="text-xl font-normal mb-6 tracking-wide text-gray-700" style="letter-spacing: 1px;">
+                                @if (request()->routeIs('register'))
+                                    Create your account
+                                @elseif (request()->routeIs('password.request'))
+                                    Reset your password
+                                @else
+                                    Sign into your account
+                                @endif
+                            </h5>
+
                             {{ $slot }}
+
+                            <div class="mt-8 pt-2 flex gap-4 text-sm text-gray-500">
+                                <a href="#!" class="hover:text-gray-800 transition-colors">Terms of use.</a>
+                                <a href="#!" class="hover:text-gray-800 transition-colors">Privacy policy</a>
+                            </div>
+
                         </div>
                     </div>
-
                 </div>
-            </main>
+            </div>
         </div>
     </body>
 </html>

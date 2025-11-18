@@ -2,6 +2,7 @@
 
 use App\Livewire\Actions\Logout;
 use Livewire\Volt\Component;
+use Livewire\Attributes\On;
 
 new class extends Component
 {
@@ -11,130 +12,84 @@ new class extends Component
     public function logout(Logout $logout): void
     {
         $logout();
-
         $this->redirect('/', navigate: true);
     }
-}; ?>
 
-<nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex">
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}" wire:navigate>
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
-                    </a>
-                </div>
+    /**
+     * Toggle the sidebar.
+     */
+    #[On('toggle-sidebar')]
+    public function toggleSidebar(): void
+    {
+        $this->dispatch('sidebar-toggled');
+    }
+};
+?>
 
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('budgets.index')" :active="request()->routeIs('budgets.*')" wire:navigate>
-                        {{ __('Budgets') }}
-                    </x-nav-link>
-                    @role('Staff')
-                    <x-nav-link :href="route('expenses.create')" :active="request()->routeIs('expenses.*')">
-                        {{ __('Submit Expense') }}
-                    </x-nav-link>
-                    @endrole
-                    @role('Manager')
-                    <x-nav-link :href="route('expenses.approvals.index')" :active="request()->routeIs('expenses.approvals.index')">
-                        {{ __('Approvals') }}
-                    </x-nav-link>
-                    @endrole
-                    @role('Admin')
-                        <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')" wire:navigate>
-                            {{ __('User Management') }}
-                        </x-nav-link>
-                    @endrole
-                </div>
-                
+<div x-data="{ open: false, profileOpen: false }" @keydown.window.escape="open = false; profileOpen = false" class="lg:hidden">
+    <!-- Mobile menu button -->
+    <div class="flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center
+        ">
+            <button @click="open = !open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 dark:text-gray-400 dark:hover:bg-gray-700">
+                <span class="sr-only">Open main menu</span>
+                <svg class="h-6 w-6" x-bind:class="{ 'hidden': open, 'block': !open }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                <svg class="h-6 w-6" x-bind:class="{ 'hidden': !open, 'block': open }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <a href="{{ route('dashboard') }}" class="ml-4">
+                <x-application-logo class="block h-9 w-auto text-gray-800 dark:text-gray-200" />
+            </a>
+        </div>
+
+        <!-- Profile dropdown -->
+        <div class="relative ml-3">
+            <div>
+                <button @click="profileOpen = !profileOpen" type="button" class="flex items-center max-w-xs rounded-full bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
+                    <span class="sr-only">Open user menu</span>
+                    <img class="h-8 w-8 rounded-full" src="{{ auth()->user()->profile_photo_url }}" alt="{{ auth()->user()->name }}">
+                </button>
             </div>
 
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <x-dropdown align="right" width="48">
-                    <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                            <img class="h-8 w-8 rounded-full object-cover me-2" src="{{ auth()->user()->profile_photo_url }}" alt="{{ auth()->user()->name }}" />
-                            <div x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
-
-                            <div class="ms-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                        </button>
-                    </x-slot>
-
-                    <x-slot name="content">
-                        <x-dropdown-link :href="route('profile')" wire:navigate>
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
-
-                        <button wire:click="logout" class="w-full text-start">
-                            <x-dropdown-link>
-                                {{ __('Log Out') }}
-                            </x-dropdown-link>
-                        </button>
-                    </x-slot>
-                </x-dropdown>
-            </div>
-
-            <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400 transition duration-150 ease-in-out">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+            <!-- Dropdown menu -->
+            <div x-show="profileOpen" @click.away="profileOpen = false" class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white dark:bg-gray-800 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
+                <a href="{{ route('profile') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-0">
+                    {{ __('Profile') }}
+                </a>
+                <button wire:click="logout" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-1">
+                    {{ __('Log Out') }}
                 </button>
             </div>
         </div>
     </div>
 
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
+    <!-- Mobile menu, show/hide based on menu state. -->
+    <div x-show="open" @click.away="open = false" class="lg:hidden">
+        <div class="space-y-1 px-2 pb-3 pt-2 bg-white dark:bg-gray-800">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('budgets.index')" :active="request()->routeIs('budgets.*')" wire:navigate>
                 {{ __('Budgets') }}
             </x-responsive-nav-link>
+            @role('Staff')
+            <x-responsive-nav-link :href="route('expenses.create')" :active="request()->routeIs('expenses.*')">
+                {{ __('Submit Expense') }}
+            </x-responsive-nav-link>
+            @endrole
             @role('Manager')
-            <x-responsive-nav-link :href="route('expenses.approvals.index')" :active="request()->routeIs('expenses.approvals.index')" wire:navigate>
+            <x-responsive-nav-link :href="route('expenses.approvals.index')" :active="request()->routeIs('expenses.approvals.*')">
                 {{ __('Approvals') }}
             </x-responsive-nav-link>
             @endrole
             @role('Admin')
-                <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')" wire:navigate>
-                    {{ __('User Management') }}
-                </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')" wire:navigate>
+                {{ __('User Management') }}
+            </x-responsive-nav-link>
             @endrole
         </div>
-        
-
-        <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
-            <div class="flex items-center px-4">
-                <div>
-                    <img class="h-10 w-10 rounded-full object-cover" src="{{ auth()->user()->profile_photo_url }}" alt="{{ auth()->user()->name }}" />
-                </div>
-                <div class="ms-3">
-                    <div class="font-medium text-base text-gray-800 dark:text-gray-200" x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
-                    <div class="font-medium text-sm text-gray-500">{{ auth()->user()->email }}</div>
-                </div>
-            </div>
-
-            <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile')" wire:navigate>
-                    {{ __('Profile') }}
-                </x-responsive-nav-link>
-
-                <button wire:click="logout" class="w-full text-start">
-                    <x-responsive-nav-link>
-                        {{ __('Log Out') }}
-                    </x-responsive-nav-link>
-                </button>
-            </div>
-        </div>
     </div>
-</nav>
+</div>
