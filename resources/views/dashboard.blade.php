@@ -99,24 +99,31 @@
 
             <!-- AI Suggestions -->
             <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl transition duration-300 border border-gray-100 dark:border-gray-700">
-                <div class="flex items-center mb-4">
-                    <div class="bg-orange-100 dark:bg-orange-900/40 p-3 rounded-full">
-                        <svg class="w-6 h-6 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
-                        </svg>
-                    </div>
-                    <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">AI Suggestions</h2>
-                </div>
-                <ul class="space-y-2">
-                    @forelse($aiSuggestions ?? [] as $suggestion)
-                        <li class="text-sm text-gray-700 dark:text-gray-300 bg-yellow-50 dark:bg-yellow-900/30 p-3 rounded-md shadow-sm border border-yellow-100 dark:border-yellow-800/40">
-                            {{ $suggestion }}
-                        </li>
-                    @empty
-                        <li class="text-sm text-gray-500 dark:text-gray-400 italic">No suggestions available.</li>
-                    @endforelse
-                </ul>
-            </div>
+    <div class="flex items-center mb-4">
+        <div class="bg-orange-100 dark:bg-orange-900/40 p-3 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+            </svg>
+        </div>
+        <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">AI Suggestions</h2>
+    </div>
+
+    <ul class="space-y-2">
+        @forelse($aiSuggestions ?? [] as $suggestion)
+            <li class="group relative text-sm text-gray-800 dark:text-gray-200 bg-yellow-50 dark:bg-yellow-900/30 p-3 rounded-md shadow-sm border border-yellow-100 dark:border-yellow-800/40 hover:bg-yellow-100 dark:hover:bg-yellow-800/50 transition duration-200">
+                <!-- Optional icon before each suggestion -->
+                <span class="absolute left-2 top-1/2 -translate-y-1/2 w-2 h-2 bg-yellow-400 dark:bg-yellow-500 rounded-full animate-pulse"></span>
+                
+                <p class="ml-5 leading-relaxed font-medium group-hover:underline">
+                    {{ $suggestion }}
+                </p>
+            </li>
+        @empty
+            <li class="text-sm text-gray-500 dark:text-gray-400 italic">No suggestions available.</li>
+        @endforelse
+    </ul>
+</div>
+
 
             <!-- Budget Overview -->
             <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl transition duration-300 border border-gray-100 dark:border-gray-700">
