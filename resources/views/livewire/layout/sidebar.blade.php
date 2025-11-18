@@ -1,4 +1,22 @@
-<div x-data="{ open: window.innerWidth >= 1024 }" class="flex h-screen bg-gray-100 dark:bg-gray-900">
+<?php
+
+use App\Livewire\Actions\Logout;
+use Livewire\Volt\Component;
+
+new class extends Component
+{
+    /**
+     * Log the current user out of the application.
+     */
+    public function logout(Logout $logout): void
+    {
+        $logout();
+        $this->redirect('/', navigate: false);
+    }
+};
+?>
+
+<div x-data="{ open: window.innerWidth >= 1024 }" class="flex flex-col md:flex-row min-h-screen bg-gray-100 dark:bg-gray-900">
     <!-- Sidebar -->
     <div 
         :class="{'w-64': open, 'w-20': !open}"
@@ -77,11 +95,17 @@
                     </div>
                 </div>
                 <div class="mt-4 space-y-1">
-                    <a href="{{ route('profile') }}" class="block px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-md" wire:navigate>
-                        {{ __('Profile') }}
+                    <a href="{{ route('profile') }}" class="flex items-center px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-md" wire:navigate>
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <span x-show="open" class="ml-2">{{ __('Profile') }}</span>
                     </a>
-                    <button wire:click="logout" class="w-full text-left px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-md">
-                        {{ __('Log Out') }}
+                    <button wire:click="logout" class="flex items-center w-full text-left px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-md">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        <span x-show="open" class="ml-2">{{ __('Log Out') }}</span>
                     </button>
                 </div>
             </div>
@@ -89,7 +113,7 @@
     </div>
 
     <!-- Main Content -->
-    <div class="flex-1 flex flex-col overflow-hidden" :class="{'lg:ml-64': open, 'lg:ml-20': !open}">
+    <div class="flex-1 flex flex-col overflow-hidden pt-16 md:pt-0" :class="{'lg:ml-64': open, 'lg:ml-20': !open}">
         <!-- Top Navigation -->
         <header class="bg-white dark:bg-gray-800 shadow-sm z-40">
             <div class="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
