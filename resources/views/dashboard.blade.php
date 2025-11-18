@@ -14,7 +14,7 @@
         <!-- GRID -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
-            <!-- Quick Action -->
+            <!-- Quick Action -->   
             <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl transition duration-300 border border-gray-100 dark:border-gray-700">
                 <div class="flex items-center mb-4">
                     <div class="bg-blue-100 dark:bg-blue-900/40 p-3 rounded-full">

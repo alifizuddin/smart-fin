@@ -17,13 +17,24 @@
             [x-cloak] { display: none !important; }
         </style>
         
-        <!-- Alpine.js -->
-        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
         @livewireScripts
     </head>
     <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900 h-full" x-data="{ sidebarOpen: window.innerWidth >= 1024 }" x-init="window.addEventListener('resize', () => { sidebarOpen = window.innerWidth >= 1024 })">
         @auth
-            <livewire:layout.sidebar />
+            @livewire('layout.sidebar')
+        
+        <!-- Page Content -->
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 dark:bg-gray-900">
+            @if (isset($header))
+                <header class="bg-white dark:bg-gray-800 shadow">
+                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                        {{ $header }}
+                    </div>
+                </header>
+            @endif
+
+            {{ $slot }}
+        </main>
         @else
             <div class="min-h-screen flex flex-col">
                 @if (Route::has('login'))
