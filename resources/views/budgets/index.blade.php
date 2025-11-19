@@ -83,23 +83,21 @@
                 <option value="active" @selected(($filters['status'] ?? '') == 'active')>Active</option>
                 <option value="closed" @selected(($filters['status'] ?? '') == 'closed')>Closed</option>
             </select>
+            </div>
+            <div>
+                <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Start Date</label>
+                <input type="date" name="start_date" id="start_date" value="{{ $filters['start_date'] ?? '' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+            </div>
+            <div>
+                <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">End Date</label>
+                <input type="date" name="end_date" id="end_date" value="{{ $filters['end_date'] ?? '' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+            </div>
+            <div class="flex items-end">
+                <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">Filter</button>
+            </div>
         </div>
-        <div>
-            <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Start Date</label>
-            <input type="date" name="start_date" id="start_date" value="{{ $filters['start_date'] ?? '' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-        </div>
-        <div>
-            <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">End Date</label>
-            <input type="date" name="end_date" id="end_date" value="{{ $filters['end_date'] ?? '' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-        </div>
-        <div class="flex items-end">
-            <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">Filter</button>
-        </div>
-    </div>
-</form>
-                    {{-- ========================================================== --}}
-                    {{-- START OF FIX: Bulk action form now ends BEFORE the table --}}
-                    {{-- ========================================================== --}}
+        </form>
+                    @hasrole('Admin')
                     <form action="{{ route('budgets.bulkAction') }}" method="POST" id="bulk-action-form">
                         @csrf
                         <input type="hidden" name="action" id="bulk-action-input">
@@ -119,39 +117,31 @@
                             </div>
                         </div>
                     </form>
-                    {{-- ========================================================== --}}
-                    {{-- END OF FIX: The form tag is now closed. --}}
-                    {{-- ========================================================== --}}
+                    @endhasrole
 
                         {{-- Table --}}
                         <div class="overflow-x-auto rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
-    <table class="w-full text-sm text-left text-gray-600 dark:text-gray-300">
-        {{-- ===== TABLE HEADER ===== --}}
-        <thead class="text-xs uppercase bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 sticky top-0 z-10">
-            <tr>
-                <th class="p-4">
-                    <input id="checkbox-all" type="checkbox" 
-                        class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500">
-                </th>
+                            <table class="w-full text-sm text-left text-gray-600 dark:text-gray-300">
+                                {{-- ===== TABLE HEADER ===== --}}
+                                <thead class="text-xs uppercase bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 sticky top-0 z-10">
+                                    <tr>
+                            @php
+                                $linkClasses = 'px-6 py-3 font-semibold cursor-pointer transition hover:bg-gray-200 dark:hover:bg-gray-700';
+                                $icon = ($filters['sort_order'] ?? 'desc') === 'desc' ? '▼' : '▲';
+                            @endphp
 
-                {{-- Sortable Headers --}}
-                @php
-                    $linkClasses = 'px-6 py-3 font-semibold cursor-pointer transition hover:bg-gray-200 dark:hover:bg-gray-700';
-                    $icon = ($filters['sort_order'] ?? 'desc') === 'desc' ? '▼' : '▲';
-                @endphp
+                            <th class="{{ $linkClasses }}"
+                                onclick="window.location.href='{{ route('budgets.index', array_merge($filters, ['sort_by' => 'department', 'sort_order' => ($filters['sort_by'] ?? '') == 'department' && ($filters['sort_order'] ?? '') == 'asc' ? 'desc' : 'asc'])) }}'">
+                                Department {!! ($filters['sort_by'] ?? '') === 'department' ? "<span class='ml-1 text-xs'>$icon</span>" : '' !!}
+                            </th>
 
-                <th class="{{ $linkClasses }}"
-                    onclick="window.location.href='{{ route('budgets.index', array_merge($filters, ['sort_by' => 'department', 'sort_order' => ($filters['sort_by'] ?? '') == 'department' && ($filters['sort_order'] ?? '') == 'asc' ? 'desc' : 'asc'])) }}'">
-                    Department {!! ($filters['sort_by'] ?? '') === 'department' ? "<span class='ml-1 text-xs'>$icon</span>" : '' !!}
-                </th>
-
-                <th class="{{ $linkClasses }}"
+                            <th class="{{ $linkClasses }}"
                     onclick="window.location.href='{{ route('budgets.index', array_merge($filters, ['sort_by' => 'total_amount', 'sort_order' => ($filters['sort_by'] ?? '') == 'total_amount' && ($filters['sort_order'] ?? '') == 'asc' ? 'desc' : 'asc'])) }}'">
                     Total Amount {!! ($filters['sort_by'] ?? '') === 'total_amount' ? "<span class='ml-1 text-xs'>$icon</span>" : '' !!}
                 </th>
 
                 <th class="px-6 py-3 font-semibold">Used / Remaining</th>
-                <th class="px-6 py-3 font-semibold">Period</th>
+                <th class="px-6 py-3 font-semibold">Budget Name</th>
                 <th class="px-6 py-3 font-semibold">Created By</th>
                 <th class="px-6 py-3 font-semibold">Status</th>
                 <th class="px-6 py-3 font-semibold text-right">Action</th>
@@ -169,18 +159,6 @@
                 @endphp
 
                 <tr class="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700 hover:bg-indigo-50 dark:hover:bg-gray-800 transition">
-                    {{-- Checkbox --}}
-                    <td class="p-4">
-                        {{-- ========================================================== --}}
-                        {{-- START OF FIX: Added form="bulk-action-form" --}}
-                        {{-- ========================================================== --}}
-                        <input type="checkbox" name="budget_ids[]" value="{{ $budget->id }}"
-                               form="bulk-action-form"
-                               class="budget-checkbox w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500">
-                        {{-- ========================================================== --}}
-                        {{-- END OF FIX --}}
-                        {{-- ========================================================== --}}
-                    </td>
 
                     {{-- Department --}}
                     <td class="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">
@@ -208,11 +186,9 @@
                         </div>
                     </td>
 
-                    {{-- Period --}}
-                    <td class="px-6 py-4 text-sm whitespace-nowrap">
-                        {{ \Carbon\Carbon::parse($budget->period_start)->format('M d, Y') }}
-                        <span class="text-gray-400">→</span>
-                        {{ \Carbon\Carbon::parse($budget->period_end)->format('M d, Y') }}
+                    {{-- Budget Name --}}
+                    <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {{ $budget->name }}
                     </td>
 
                     {{-- Creator --}}

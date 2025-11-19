@@ -19,9 +19,9 @@
                 <div class="bg-white rounded-[1rem] shadow-2xl overflow-hidden flex flex-col md:flex-row">
                     
                     <div class="hidden md:block md:w-5/12 lg:w-5/12 bg-gray-200">
-                        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/img3.webp"
-                             alt="login form" 
-                             class="w-full h-full object-cover rounded-l-[1rem]" />
+                        <img src="https://images.stockcake.com/public/5/d/1/5d1e0df2-31a3-4206-a733-0f5e609a97a9/vibrant-abstract-art-stockcake.jpg"
+                            alt="login form" 
+                            class="w-full h-full object-cover rounded-l-[1rem]" />
                     </div>
 
                     <div class="w-full md:w-7/12 lg:w-7/12 flex items-center">

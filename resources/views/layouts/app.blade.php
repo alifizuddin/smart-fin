@@ -19,7 +19,20 @@
         
         @livewireScripts
     </head>
-    <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900 h-full" x-data="{ sidebarOpen: window.innerWidth >= 1024 }" x-init="window.addEventListener('resize', () => { sidebarOpen = window.innerWidth >= 1024 })">
+    <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900 h-full" x-data="{ 
+    sidebarOpen: window.innerWidth >= 1024,
+    darkMode: localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches),
+    toggleTheme() {
+        this.darkMode = !this.darkMode;
+        if (this.darkMode) {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+        }
+    }
+}" x-init="window.addEventListener('resize', () => { sidebarOpen = window.innerWidth >= 1024 }); if (darkMode) { document.documentElement.classList.add('dark') }">
         @auth
             @livewire('layout.sidebar')
         

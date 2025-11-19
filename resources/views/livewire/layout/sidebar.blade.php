@@ -99,6 +99,17 @@ new class extends Component
                     </svg>
                     <span x-show="sidebarOpen" class="ml-2">{{ __('Profile') }}</span>
                 </a>
+                <!-- Dark Mode Toggle -->
+                <button 
+                    @click="$root.toggleTheme()"
+                    class="flex items-center w-full text-left px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-md"
+                >
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                    <span x-show="sidebarOpen" class="ml-2">{{ __('Toggle Theme') }}</span>
+                </button>
+                
                 <button wire:click="logout" class="flex items-center w-full text-left px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-md">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

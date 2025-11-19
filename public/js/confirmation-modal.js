@@ -25,7 +25,17 @@ function confirmAction(url, action, modalId = 'confirmationModal', extraText = '
             </div>`
         title.textContent = 'Approve Action?'
         message.textContent = 'Confirm approval ' + (extraText ? `(${extraText})` : '') + '?'
-        confirmButton.className = 'px-5 py-2 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300 transition'
+        confirmButton.className = 'px-5 py-2 rounded-lg font-semibold text-white bg-green-600 hover:bg-green-700 focus:ring-green-300 transition'
+    } else if (action === 'delete') {
+        icon.innerHTML = `
+            <div class="bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 p-4 rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4h6v3m-9 0h12" />
+                </svg>
+            </div>`
+        title.textContent = 'Delete Item?'
+        message.textContent = 'Delete this item ' + (extraText ? `(${extraText})` : '') + '? This action cannot be undone.'
+        confirmButton.className = 'px-5 py-2 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 focus:ring-red-300 transition'
     } else {
         icon.innerHTML = `
             <div class="bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 p-4 rounded-full">

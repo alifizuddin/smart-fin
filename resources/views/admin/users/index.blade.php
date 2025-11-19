@@ -50,72 +50,101 @@
 
                         {{-- Table --}}
                         <table class="w-full text-sm text-left text-gray-600 dark:text-gray-300">
-                            <thead class="text-xs uppercase bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 sticky top-0">
+                            <thead class="text-xs uppercase bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 sticky top-0 border-b border-gray-200 dark:border-gray-600">
                                 <tr>
-                                    <th scope="col" class="p-4">
+                                    <th class="p-4">
                                         <input id="checkbox-all" type="checkbox"
                                             class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
                                     </th>
-                                    <th scope="col" class="px-6 py-3">Name</th>
-                                    <th scope="col" class="px-6 py-3">Department</th>
-                                    <th scope="col" class="px-6 py-3">Roles</th>
-                                    <th scope="col" class="px-6 py-3 text-right">Action</th>
+                                    <th class="px-6 py-3">Name</th>
+                                    <th class="px-6 py-3">Department</th>
+                                    <th class="px-6 py-3">Roles</th>
+                                    <th class="px-6 py-3 text-right">Action</th>
                                 </tr>
                             </thead>
-                            <tbody>
+
+                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                 @foreach ($users as $user)
-                                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors duration-150 ease-in-out">
-                                        <td class="p-4">
-                                            <input type="checkbox" id="checkbox-{{ $user->id }}"
-                                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="flex items-center">
-                                                <div class="flex-shrink-0 h-10 w-10">
-                                                    <img class="h-10 w-10 rounded-full object-cover" src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}">
-                                                </div>
-                                                <div class="ml-4">
-                                                    <div class="text-base font-semibold text-gray-900 dark:text-white">{{ $user->name }}</div>
-                                                    <div class="text-sm text-gray-500">{{ $user->email }}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            @if ($user->department)
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                                                    {{ $user->department->name }}
-                                                </span>
-                                            @endif
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            @foreach ($user->roles as $role)
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                                                    {{ $role->name }}
-                                                </span>
-                                            @endforeach
-                                        </td>
-                                        <td class="px-6 py-4 text-right">
-                                            <a href="{{ route('users.edit', $user) }}" 
-                                                class="text-blue-600 dark:text-blue-400 hover:underline font-medium">
-                                                Edit
-                                            </a>
-                                            <form action="{{ route('users.destroy', $user) }}" method="POST" class="inline-block ml-3"
-                                                onsubmit="return confirm('Are you sure you want to delete this user?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit"
-                                                    class="text-red-600 dark:text-red-400 hover:underline font-medium">
-                                                    Delete
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
+                                    <tr class="bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                
+                                <td class="p-4">
+                                    <input type="checkbox" id="checkbox-{{ $user->id }}"
+                                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                </td>
+
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <img class="h-10 w-10 rounded-full object-cover shadow-sm"
+                                            src="{{ $user->profile_photo_url }}"
+                                            alt="{{ $user->name }}">
+
+                                    <div class="ml-4">
+                                        <div class="font-medium text-gray-900 dark:text-white">
+                                            {{ $user->name }}
+                                        </div>
+                                        <div class="text-sm text-gray-500">{{ $user->email }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            
+                            <td class="px-6 py-4">
+                                @if ($user->department)
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                        {{ $user->department->name }}
+                                    </span>
+                                @endif
+                            </td>
+
+                            <td class="px-6 py-4 space-x-1">
+                                @foreach ($user->roles as $role)
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                                        {{ $role->name }}
+                                    </span>
                                 @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                            </td>
+
+                            <td class="px-6 py-4 text-right space-x-3 flex justify-end">
+
+                                <a href="{{ route('users.edit', $user) }}"
+                        class="w-9 h-9 flex items-center justify-center rounded-full bg-blue-100 text-blue-700 
+                        hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800 transition shadow">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                             viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                        </svg>
+                    </a>
+
+                    <form action="{{ route('users.destroy', $user) }}" method="POST"
+                          onsubmit="event.preventDefault(); confirmAction('{{ route('users.destroy', $user) }}', 'delete', 'confirmationModal', '{{ $user->name }}');">
+                        @csrf
+                        @method('DELETE')
+
+                        <button type="submit"
+                            class="w-9 h-9 flex items-center justify-center rounded-full bg-red-100 text-red-700 
+                            hover:bg-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 transition shadow">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                 viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4h6v3m-9 0h12" />
+                            </svg>
+                        </button>
+                        </form>
+
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Confirmation Modal -->
+    <x-confirmation-modal />
+
 </x-app-layout>
