@@ -99,9 +99,13 @@ new class extends Component
                     </svg>
                     <span x-show="sidebarOpen" class="ml-2">{{ __('Profile') }}</span>
                 </a>
+                <a class="flex items-center px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-md">
+                    <livewire:layout.notifications />
+                    <span x-show="sidebarOpen" class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ __('Notifications') }}</span>
+                </a>
                 <!-- Dark Mode Toggle -->
                 <button 
-                    @click="$root.toggleTheme()"
+                    @click="toggleTheme()"
                     class="flex items-center w-full text-left px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-md"
                 >
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -44,6 +44,10 @@ new class extends Component
                 <x-application-logo class="block h-9 w-auto text-gray-800 dark:text-gray-200" />
             </a>
         </div>
+        
+        <div class="ml-3">
+            <livewire:layout.notifications />
+        </div>
 
         <!-- Profile dropdown -->
         <div class="relative ml-3">
