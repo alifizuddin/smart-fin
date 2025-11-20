@@ -8,8 +8,8 @@
             <!-- Search bar -->
             <form method="GET" action="{{ route('expenses.approvals.index') }}" class="flex items-center space-x-2">
                 <input type="text" name="search" value="{{ request('search') }}"
-                       placeholder="Search by user or category..."
-                       class="rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-indigo-500 focus:border-indigo-500 text-sm px-3 py-1.5 w-64">
+                    placeholder="Search by user or category..."
+                    class="rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-indigo-500 focus:border-indigo-500 text-sm px-3 py-1.5 w-64">
                 <x-primary-button>Search</x-primary-button>
             </form>
         </div>
@@ -17,10 +17,20 @@
 
     <div class="py-10">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">
-                    Pending Expenses — <span class="text-indigo-500">{{ Auth::user()->department->name ?? 'Unknown' }}</span>
-                </h3>
+            <!-- Pending Expenses Section -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl transition duration-300 border border-gray-100 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center">
+                        <div class="bg-yellow-100 dark:bg-yellow-900/40 p-3 rounded-full">
+                            <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <h2 class="ml-3 text-xl font-semibold text-gray-900 dark:text-gray-100">
+                            Pending Expenses — <span class="text-indigo-500">{{ Auth::user()->department->name ?? 'Unknown' }}</span>
+                        </h2>
+                    </div>
+                </div>
 
                 <!-- Alerts -->
                 @foreach (['success' => 'green', 'error' => 'red', 'info' => 'blue'] as $msg => $color)
@@ -176,7 +186,7 @@
 
                 <div class="mt-4 text-right">
                     <a href="{{ route('expenses.approvals.index') }}"
-                       class="text-sm text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300">
+                    class="text-sm text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300">
                         View all approved expenses →
                     </a>
                 </div>

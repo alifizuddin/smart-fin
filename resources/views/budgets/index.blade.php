@@ -8,13 +8,13 @@
             @hasanyrole('Admin|Manager')
                 {{-- New Report Button --}}
                 <a href="{{ route('budgets.report', request()->query()) }}"
-                   class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
+                    class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
                     Print Report
                 </a>
             @endhasanyrole
             @hasanyrole('Admin|Manager')
                 <a href="{{ route('budgets.create') }}"
-                   class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
+                    class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
                     + Create Budget
                 </a>
             @endhasanyrole
@@ -148,7 +148,6 @@
             </tr>
         </thead>
 
-        {{-- ===== TABLE BODY ===== --}}
         <tbody>
             @forelse ($budgets as $budget)
                 @php
@@ -207,18 +206,14 @@
                             {{ ucfirst($budget->status) }}
                             </span>
                     </td>
-                    
-                    {{-- ========================================================== --}}
-                    {{-- START OF FIX: This is the updated Actions cell --}}
-                    {{-- ========================================================== --}}
                     <td class="px-6 py-4 text-right space-x-2 whitespace-nowrap">
                         {{-- View Button (Visible to all, policy handles logic) --}}
                         <button type="button"
                                 data-budget-id="{{ $budget->id }}"
                                 class="view-budget-btn inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium
-                                       bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 
-                                       dark:bg-indigo-900/40 dark:text-indigo-300 dark:border-indigo-700 
-                                       dark:hover:bg-indigo-800/60 transition-all duration-200 shadow-sm hover:shadow-md">
+                                        bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 
+                                        dark:bg-indigo-900/40 dark:text-indigo-300 dark:border-indigo-700 
+                                        dark:hover:bg-indigo-800/60 transition-all duration-200 shadow-sm hover:shadow-md">
                             View
                         </button>
                         
@@ -228,9 +223,9 @@
                                 <button type="button"
                                         data-budget-id="{{ $budget->id }}"
                                         class="edit-budget-btn inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium
-                                               bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 
-                                               dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-700 
-                                               dark:hover:bg-blue-800/60 transition-all duration-200 shadow-sm hover:shadow-md">
+                                                bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 
+                                                dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-700 
+                                                dark:hover:bg-blue-800/60 transition-all duration-200 shadow-sm hover:shadow-md">
                                     Edit
                                 </button>
                             @endif
@@ -243,9 +238,9 @@
                                     @method('PATCH')
                                     <button type="submit"
                                             class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium
-                                                   bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 
-                                                   dark:bg-green-900/40 dark:text-green-300 dark:border-green-700 
-                                                   dark:hover:bg-green-800/60 transition-all duration-200 shadow-sm hover:shadow-md">
+                                                bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 
+                                                dark:bg-green-900/40 dark:text-green-300 dark:border-green-700 
+                                                dark:hover:bg-green-800/60 transition-all duration-200 shadow-sm hover:shadow-md">
                                         Approve
                                     </button>
                                 </form>
@@ -256,18 +251,15 @@
                                     @method('PATCH') {{-- Route is defined as PATCH --}}
                                     <button type="submit"
                                             class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium
-                                                   bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 
-                                                   dark:bg-red-900/40 dark:text-red-300 dark:border-red-700 
-                                                   dark:hover:bg-red-800/60 transition-all duration-200 shadow-sm hover:shadow-md">
+                                                bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 
+                                                dark:bg-red-900/40 dark:text-red-300 dark:border-red-700 
+                                                dark:hover:bg-red-800/60 transition-all duration-200 shadow-sm hover:shadow-md">
                                         Reject
                                     </button>
                                 </form>
                             @endif
                         @endrole
                     </td>
-                    {{-- ========================================================== --}}
-                    {{-- END OF FIX --}}
-                    {{-- ========================================================== --}}
 
                 </tr>
             @empty
@@ -279,22 +271,13 @@
             @endforelse
         </tbody>
     </table>
-</div>
-
-                    {{-- ========================================================== --}}
-                    {{-- START OF FIX: The <form> tag was removed from here. --}}
-                    {{-- ========================================================== --}}
-                    <div class="mt-4">{{ $budgets->links() }}</div>
-                    {{-- ========================================================== --}}
-                    {{-- END OF FIX --}}
-                    {{-- ========================================================== --}}
-                </div>
             </div>
+            <div class="mt-4">{{ $budgets->links() }}</div>
         </div>
     </div>
 
     <div id="viewBudgetModal" tabindex="-1" aria-hidden="true"
-     class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
     <div class="relative w-full max-w-3xl mx-4">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden">
             
@@ -303,9 +286,9 @@
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
-                              d="M12 8c-1.657 0-3 .895-3 2v4c0 1.105 1.343 2 3 2s3-.895 3-2v-4c0-1.105-1.343-2-3-2z" />
+                            d="M12 8c-1.657 0-3 .895-3 2v4c0 1.105 1.343 2 3 2s3-.895 3-2v-4c0-1.105-1.343-2-3-2z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
-                              d="M5 8v8a7 7 0 0014 0V8" />
+                            d="M5 8v8a7 7 0 0014 0V8" />
                     </svg>
                     <span class="text-gray-900 dark:text-white">Budget Details</span>
                 </h3>
@@ -314,9 +297,9 @@
                         data-modal-close
                         aria-label="Close">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none"
-                         viewBox="0 0 24 24" stroke="currentColor">
+                        viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M6 18L18 6M6 6l12 12" />
+                            d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
@@ -348,8 +331,8 @@
         </div>
     </div>
 </div>
-    <div id="editBudgetModal" tabindex="-1" aria-hidden="true"
-     class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+<div id="editBudgetModal" tabindex="-1" aria-hidden="true"
+    class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
     <div class="relative w-full max-w-3xl mx-4">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden">
             
@@ -358,7 +341,7 @@
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
-                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                     <span class="text-gray-900 dark:text-white">Edit Budget</span>
                 </h3>
@@ -367,15 +350,22 @@
                         data-modal-close
                         aria-label="Close">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none"
-                         viewBox="0 0 24 24" stroke="currentColor">
+                        viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M6 18L18 6M6 6l12 12" />
+                            d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
 
             {{-- Body --}}
             <div class="p-6 space-y-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+                
+                {{-- Loading State (Initially Hidden) --}}
+                <div id="edit-modal-loading" class="hidden flex justify-center py-8">
+                    <div class="animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent"></div>
+                </div>
+
+                {{-- Form Content --}}
                 <form id="editBudgetForm" method="POST" class="space-y-6">
                     @csrf
                     @method('PUT')
@@ -388,8 +378,8 @@
                             </label>
                             <select id="edit-department_id" name="department_id"
                                     class="w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 
-                                           focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
-                                           dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-all"
+                                        focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+                                        dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-all"
                                     required>
                                 @foreach($departments as $department)
                                     <option value="{{ $department->id }}">{{ $department->name }}</option>
@@ -403,10 +393,10 @@
                                 Total Amount
                             </label>
                             <input type="number" name="total_amount" id="edit-total_amount"
-                                   class="w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 
-                                          focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
-                                          dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-all"
-                                   required>
+                                class="w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 
+                                        focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+                                        dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-all"
+                                required>
                         </div>
 
                         {{-- Start Date --}}
@@ -415,10 +405,10 @@
                                 Start Date
                             </label>
                             <input type="date" name="period_start" id="edit-period_start"
-                                   class="w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 
-                                          focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
-                                          dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-all"
-                                   required>
+                                class="w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 
+                                        focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+                                        dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-all"
+                                required>
                         </div>
 
                         {{-- End Date --}}
@@ -427,10 +417,10 @@
                                 End Date
                             </label>
                             <input type="date" name="period_end" id="edit-period_end"
-                                   class="w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 
-                                          focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
-                                          dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-all"
-                                   required>
+                                class="w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 
+                                        focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+                                        dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-all"
+                                required>
                         </div>
 
                         {{-- Status --}}
@@ -439,10 +429,10 @@
                                 Status
                             </label>
                             <select id="edit-status" name="status"
-                                    class="w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 
-                                           focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
-                                           dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-all"
-                                    required>
+                                class="w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 
+                                        focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+                                        dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-all"
+                                required>
                                 <option value="active">Active</option>
                                 <option value="closed">Closed</option>
                             </select>
@@ -452,18 +442,19 @@
             </div>
 
             {{-- Footer --}}
-            <div class="flex justify-end items-center gap-3 p-6 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+            <div id="edit-modal-footer" class="flex justify-end items-center gap-3 p-6 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                 <button type="button" data-modal-close
                         class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600">
                     Cancel
                 </button>
-                <button type="submit"
+                {{-- Note: form attribute links this button to the form above --}}
+                <button type="submit" form="editBudgetForm"
                         class="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                     <span class="inline-flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
-                             viewBox="0 0 24 24" stroke="currentColor">
+                            viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                  d="M5 13l4 4L19 7" />
+                                d="M5 13l4 4L19 7" />
                         </svg>
                         Update Budget
                     </span>
@@ -477,12 +468,11 @@
 
 
     @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
         <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('load', () => {
     // =========================
-    // ✅ Chart Initialization
+    // 📊 Chart Initialization (Unchanged)
     // =========================
     const pieData = @json($charts['pie']);
     const barData = @json($charts['bar']);
@@ -499,10 +489,7 @@
                     hoverOffset: 4
                 }]
             },
-            options: {
-                responsive: true,
-                plugins: { legend: { position: 'bottom' } }
-            }
+            options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
         });
     }
 
@@ -517,16 +504,12 @@
                     { label: 'Amount Used', data: Object.values(barData).map(d => d.used), backgroundColor: '#F87171' }
                 ]
             },
-            options: {
-                responsive: true,
-                scales: { y: { beginAtZero: true } },
-                plugins: { legend: { position: 'top' } }
-            }
+            options: { responsive: true, scales: { y: { beginAtZero: true } }, plugins: { legend: { position: 'top' } } }
         });
     }
 
     // =========================
-    // ✅ Bulk Action
+    // 🛠 Bulk Action (Unchanged)
     // =========================
     const selectAllCheckbox = document.getElementById('checkbox-all');
     const budgetCheckboxes = document.querySelectorAll('.budget-checkbox');
@@ -538,61 +521,54 @@
         });
 
         bulkActionForm.addEventListener('submit', e => {
-            const action = e.submitter?.value;
-            if (!action) {
+            if (!e.submitter?.value) {
                 e.preventDefault();
                 alert('Please select a bulk action.');
                 return;
             }
-            if (action === 'delete' && !confirm('Are you sure you want to delete the selected budgets?')) {
+            if (e.submitter.value === 'delete' && !confirm('Are you sure you want to delete the selected budgets?')) {
                 e.preventDefault();
             }
         });
     }
 
     // =========================
-    // ✅ View Budget Modal
+    // 👁️ View Budget Modal
     // =========================
     const viewBudgetButtons = document.querySelectorAll('.view-budget-btn');
     const viewBudgetModal = document.getElementById('viewBudgetModal');
     const modalBodyContent = document.getElementById('modal-body-content');
-    const closeModalButtons = viewBudgetModal?.querySelectorAll('[data-modal-close]') || [];
+    const closeViewModalButtons = viewBudgetModal?.querySelectorAll('[data-modal-close]') || [];
 
-    function openModal() {
+    function openViewModal() {
         viewBudgetModal?.classList.remove('hidden');
         viewBudgetModal?.setAttribute('aria-hidden', 'false');
     }
 
-    function closeModal() {
+    function closeViewModal() {
+        // FIX: Blur focus before hiding to prevent aria-hidden console error
+        if (document.activeElement && viewBudgetModal.contains(document.activeElement)) {
+            document.activeElement.blur();
+        }
         viewBudgetModal?.classList.add('hidden');
         viewBudgetModal?.setAttribute('aria-hidden', 'true');
         modalBodyContent.innerHTML = '';
     }
 
-    closeModalButtons.forEach(btn => btn.addEventListener('click', closeModal));
+    closeViewModalButtons.forEach(btn => btn.addEventListener('click', closeViewModal));
     viewBudgetModal?.addEventListener('click', e => {
-        if (e.target === viewBudgetModal) closeModal();
-    });
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') {
-            closeModal(); // Closes the view modal
-            
-            // This will close the edit modal (function defined in next step)
-            if (typeof closeEditModal === 'function') {
-                closeEditModal();
-            }
-        }
+        if (e.target === viewBudgetModal) closeViewModal();
     });
 
     viewBudgetButtons.forEach(button => {
         button.addEventListener('click', () => {
             const budgetId = button.dataset.budgetId;
+            // Show Spinner
             modalBodyContent.innerHTML = `
                 <div class="flex justify-center py-8">
                     <div class="animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent"></div>
-                </div>
-            `;
-            openModal();
+                </div>`;
+            openViewModal();
 
             fetch(`/budgets/${budgetId}/json`)
                 .then(res => res.json())
@@ -601,9 +577,7 @@
                     const percentage = data.total_amount > 0
                         ? Math.round((data.used_amount / data.total_amount) * 100)
                         : 0;
-                    const colorClass =
-                        percentage < 70 ? 'bg-green-500' :
-                        percentage < 90 ? 'bg-yellow-500' : 'bg-red-500';
+                    const colorClass = percentage < 70 ? 'bg-green-500' : percentage < 90 ? 'bg-yellow-500' : 'bg-red-500';
 
                     modalBodyContent.innerHTML = `
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -617,24 +591,15 @@
                                 <div><h4 class="text-gray-500 text-sm uppercase dark:text-gray-400">Remaining</h4>
                                 <p class="text-lg font-semibold ${remaining >= 0 ? 'text-green-600' : 'text-red-600'}">$${remaining.toLocaleString()}</p></div>
                             </div>
-
                             <div class="flex flex-col justify-center">
                                 <div class="mb-2 flex justify-between text-sm text-gray-500"><span>Usage</span><span>${percentage}%</span></div>
                                 <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
                                     <div class="h-3 rounded-full ${colorClass}" style="width: ${Math.min(percentage, 100)}%"></div>
                                 </div>
-                                <div class="mt-4">
-                                    <h4 class="text-gray-500 text-sm uppercase">Period</h4>
-                                    <p class="text-sm">${new Date(data.period_start).toLocaleDateString()} - ${new Date(data.period_end).toLocaleDateString()}</p>
-                                </div>
-                                <div class="mt-4">
-                                    <h4 class="text-gray-500 text-sm uppercase">Status</h4>
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                        data.status === 'active'
-                                            ? 'bg-green-100 text-green-800'
-                                            : 'bg-red-100 text-red-800'
-                                    }">${data.status.toUpperCase()}</span>
-                                </div>
+                                <div class="mt-4"><h4 class="text-gray-500 text-sm uppercase">Period</h4>
+                                <p class="text-sm">${new Date(data.period_start).toLocaleDateString()} - ${new Date(data.period_end).toLocaleDateString()}</p></div>
+                                <div class="mt-4"><h4 class="text-gray-500 text-sm uppercase">Status</h4>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${data.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${data.status.toUpperCase()}</span></div>
                             </div>
                         </div>`;
                 })
@@ -645,16 +610,23 @@
     });
 
     // =========================
-    // ✅ Edit Budget Modal (Custom, like View Modal)
+    // ✏️ Edit Budget Modal
     // =========================
     const editBudgetButtons = document.querySelectorAll('.edit-budget-btn');
     const editBudgetModal = document.getElementById('editBudgetModal');
     const editBudgetForm = document.getElementById('editBudgetForm');
+    const editModalLoading = document.getElementById('edit-modal-loading');
+    const editModalFooter = document.getElementById('edit-modal-footer');
     const closeEditModalButtons = editBudgetModal?.querySelectorAll('[data-modal-close]') || [];
 
-    // Define the close function in a scope the 'Escape' listener can access
     function closeEditModal() {
         if (!editBudgetModal) return;
+        
+        // FIX: Blur focus before hiding to prevent aria-hidden console error
+        if (document.activeElement && editBudgetModal.contains(document.activeElement)) {
+            document.activeElement.blur();
+        }
+
         editBudgetModal.classList.add('hidden');
         editBudgetModal.setAttribute('aria-hidden', 'true');
     }
@@ -665,34 +637,56 @@
         editBudgetModal.setAttribute('aria-hidden', 'false');
     }
 
-    // Attach close events for 'X' button and 'Cancel' button
+    // Attach close events
     closeEditModalButtons.forEach(btn => btn.addEventListener('click', closeEditModal));
-    
-    // Attach close event for clicking on the background
     editBudgetModal?.addEventListener('click', e => {
         if (e.target === editBudgetModal) closeEditModal();
+    });
+
+    // Global Escape key for both
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            closeViewModal();
+            closeEditModal();
+        }
     });
 
     if (editBudgetModal && editBudgetForm) {
         editBudgetButtons.forEach(button => {
             button.addEventListener('click', () => {
                 const budgetId = button.dataset.budgetId;
-                if (!budgetId) return; // Safety check
+                if (!budgetId) return;
 
+                // 1. Open Modal Immediately
+                openEditModal();
+
+                // 2. Show Loading / Hide Form
+                editModalLoading.classList.remove('hidden');
+                editBudgetForm.classList.add('hidden');
+                editModalFooter.classList.add('hidden'); // Hide buttons while loading
+
+                // 3. Fetch Data
                 editBudgetForm.action = `/budgets/${budgetId}`;
 
                 fetch(`/budgets/${budgetId}/json`)
                     .then(res => res.json())
                     .then(data => {
-                        // Populate the form fields
+                        // Populate fields
                         document.getElementById('edit-department_id').value = data.department_id;
                         document.getElementById('edit-total_amount').value = data.total_amount;
                         document.getElementById('edit-period_start').value = data.period_start.split('T')[0];
                         document.getElementById('edit-period_end').value = data.period_end.split('T')[0];
                         document.getElementById('edit-status').value = data.status;
                         
-                        // Show the modal *after* data is populated
-                        openEditModal(); 
+                        // 4. Hide Loading / Show Form
+                        editModalLoading.classList.add('hidden');
+                        editBudgetForm.classList.remove('hidden');
+                        editModalFooter.classList.remove('hidden');
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert('Failed to load budget data. Please try again.');
+                        closeEditModal();
                     });
             });
         });

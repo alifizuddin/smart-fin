@@ -6,6 +6,9 @@ function confirmAction(url, action, modalId = 'confirmationModal', extraText = '
     const message = document.getElementById(modalId + 'Message')
     const confirmButton = document.getElementById(modalId + 'ConfirmButton')
     const form = document.getElementById(modalId + 'Form')
+    
+    // Locate the hidden input that Laravel uses to determine the HTTP verb (PATCH, DELETE, etc.)
+    const methodInput = form.querySelector('input[name="_method"]')
 
     form.action = url
     modal.classList.remove('hidden')
@@ -17,6 +20,9 @@ function confirmAction(url, action, modalId = 'confirmationModal', extraText = '
     }, 10)
 
     if (action === 'approve') {
+        // Ensure method is PATCH for approvals
+        if (methodInput) methodInput.value = 'PATCH'
+
         icon.innerHTML = `
             <div class="bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300 p-4 rounded-full">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -26,7 +32,11 @@ function confirmAction(url, action, modalId = 'confirmationModal', extraText = '
         title.textContent = 'Approve Action?'
         message.textContent = 'Confirm approval ' + (extraText ? `(${extraText})` : '') + '?'
         confirmButton.className = 'px-5 py-2 rounded-lg font-semibold text-white bg-green-600 hover:bg-green-700 focus:ring-green-300 transition'
+        
     } else if (action === 'delete') {
+        // Change method to DELETE for delete actions
+        if (methodInput) methodInput.value = 'DELETE'
+
         icon.innerHTML = `
             <div class="bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 p-4 rounded-full">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -36,7 +46,11 @@ function confirmAction(url, action, modalId = 'confirmationModal', extraText = '
         title.textContent = 'Delete Item?'
         message.textContent = 'Delete this item ' + (extraText ? `(${extraText})` : '') + '? This action cannot be undone.'
         confirmButton.className = 'px-5 py-2 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 focus:ring-red-300 transition'
+        
     } else {
+        // Default to PATCH for rejections (or other updates)
+        if (methodInput) methodInput.value = 'PATCH'
+
         icon.innerHTML = `
             <div class="bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 p-4 rounded-full">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -46,6 +60,13 @@ function confirmAction(url, action, modalId = 'confirmationModal', extraText = '
         title.textContent = 'Reject Action?'
         message.textContent = 'Reject this item ' + (extraText ? `(${extraText})` : '') + '?'
         confirmButton.className = 'px-5 py-2 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 focus:ring-red-300 transition'
+    }
+
+    // Always bind the confirm button to submit the modal form.
+    // The actual HTTP verb seen in the Network tab will be POST,
+    // with Laravel using the hidden _method field (DELETE/PATCH).
+    if (confirmButton && form) {
+        confirmButton.onclick = () => form.submit()
     }
 }
 
