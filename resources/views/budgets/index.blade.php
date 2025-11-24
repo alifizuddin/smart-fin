@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            <h2 class="font-semibold text-2xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ __('Budgets Dashboard') }}
             </h2>
             <div class="flex items-center gap-2">
@@ -371,6 +371,18 @@
                     @method('PUT')
 
                     <div class="grid gap-4 sm:grid-cols-2">
+                        {{-- Budget Name --}}
+                        <div class="sm:col-span-2">
+                            <label for="edit-name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                Budget Name
+                            </label>
+                            <input type="text" name="name" id="edit-name"
+                                class="w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 
+                                        focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+                                        dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-all"
+                                required>
+                        </div>
+
                         {{-- Department --}}
                         <div>
                             <label for="edit-department_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
@@ -672,6 +684,7 @@
                     .then(res => res.json())
                     .then(data => {
                         // Populate fields
+                        document.getElementById('edit-name').value = data.name || '';
                         document.getElementById('edit-department_id').value = data.department_id;
                         document.getElementById('edit-total_amount').value = data.total_amount;
                         document.getElementById('edit-period_start').value = data.period_start.split('T')[0];

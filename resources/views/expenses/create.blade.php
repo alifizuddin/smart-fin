@@ -1,9 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-2xl text-gray-800 dark:text-gray-200 leading-tight flex items-center gap-2">
-            <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6m0 0l6 6m-6-6v12" />
-            </svg>
             {{ __('Submit New Expense') }}
         </h2>
     </x-slot>

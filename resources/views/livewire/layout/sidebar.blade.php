@@ -103,7 +103,6 @@ new class extends Component
                     <livewire:layout.notifications />
                     <span x-show="sidebarOpen" class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ __('Notifications') }}</span>
                 </a>
-                <!-- Dark Mode Toggle -->
                 <button 
                     @click="toggleTheme()"
                     class="flex items-center w-full text-left px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-md"
