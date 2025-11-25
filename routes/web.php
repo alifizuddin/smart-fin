@@ -17,12 +17,17 @@ Route::view('profile', 'profile')
     ->name('profile');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-
-    Route::post('expenses/quick-store', [ExpenseController::class, 'quickStore'])
-        ->name('expenses.quickStore')
-        ->middleware('role:Staff');
-        
-    Route::delete('/expenses/{id}', [ExpenseController::class, 'destroy'])->name('expenses.delete');
+    // Staff routes
+    Route::middleware('role:Staff')->group(function () {
+        Route::get('my-expenses', [ExpenseController::class, 'myExpenses'])
+            ->name('expenses.my-expenses');
+            
+        Route::post('expenses/quick-store', [ExpenseController::class, 'quickStore'])
+            ->name('expenses.quickStore');
+            
+        Route::delete('/expenses/{id}', [ExpenseController::class, 'destroy'])
+            ->name('expenses.delete');
+    });
 
     // --- ADMIN-ONLY ROUTES ---
     Route::middleware('role:Admin')->group(function () {

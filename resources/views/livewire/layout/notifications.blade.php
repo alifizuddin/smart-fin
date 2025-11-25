@@ -1,24 +1,69 @@
+@php
+    \Log::info('Rendering notifications', [
+        'user_id' => auth()->id(),
+        'notifications_count' => $this->notifications->count(),
+        'unread_count' => $this->unreadCount
+    ]);
+@endphp
+
 <?php
 
 use Livewire\Volt\Component;
 use Illuminate\Notifications\DatabaseNotification;
 
 new class extends Component {
+
+    protected $listeners = ['refreshNotifications' => '$refresh'];
+
     public function getNotificationsProperty()
     {
-        // Fetch latest 20 notifications
-        return auth()->user()->notifications()->take(20)->get();
+        if (!auth()->check()) {
+        return collect();
+    }
+    
+    return auth()->user()
+        ->notifications()
+        ->latest()
+        ->take(20)
+        ->get()
+        ->map(function ($notification) {
+            // Ensure data is always an array
+            $notification->data = is_array($notification->data) 
+                ? $notification->data 
+                : (array) $notification->data;
+            return $notification;
+        });
     }
 
     public function getUnreadCountProperty()
     {
         return auth()->user()->unreadNotifications()->count();
     }
+    public function getListeners()
+{
+    return [
+        "echo-private:App.Models.User." . auth()->id() . ",.Illuminate\\Notifications\\Events\\BroadcastNotificationCreated" => 'refreshNotifications',
+    ];
+}
+
+public function refreshNotifications()
+{
+    $this->notifications = $this->notifications;
+    $this->unreadCount = $this->unreadCount;
+}
 
     public function markAsRead($notificationId)
     {
         $notification = auth()->user()->notifications()->findOrFail($notificationId);
         $notification->markAsRead();
+    
+    // Redirect to the notification's action URL if it exists
+        if (isset($notification->data['action_url'])) {
+            return redirect($notification->data['action_url']);
+        }
+    
+    // Otherwise, just refresh the notifications
+        $this->dispatch('$refresh');
     }
 
     public function markAllRead()
@@ -98,25 +143,56 @@ new class extends Component {
                                             @else
                                                 <ul role="list" class="-my-6 divide-y divide-gray-200 dark:divide-gray-700">
                                                     @foreach($this->notifications as $notification)
-                                                        <li class="py-6 {{ $notification->read_at ? 'opacity-50' : '' }}">
-                                                            <div class="flex gap-4">
-                                                                <div class="flex-1">
-                                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                                        {{ $notification->data['title'] ?? 'Notification' }}
-                                                                    </p>
-                                                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                                                        {{ $notification->data['message'] ?? 'You have a new notification.' }}
-                                                                    </p>
-                                                                    <p class="text-xs text-gray-400 mt-2">{{ $notification->created_at->diffForHumans() }}</p>
-                                                                </div>
-                                                                @if(!$notification->read_at)
+                                                        @php
+                                                            $isExpenseNotification = $notification->type === 'App\\Notifications\\NewExpenseSubmission';
+                                                            $actionUrl = $isExpenseNotification 
+                                                                ? ($notification->data['action_url'] ?? route('expenses.approvals'))
+                                                                : '#';
+                                                        @endphp
+                                                        <li class="py-4 {{ $notification->read_at ? 'opacity-50' : '' }}">
+                                                            <a href="{{ $actionUrl }}" class="block hover:bg-gray-50 dark:hover:bg-gray-800 -mx-4 px-4 py-2 rounded-md transition-colors">
+                                                                <div class="flex gap-4">
                                                                     <div class="flex-shrink-0">
-                                                                        <button wire:click="markAsRead('{{ $notification->id }}')" class="text-indigo-600 hover:text-indigo-500 text-xs font-medium">
-                                                                            Mark read
-                                                                        </button>
+                                                                        @if($isExpenseNotification)
+                                                                            <div class="h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
+                                                                                <svg class="h-5 w-5 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a1 1 0 11-2 0 1 1 0 012 0z" />
+                                                                                </svg>
+                                                                            </div>
+                                                                        @else
+                                                                            <div class="h-10 w-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                                                                <svg class="h-5 w-5 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                                </svg>
+                                                                            </div>
+                                                                        @endif
                                                                     </div>
-                                                                @endif
-                                                            </div>
+                                                                    <div class="flex-1 min-w-0">
+                                                                        <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                                                            @if($isExpenseNotification)
+                                                                                New Expense Submission
+                                                                            @else
+                                                                                {{ $notification->data['title'] ?? 'Notification' }}
+                                                                            @endif
+                                                                        </p>
+                                                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                                                            @if($isExpenseNotification)
+                                                                                {{ $notification->data['message'] ?? 'A new expense requires your approval' }}
+                                                                            @else
+                                                                                {{ $notification->data['message'] ?? 'You have a new notification.' }}
+                                                                            @endif
+                                                                        </p>
+                                                                        <p class="text-xs text-gray-400 mt-1">
+                                                                            {{ $notification->created_at->diffForHumans() }}
+                                                                        </p>
+                                                                    </div>
+                                                                    @if(!$notification->read_at)
+                                                                        <div class="flex-shrink-0">
+                                                                            <span class="h-2.5 w-2.5 rounded-full bg-indigo-600"></span>
+                                                                        </div>
+                                                                    @endif
+                                                                </div>
+                                                            </a>
                                                         </li>
                                                     @endforeach
                                                 </ul>
@@ -140,3 +216,16 @@ new class extends Component {
         </div>
     </template>
 </div>
+<script>
+    document.addEventListener('livewire:initialized', () => {
+        // Mark notification as read when clicked
+        document.querySelectorAll('a[href^="{{ route('expenses.approvals.index') }}"]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                const notificationId = this.closest('li').getAttribute('data-notification-id');
+                if (notificationId) {
+                    @this.markAsRead(notificationId);
+                }
+            });
+        });
+    });
+</script>

@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Budget;
 use App\Services\ExpenseCategorizationService;
 use App\Models\Expense;
+use App\Models\User;
+use App\Notifications\NewExpenseSubmission;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -17,6 +20,40 @@ use Carbon\Carbon;
 
 class ExpenseController extends Controller
 {
+    /**
+     * Display a listing of the authenticated user's expenses.
+     */
+    public function myExpenses(Request $request)
+    {
+        $user = Auth::user();
+        
+        $query = $user->expenses()
+            ->with(['budget', 'department'])
+            ->latest('created_at');
+            
+        // Add search functionality
+        if ($request->filled('search')) {
+            $searchTerm = $request->input('search');
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('category', 'like', "%{$searchTerm}%")
+                  ->orWhere('description', 'like', "%{$searchTerm}%")
+                  ->orWhere('status', 'like', "%{$searchTerm}%");
+            });
+        }
+        
+        // Add status filter
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+        
+        $expenses = $query->paginate(15);
+        
+        return view('expenses.my-expenses', [
+            'expenses' => $expenses,
+            'statuses' => ['pending', 'approved', 'rejected']
+        ]);
+    }
+    
     public function index()
     {
         //
@@ -87,7 +124,7 @@ class ExpenseController extends Controller
             $path = $request->file('receipt')->store('receipts', 'public');
 
             // 6. Create the expense
-            Expense::create([
+            $expense = Expense::create([
                 'user_id' => $user->id,
                 'department_id' => $user->department_id,
                 'budget_id' => $selectedBudget->id,
@@ -99,6 +136,29 @@ class ExpenseController extends Controller
                 'payment_method' => 'Not specified',
                 'status' => 'pending',
             ]);
+
+            // Notify managers in the same department
+            $managers = User::role('Manager')
+                ->where('department_id', $user->department_id)
+                ->get();
+
+            \Log::info('Found managers to notify', [
+                'count' => $managers->count(),
+                'department_id' => $user->department_id,
+                'managers' => $managers->pluck('id')->toArray()
+            ]);
+
+            if ($managers->isNotEmpty()) {
+                try {
+                    Notification::send($managers, new NewExpenseSubmission($expense));
+                    \Log::info('Notification sent successfully');
+                } catch (\Exception $e) {
+                    \Log::error('Failed to send notification', [
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+                }
+            }
 
             return response()->json([
                 'message' => 'Expense submitted successfully! Automatically assigned to Budget #' . $selectedBudget->id
@@ -137,9 +197,9 @@ class ExpenseController extends Controller
             $searchTerm = $request->input('search');
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('category', 'like', "%{$searchTerm}%")
-                  ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
-                      $userQuery->where('name', 'like', "%{$searchTerm}%");
-                  });
+                ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
+                    $userQuery->where('name', 'like', "%{$searchTerm}%");
+                });
             });
         }
 
@@ -280,8 +340,6 @@ class ExpenseController extends Controller
 
             $ai_data = $response->json();
 
-            // **FIXED SYNTAX ERROR**: Removed a broken, duplicated block of code that was here.
-
             // 4. Prepare data array for creation using AI-extracted data
             $user = Auth::user();
 
@@ -320,6 +378,31 @@ class ExpenseController extends Controller
             try {
                 $expense = Expense::create($data);
 
+                $managers = User::role('Manager')
+                    ->where('department_id', $user->department_id)
+                    ->get();
+                // After creating the expense, before sending notifications
+\Log::info('Sending notifications to managers', [
+    'expense_id' => $expense->id,
+    'department_id' => $user->department_id,
+    'managers_count' => $managers->count()
+]);
+
+if ($managers->isNotEmpty()) {
+    Notification::send($managers, new NewExpenseSubmission($expense));
+    \Log::info('Notification sent', [
+        'managers' => $managers->pluck('id', 'name')->toArray()
+    ]);
+} else {
+    \Log::warning('No managers found for department', [
+        'department_id' => $user->department_id
+    ]);
+}
+
+                if ($managers->isNotEmpty()) {
+                    Notification::send($managers, new NewExpenseSubmission($expense));
+                }
+
                 return redirect()->route('dashboard')->with(
                     'success',
                     'Expense submitted successfully! ' .
@@ -333,9 +416,6 @@ class ExpenseController extends Controller
                     ->withInput();
             }
 
-            // **FIXED SYNTAX ERROR**: Removed the redundant Expense::create and redirect calls that were here.
-            // The logic is already handled inside the try/catch block above.
-
         } catch (\Exception $e) { // This catch block is for the Http::post call
             logger()->error('Receipt processing HTTP call failed', ['error' => $e->getMessage()]);
             return redirect()->back()
@@ -345,17 +425,12 @@ class ExpenseController extends Controller
     }
 
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+
     public function edit(string $id)
     {
         //
@@ -381,8 +456,7 @@ class ExpenseController extends Controller
     }
     private function getCategoryFromImage(string $imageAbsolutePath): string
     {
-        // IMPORTANT: Use absolute paths for your Python script and model
-        // e.g., base_path('ml/predict_from_image.py')
+
         $pythonScriptPath = base_path('ml/predict_from_image.py');
 
         // Set the working directory to where the model is, so the script can find it
