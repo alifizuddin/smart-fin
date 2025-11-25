@@ -55,11 +55,18 @@ new class extends Component
                 </x-sidebar-link>
 
                 @role('Staff')
-                <x-sidebar-link :href="route('expenses.create')" :active="request()->routeIs('expenses.*')">
+                <x-sidebar-link :href="route('expenses.create')" :active="request()->routeIs('expenses.create')">
                     <svg class="flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
                     <span x-show="sidebarOpen" class="ml-3">{{ __('Submit Expense') }}</span>
+                </x-sidebar-link>
+                
+                <x-sidebar-link :href="route('expenses.my-expenses')" :active="request()->routeIs('expenses.my-expenses')">
+                    <svg class="flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    <span x-show="sidebarOpen" class="ml-3">{{ __('My Expenses') }}</span>
                 </x-sidebar-link>
                 @endrole
 
@@ -99,7 +106,7 @@ new class extends Component
                     </svg>
                     <span x-show="sidebarOpen" class="ml-2">{{ __('Profile') }}</span>
                 </a>
-                <a class="flex items-center px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-md">
+                <a class="flex items-center w-full text-left px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-md">
                     <livewire:layout.notifications />
                     <span x-show="sidebarOpen" class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ __('Notifications') }}</span>
                 </a>
