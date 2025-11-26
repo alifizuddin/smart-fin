@@ -613,6 +613,86 @@
     </div>
 </main>
 @endhasrole
+
+@hasrole('Admin')
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+    <!-- System Overview -->
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl transition duration-300 border border-gray-100 dark:border-gray-700 md:col-span-2">
+        <div class="flex items-center mb-4">
+            <div class="bg-blue-100 dark:bg-blue-900/40 p-3 rounded-full">
+                <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9.75 17L12 19.25 14.25 17m-7.5-5.75h10.5M4.75 6.75h14.5c.69 0 1.25.56 1.25 1.25v10c0 .69-.56 1.25-1.25 1.25H4.75A1.25 1.25 0 013.5 18V8c0-.69.56-1.25 1.25-1.25z" />
+                </svg>
+            </div>
+            <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">System Overview</h2>
+        </div>
+
+        <p class="text-sm text-gray-700 dark:text-gray-300 mb-4">
+            <strong>Total Users:</strong> 1,250 |
+            <strong>Active Modules:</strong> 95% |
+            <strong>Uptime:</strong> 99.9%
+        </p>
+
+        <canvas id="systemChart" class="w-full h-40"></canvas>
+    </div>
+
+    <!-- Alerts & Logs -->
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl transition duration-300 border border-gray-100 dark:border-gray-700">
+        <div class="flex items-center mb-4">
+            <div class="bg-orange-100 dark:bg-orange-900/40 p-3 rounded-full">
+                <svg class="w-6 h-6 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+            </div>
+            <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Alerts & Logs</h2>
+        </div>
+
+        <ul class="space-y-2 mb-3">
+            <li class="text-sm text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 p-3 rounded-md border border-red-100 dark:border-red-800/40 shadow-sm">
+                Anomaly: Unusual login from IP 192.168.1.1
+            </li>
+            <li class="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/40 p-3 rounded-md border border-gray-200 dark:border-gray-600 shadow-sm">
+                Log: System update completed
+            </li>
+        </ul>
+
+        <button class="px-4 py-2 bg-yellow-500 text-black rounded-lg hover:bg-yellow-400">
+            View Full Logs
+        </button>
+    </div>
+
+    <!-- Compliance Engine -->
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl transition duration-300 border border-gray-100 dark:border-gray-700">
+        <div class="flex items-center mb-4">
+            <div class="bg-indigo-100 dark:bg-indigo-900/40 p-3 rounded-full">
+                <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+            <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Compliance Engine</h2>
+        </div>
+
+        <p class="text-sm text-gray-700 dark:text-gray-300">
+            <strong>Spending Limit per Category:</strong> $10,000
+        </p>
+        <p class="text-sm text-gray-700 dark:text-gray-300 mt-1">
+            <strong>Approved Vendors:</strong> Vendor A, Vendor B
+        </p>
+
+        <button class="mt-4 px-4 py-2 bg-yellow-500 text-black rounded-lg hover:bg-blue-400">
+            Edit Rules
+        </button>
+    </div>
+</div>
+</main>
+@endhasrole
+
     
 </x-app-layout>
 
@@ -740,4 +820,20 @@
                 }
             }
         });
+
+                    // Chart.js for System Overview
+            const ctx = document.getElementById('systemChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr'],
+                    datasets: [{
+                        label: 'User Activity',
+                        data: [120, 150, 180, 200],
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    }]
+                }
+            });
+
 </script>
