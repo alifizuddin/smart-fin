@@ -36,7 +36,6 @@ class DashboardController extends Controller
             ->where('status', 'pending')
             ->with('user', 'budget') 
             ->latest()
-            ->take(5)
             ->get();
 
         $spendingByCategory = Expense::where('department_id', $user->department_id)
@@ -46,13 +45,14 @@ class DashboardController extends Controller
             ->orderBy('total_amount', 'desc')
             ->get();
 
-        $anomalyAlerts = $user->notifications()
+        $anomalyAlerts = $user->unreadNotifications()
             ->where('type', 'App\Notifications\NewAiAlert')
             ->latest()
             ->take(5) 
             ->get()
             ->map(function ($notification) {
                 return [
+                    'id' => $notification->id ,
                     'message' => $notification->data['message'] ?? 'No detail provided',
                     'severity' => $notification->data['severity'] ?? 'info',
                     'date' => $notification->created_at->diffForHumans(),
@@ -144,5 +144,15 @@ class DashboardController extends Controller
             'spendingByCategory' => $spendingByCategory,
             'anomalyAlerts' => $anomalyAlerts,
         ]);
+    }
+    public function markNotificationRead($id)
+    {
+        $notification = auth()->user()->unreadNotifications()->find($id);
+
+        if ($notification) {
+            $notification->markAsRead();
+        }
+
+        return back()->with('success', 'Alert dismissed.');
     }
 }

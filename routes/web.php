@@ -65,13 +65,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Add any routes here that are ONLY for Managers (and not Admins)
         Route::get('expenses/approvals', [ExpenseController::class, 'approvalsIndex'])
             ->name('expenses.approvals.index');
+        
+        Route::patch('notifications/read/{id}', [DashboardController::class, 'markNotificationRead'])
+            ->name('notifications.read');
+            
     });
     Route::middleware('role:Staff')->group(function () {
         // Staff-specific routes
     });
 
-    // --- ROUTES FOR ALL LOGGED-IN ROLES ---
-    // (Permissions are handled inside the BudgetController for each action)
     Route::resource('budgets', BudgetController::class);
     Route::resource('expenses', ExpenseController::class);
     Route::get('/budgets/{budget}/json', [BudgetController::class, 'showJson'])->name('budgets.showJson');

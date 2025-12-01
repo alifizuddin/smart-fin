@@ -228,8 +228,7 @@
                                             </div>
                                             <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 overflow-hidden">
                                                 <div class="h-full rounded-full transition-all duration-500 {{ $barColor }}" 
-                                                     style="width: {{ min($percentage, 100) }}%;">
-                                                    <div class="h-full w-full bg-white/30 rounded-full absolute right-0 top-0 transform translate-x-1/2"></div>
+                                                    style="width: {{ min($percentage, 100) }}%;">
                                                 </div>
                                             </div>
                                             <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400">
@@ -520,7 +519,7 @@
                                             <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 overflow-hidden">
                                                 <div class="h-full rounded-full transition-all duration-500 ${barColor}" 
                                                      style="width: ${Math.min(pct, 100)}%;">
-                                                    <div class="h-full w-full bg-white/30 rounded-full absolute right-0 top-0 transform translate-x-1/2"></div>
+                                                    
                                                 </div>
                                             </div>
                                             <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400">

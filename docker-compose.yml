@@ -16,6 +16,22 @@ services:
     networks:
       - smartfin-net
     
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    container_name: smartfin-queue
+    restart: unless-stopped
+    working_dir: /var/www/html
+    command: php artisan queue:work --verbose --tries=3 --timeout=90
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - app
+      - db
+    networks:
+      - smartfin-net
+    
   n8n:
     image: n8nio/n8n
     container_name: n8n_local

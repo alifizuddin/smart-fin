@@ -382,22 +382,6 @@ class ExpenseController extends Controller
                     ->where('department_id', $user->department_id)
                     ->get();
                 // After creating the expense, before sending notifications
-\Log::info('Sending notifications to managers', [
-    'expense_id' => $expense->id,
-    'department_id' => $user->department_id,
-    'managers_count' => $managers->count()
-]);
-
-if ($managers->isNotEmpty()) {
-    Notification::send($managers, new NewExpenseSubmission($expense));
-    \Log::info('Notification sent', [
-        'managers' => $managers->pluck('id', 'name')->toArray()
-    ]);
-} else {
-    \Log::warning('No managers found for department', [
-        'department_id' => $user->department_id
-    ]);
-}
 
                 if ($managers->isNotEmpty()) {
                     Notification::send($managers, new NewExpenseSubmission($expense));

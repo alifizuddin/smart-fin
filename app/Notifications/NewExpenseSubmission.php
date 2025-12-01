@@ -41,7 +41,7 @@ class NewExpenseSubmission extends Notification implements ShouldQueue
             ->line('A new expense has been submitted by ' . $this->expense->user->name . '.')
             ->line('Amount: $' . number_format($this->expense->amount, 2))
             ->line('Category: ' . $this->expense->category)
-            ->action('Review Expense', route('expenses.approvals')) // Ensure this route exists
+            ->action('Review Expense', route('expenses.approvals.index')) // Ensure this route exists
             ->line('Please review this request at your earliest convenience.');
     }
 
@@ -68,7 +68,7 @@ class NewExpenseSubmission extends Notification implements ShouldQueue
             ),
             'amount' => $this->expense->amount,
             'expense_id' => $this->expense->id,
-            'action_url' => route('expenses.approvals'),
+            'action_url' => route('expenses.approvals.index'),
             'type' => 'expense_submission',
             'user_name' => $this->expense->user->name,
             'created_at' => now()->toDateTimeString(),
