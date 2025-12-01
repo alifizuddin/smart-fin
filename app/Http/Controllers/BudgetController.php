@@ -17,7 +17,7 @@ use App\Services\BudgetService;
 
 class BudgetController extends Controller
 {
-    protected $budgetService; // 2. CREATE A PROPERTY FOR IT
+    protected $budgetService; 
 
     // 3. INJECT THE SERVICE IN THE CONSTRUCTOR
     public function __construct(BudgetService $budgetService)
@@ -45,6 +45,16 @@ class BudgetController extends Controller
         // ============================================================
         $summary = $this->budgetService->getBudgetSummary($allFilteredBudgets);
         $charts = $this->budgetService->getBudgetChartData($allFilteredBudgets);
+        $categoryData = [] ;
+        if (!Auth::user()->hasRole('Admin')) {
+            $budgetIds = $allFilteredBudgets->pluck('id');
+            $categoryData = Expense::whereIn('budget_id', $budgetIds)
+                ->where('status', 'approved')
+                ->selectRaw('category, sum(amount) as total')
+                ->groupBy('category')
+                ->pluck('total', 'category')
+                ->toArray();
+        }
 
         // ============================================================
         // 3️⃣ Fetch Filter Options
@@ -59,6 +69,7 @@ class BudgetController extends Controller
             'departments'  => $departments,
             'summary'      => $summary,
             'charts'       => $charts,
+            'categoryChart' => $categoryData,
             'filters'      => $request->only(['status', 'start_date', 'end_date', 'sort_by', 'sort_order', 'department_id']),
         ];
 
@@ -70,8 +81,16 @@ class BudgetController extends Controller
     
     public function showJson(Budget $budget)
     {
-    
-        return response()->json($budget->load('department'));
+        // Calculate used amount from approved expenses only
+        $usedAmount = $budget->expenses()->where('status', 'approved')->sum('amount');
+        
+        // Create a fresh array with the budget data and override the used_amount
+        $budgetData = array_merge($budget->toArray(), [
+            'used_amount' => $usedAmount,
+            'department' => $budget->department
+        ]);
+        
+        return response()->json($budgetData);
     }
     
     public function report(Request $request)

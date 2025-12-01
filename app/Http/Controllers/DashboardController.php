@@ -10,6 +10,7 @@ use App\Models\Expense;
 use App\Models\Budget;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\DB;
+use App\Notifications\NewAiAlert; // Ensure this is imported if you use the class name
 
 class DashboardController extends Controller
 {
@@ -30,46 +31,35 @@ class DashboardController extends Controller
 
         // 2. Fetch data based on user role
         if ($user->hasRole('Manager')) {
-            // Managers see pending expenses for their department
-            $pendingExpenses = Expense::where('department_id', $user->department_id)
-                ->where('status', 'pending')
-                ->with('user', 'budget') // Load relations
-                ->latest()
-                ->take(5)
-                ->get();
-            $spendingByCategory = Expense::where('department_id', $user->department_id)
-                ->where('status', 'approved')
-                ->groupBy('category')
-                ->select('category', DB::raw('SUM(amount) as total_amount'))
-                ->orderBy('total_amount', 'desc')
-                ->get();
+        // ... existing expenses/spending logic ...
+        $pendingExpenses = Expense::where('department_id', $user->department_id)
+            ->where('status', 'pending')
+            ->with('user', 'budget') 
+            ->latest()
+            ->take(5)
+            ->get();
 
-            $webhookUrl = config('services.n8n.anomaly_url');
-            if ($webhookUrl) {
-                $departmentExpenses = Expense::where('department_id', $user->department_id)
-                    ->whereIn('status', ['approved', 'pending'])
-                    ->with('user:id,name')
-                    ->latest('created_at')
-                    ->take(100)
-                    ->get();
-                try {
-                    $response = Http::timeout(10)-> post($webhookUrl, [
-                        'department_id' => $user->department_id,
-                        'department_name' => $user->department->name,
-                        'expenses' => $departmentExpenses,
-                        'spending_by_category' => $spendingByCategory,
-                    ]);
-                    if ($response->successful()) {
-                        $anomalyAlerts = collect($response->json('alerts',[]));
-                    }
-                    else {
-                        Log::error('N8N Anomaly Detection failed: ', ['status' => $response->status(), 'body' => $response->body()]);
-                    }
-                } catch (\Exception $e) {
-                    Log::error('N8N Anomaly call exception: ' . $e->getMessage());
-                }
-            }
-        }
+        $spendingByCategory = Expense::where('department_id', $user->department_id)
+            ->where('status', 'approved')
+            ->groupBy('category')
+            ->select('category', DB::raw('SUM(amount) as total_amount'))
+            ->orderBy('total_amount', 'desc')
+            ->get();
+
+        $anomalyAlerts = $user->notifications()
+            ->where('type', 'App\Notifications\NewAiAlert')
+            ->latest()
+            ->take(5) 
+            ->get()
+            ->map(function ($notification) {
+                return [
+                    'message' => $notification->data['message'] ?? 'No detail provided',
+                    'severity' => $notification->data['severity'] ?? 'info',
+                    'date' => $notification->created_at->diffForHumans(),
+                ];
+            });
+        // -------------------------------------------------------
+    }
 
         if ($user->hasRole('Staff')) {
             $userExpenses = Expense::where('user_id', $user->id)

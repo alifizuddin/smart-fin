@@ -307,16 +307,41 @@
                                             <x-expense-details-modal :id="'expense-details-' . $expense->id" />
 
                                             <!-- Delete Confirmation Modal Component -->
-                                            <x-confirmation-modal 
-                                                :id="'delete-expense-'.$expense->id"
-                                                title="Delete Expense"
-                                                :message="'Are you sure you want to delete this expense? This action cannot be undone.'"
-                                                :confirmText="'Delete'">
-                                                <form id="delete-expense-{{ $expense->id }}Form" method="POST" action="{{ route('expenses.destroy', $expense->id) }}">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                </form>
-                                            </x-confirmation-modal>
+                                            <div id="delete-expense-{{ $expense->id }}" 
+                                                 class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center transition-opacity duration-300">
+                                                <div id="delete-expense-{{ $expense->id }}Card"
+                                                     class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl transform scale-95 opacity-0 transition-all duration-300 w-full max-w-md relative">
+                                                    
+                                                    <div class="w-16 h-16 flex items-center justify-center mx-auto rounded-full mb-4 bg-red-100 dark:bg-red-900/30">
+                                                        <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                                        </svg>
+                                                    </div>
+                                                    
+                                                    <h3 class="text-2xl font-bold text-center text-gray-800 dark:text-gray-100 mb-3">
+                                                        Delete Expense
+                                                    </h3>
+                                                    <p class="text-center text-gray-600 dark:text-gray-400 mb-6">
+                                                        Are you sure you want to delete this expense? This action cannot be undone.
+                                                    </p>
+
+                                                    <div class="flex justify-center gap-4">
+                                                        <button type="button" 
+                                                                onclick="closeModal('delete-expense-{{ $expense->id }}')" 
+                                                                class="px-5 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition font-medium">
+                                                            Cancel
+                                                        </button>
+                                                        <form id="delete-expense-{{ $expense->id }}Form" method="POST" action="{{ route('expenses.destroy', $expense->id) }}" class="inline">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" 
+                                                                    class="px-5 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition font-medium">
+                                                                Delete
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         @endforeach
                                     </tbody>
                                 </table>

@@ -21,9 +21,16 @@ RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 # Install Composer (globally)
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Install Node.js (>= 14.x)
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+# Remove any default Debian Node.js (which is v18)
+RUN apt-get remove -y nodejs npm || true
+
+# Install Node.js 20.x
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 RUN apt-get install -y nodejs
+
+# Verify version (optional but helpful)
+RUN node -v
+RUN npm -v
 
 # Set working directory
 WORKDIR /var/www/html
@@ -34,6 +41,12 @@ COPY . .
 # Fix permissions for storage and cache
 RUN chown -R www-data:www-data storage bootstrap/cache
 RUN chmod -R 775 storage bootstrap/cache
+
+# Install npm dependencies
+RUN npm install
+
+# Build frontend assets
+RUN npm run build
 
 # Expose port 9000 and start php-fpm
 EXPOSE 9000

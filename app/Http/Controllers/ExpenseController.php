@@ -403,7 +403,7 @@ if ($managers->isNotEmpty()) {
                     Notification::send($managers, new NewExpenseSubmission($expense));
                 }
 
-                return redirect()->route('dashboard')->with(
+                return redirect()->route('expenses.create')->with(
                     'success',
                     'Expense submitted successfully! ' .
                         'Amount: $' . number_format($expense->amount, 2) . ', ' .
