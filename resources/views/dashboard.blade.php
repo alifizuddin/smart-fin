@@ -693,7 +693,185 @@
 </main>
 @endhasrole
 
-    
+@hasrole('Finance Admin')
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+        <!-- Budget Overview (Annual Financial Budget) -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700 md:col-span-2">
+            <div class="flex items-center mb-4">
+                <div class="bg-green-100 dark:bg-green-900/40 p-3 rounded-full">
+                    <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Budget Overview</h2>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300 mb-4">
+                <strong>Total Annual Budget:</strong> $5,000,000 |
+                <strong>Spent:</strong> $3,200,000 (64%) |
+                <strong>Remaining:</strong> $1,800,000
+            </p>
+            <div class="relative w-full h-[260px]">
+                <canvas id="budgetChart"></canvas>
+            </div>
+            <button class="mt-4 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-400">View Details</button>
+        </div>
+
+        <!-- Budget Alerts -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center mb-4">
+                <div class="bg-red-100 dark:bg-red-900/40 p-3 rounded-full">
+                    <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                </div>
+                <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Budget Alerts</h2>
+            </div>
+            <ul class="space-y-2 mb-3">
+                <li class="text-sm text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 p-3 rounded-md border border-red-100 dark:border-red-800/40 shadow-sm">
+                    Alert: Marketing Dept budget at 95% limit ($950,000 spent).
+                </li>
+                <li class="text-sm text-yellow-700 dark:text-yellow-300 bg-yellow-50 dark:bg-yellow-900/30 p-3 rounded-md border border-yellow-100 dark:border-yellow-800/40 shadow-sm">
+                    Alert: IT Dept approaching 80% limit.
+                </li>
+            </ul>
+            <button class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-400">Acknowledge Alerts</button>
+        </div>
+
+        <!-- Departmental Budget Approval -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center mb-4">
+                <div class="bg-blue-100 dark:bg-blue-900/40 p-3 rounded-full">
+                    <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Dept Budget Approval</h2>
+            </div>
+            <ul class="space-y-2 mb-3">
+                <li class="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/40 p-3 rounded-md border border-gray-200 dark:border-gray-600 shadow-sm">
+                    Marketing: Proposed $1,000,000 - <button class="text-green-600 hover:underline">Approve</button> | <button class="text-red-600 hover:underline">Reject</button>
+                </li>
+                <li class="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/40 p-3 rounded-md border border-gray-200 dark:border-gray-600 shadow-sm">
+                    IT: Proposed $800,000 - <button class="text-green-600 hover:underline">Approve</button> | <button class="text-red-600 hover:underline">Reject</button>
+                </li>
+            </ul>
+            <button class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400">Review All Proposals</button>
+        </div>
+
+        <!-- Fund Reallocation -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center mb-4">
+                <div class="bg-purple-100 dark:bg-purple-900/40 p-3 rounded-full">
+                    <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                    </svg>
+                </div>
+                <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Fund Reallocation</h2>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                <strong>Available for Reallocation:</strong> $500,000
+            </p>
+            <div class="space-y-2">
+                <input type="number" placeholder="Amount to Transfer" class="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
+                <select class="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
+                    <option>From: Marketing</option>
+                    <option>From: IT</option>
+                </select>
+                <select class="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
+                    <option>To: HR</option>
+                    <option>To: Operations</option>
+                </select>
+            </div>
+            <button class="mt-4 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-400">Reallocate Funds</button>
+        </div>
+
+        <!-- Financial Reports & Analytics -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700 md:col-span-2">
+            <div class="flex items-center mb-4">
+                <div class="bg-indigo-100 dark:bg-indigo-900/40 p-3 rounded-full">
+                    <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                </div>
+                <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Financial Reports & Analytics</h2>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300 mb-4">
+                <strong>Revenue Growth:</strong> +15% YoY |
+                <strong>Expense Ratio:</strong> 65% |
+                <strong>Profit Margin:</strong> 20%
+            </p>
+            <div class="relative w-full h-[260px]">
+                <canvas id="analyticsChart"></canvas>
+            </div>
+            <div class="mt-4 space-x-2">
+                <button class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-400">Download Report</button>
+                <button class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-400">View Analytics</button>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Budget Chart
+    const budgetCtx = document.getElementById('budgetChart').getContext('2d');
+    new Chart(budgetCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Spent', 'Remaining'],
+            datasets: [{
+                data: [3200000, 1800000],
+                backgroundColor: ['#ef4444', '#10b981'],
+                borderWidth: 1,
+            }]
+        },
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+
+    // Analytics Chart
+    const analyticsCtx = document.getElementById('analyticsChart').getContext('2d');
+    new Chart(analyticsCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Revenue',
+                data: [400000, 450000, 500000, 550000, 600000, 650000],
+                borderColor: '#6366f1',
+                fill: false,
+                tension: 0.4
+            }]
+        },
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: true, position: 'bottom' }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>
+@endpush
+
+@endhasrole
+
+   
 </x-app-layout>
 
 <!-- Confirmation Modal -->
