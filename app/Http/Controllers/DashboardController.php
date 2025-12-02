@@ -10,7 +10,7 @@ use App\Models\Expense;
 use App\Models\Budget;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\DB;
-use App\Notifications\NewAiAlert; // Ensure this is imported if you use the class name
+use App\Notifications\NewAiAlert;
 
 class DashboardController extends Controller
 {
@@ -62,12 +62,7 @@ class DashboardController extends Controller
     }
 
         if ($user->hasRole('Staff')) {
-            $userExpenses = Expense::where('user_id', $user->id)
-                ->with('budget')
-                ->latest()
-                ->take(5)
-                ->get();
-
+            // Get user's budgets first
             $userBudgets = Budget::where('department_id', $user->department_id)
                 ->where('status', 'active')
                 ->where('period_end', '>=', now())
@@ -79,7 +74,6 @@ class DashboardController extends Controller
             $activeBudget = null;
 
             if ($requestedBudgetId) {
-                // Find the requested budget within the user's accessible budgets
                 $activeBudget = $userBudgets->firstWhere('id', $requestedBudgetId);
             }
 
@@ -87,6 +81,17 @@ class DashboardController extends Controller
             if (!$activeBudget && $userBudgets->isNotEmpty()) {
                 $activeBudget = $userBudgets->first();
             }
+
+            // Get expenses for the selected budget
+            $userExpensesQuery = Expense::where('user_id', $user->id)
+                ->with('budget')
+                ->latest();
+
+            if ($activeBudget) {
+                $userExpensesQuery->where('budget_id', $activeBudget->id);
+            }
+
+            $userExpenses = $userExpensesQuery->get();
 
             $totalDepartmentBudget = $userBudgets->sum('total_amount');
             
@@ -129,7 +134,6 @@ class DashboardController extends Controller
                     Log::error('AI Suggestion Service failed: ' . $e->getMessage());
                 }
             }
-            // --- End of AI Logic ---
 
         } // <-- The 'if ($user->hasRole('Staff'))' block ends HERE
         

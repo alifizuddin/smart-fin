@@ -144,21 +144,37 @@ public function refreshNotifications()
                                                 <ul role="list" class="-my-6 divide-y divide-gray-200 dark:divide-gray-700">
                                                     @foreach($this->notifications as $notification)
                                                         @php
-                                                            $isExpenseNotification = $notification->type === 'App\\Notifications\\NewExpenseSubmission';
-                                                            $actionUrl = $isExpenseNotification 
-                                                                ? ($notification->data['action_url'] ?? route('expenses.approvals'))
-                                                                : '#';
-                                                        @endphp
+                                                        $isExpenseSubmission = $notification->type === 'App\\Notifications\\NewExpenseSubmission';
+                                                        $isExpenseApproved = $notification->type === 'App\\Notifications\\ExpenseApproved';
+                                                        $isExpenseNotification = $isExpenseSubmission || $isExpenseApproved;
+                                                        
+                                                        // Set the appropriate action URL based on notification type
+                                                        if ($isExpenseSubmission) {
+                                                            $actionUrl = $notification->data['action_url'] ?? route('expenses.approvals');
+                                                        } elseif ($isExpenseApproved) {
+                                                            $actionUrl = $notification->data['action_url'] ?? route('expenses.my-expenses');
+                                                        } else {
+                                                            $actionUrl = $notification->data['action_url'] ?? '#';
+                                                        }
+                                                    @endphp
                                                         <li class="py-4 {{ $notification->read_at ? 'opacity-50' : '' }}">
                                                             <a href="{{ $actionUrl }}" class="block hover:bg-gray-50 dark:hover:bg-gray-800 -mx-4 px-4 py-2 rounded-md transition-colors">
                                                                 <div class="flex gap-4">
                                                                     <div class="flex-shrink-0">
                                                                         @if($isExpenseNotification)
-                                                                            <div class="h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
-                                                                                <svg class="h-5 w-5 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a1 1 0 11-2 0 1 1 0 012 0z" />
-                                                                                </svg>
-                                                                            </div>
+                                                                            @if($isExpenseApproved)
+                                                                                <div class="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                                                                                    <svg class="h-6 w-6 text-green-600 dark:text-green-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                                    </svg>
+                                                                                </div>
+                                                                            @else
+                                                                                <div class="h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
+                                                                                    <svg class="h-6 w-6 text-indigo-600 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+                                                                                    </svg>
+                                                                                </div>
+                                                                            @endif
                                                                         @else
                                                                             <div class="h-10 w-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
                                                                                 <svg class="h-5 w-5 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -168,21 +184,13 @@ public function refreshNotifications()
                                                                         @endif
                                                                     </div>
                                                                     <div class="flex-1 min-w-0">
-                                                                        <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                                                            @if($isExpenseNotification)
-                                                                                New Expense Submission
-                                                                            @else
-                                                                                {{ $notification->data['title'] ?? 'Notification' }}
-                                                                            @endif
+                                                                        <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                                            {{ $notification->data['title'] ?? ($isExpenseApproved ? 'Expense Approved' : 'New Expense Submission') }}
                                                                         </p>
-                                                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                                                            @if($isExpenseNotification)
-                                                                                {{ $notification->data['message'] ?? 'A new expense requires your approval' }}
-                                                                            @else
-                                                                                {{ $notification->data['message'] ?? 'You have a new notification.' }}
-                                                                            @endif
+                                                                        <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
+                                                                            {{ $notification->data['message'] ?? ($isExpenseApproved ? 'Your expense has been approved' : 'A new expense requires your approval') }}
                                                                         </p>
-                                                                        <p class="text-xs text-gray-400 mt-1">
+                                                                        <p class="mt-1 text-xs text-gray-400">
                                                                             {{ $notification->created_at->diffForHumans() }}
                                                                         </p>
                                                                     </div>

@@ -23,10 +23,12 @@ class N8nController extends Controller
             ->get()
             ->map(function ($expense) {
                 return [
+                    'id' => $expense->id,
                     'date' => $expense->created_at->toDateString(),
                     'amount' => $expense->amount,
                     'category' => $expense->category,
                     'user' => $expense->user->name,
+                    'user_id' => $expense->user_id,
                     'budget' => $expense->budget->name ?? 'N/A',
                 ];
             });

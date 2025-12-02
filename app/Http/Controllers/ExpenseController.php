@@ -6,7 +6,9 @@ use App\Models\Budget;
 use App\Services\ExpenseCategorizationService;
 use App\Models\Expense;
 use App\Models\User;
+use App\Notifications\ExpenseApproved;
 use App\Notifications\NewExpenseSubmission;
+use App\Events\ExpenseCreated;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -36,8 +38,8 @@ class ExpenseController extends Controller
             $searchTerm = $request->input('search');
             $query->where(function($q) use ($searchTerm) {
                 $q->where('category', 'like', "%{$searchTerm}%")
-                  ->orWhere('description', 'like', "%{$searchTerm}%")
-                  ->orWhere('status', 'like', "%{$searchTerm}%");
+                ->orWhere('description', 'like', "%{$searchTerm}%")
+                ->orWhere('status', 'like', "%{$searchTerm}%");
             });
         }
         
@@ -46,10 +48,14 @@ class ExpenseController extends Controller
             $query->where('status', $request->status);
         }
         
-        $expenses = $query->paginate(15);
+        $expenses = $query->paginate(10);
+        
+        // Calculate total expenses across all pages
+        $totalExpenses = $user->expenses()->sum('amount');
         
         return view('expenses.my-expenses', [
             'expenses' => $expenses,
+            'totalExpenses' => $totalExpenses,
             'statuses' => ['pending', 'approved', 'rejected']
         ]);
     }
@@ -235,6 +241,13 @@ class ExpenseController extends Controller
                 // 5. Deduct amount from the budget
                 $budget->increment('used_amount', $expense->amount);
             });
+            
+            try {
+                $expense->user->notify(new ExpenseApproved($expense));
+            } catch (\Exception $e) {
+                // Log notification failure but don't fail the approval transaction
+                \Log::error('Failed to send approval notification', ['error' => $e->getMessage()]);
+            }
 
             return redirect()->back()->with('success', 'Expense approved and budget updated.');
         } catch (\Exception $e) {
@@ -406,6 +419,7 @@ class ExpenseController extends Controller
                 ->with('error', 'Could not connect to the receipt processing service. Please try again later.')
                 ->withInput();
         }
+        event(new ExpenseCreated($expense));
     }
 
 

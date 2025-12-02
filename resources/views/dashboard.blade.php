@@ -393,31 +393,35 @@
                 <div class="space-y-4 max-h-[300px] overflow-y-auto pr-1">
                     <ul class="space-y-2">
     @forelse($anomalyAlerts as $alert)
-        <li class="relative flex flex-col text-sm text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 p-3 rounded-md border border-red-100 dark:border-red-800/40 shadow-sm group transition-all hover:shadow-md">
-            
-            <div class="flex justify-between items-start pr-6">
-                <span class="font-medium leading-tight">{{ $alert['message'] }}</span>
-                
-                {{-- Dismiss Button (Top Right) --}}
-                <form action="{{ route('notifications.read', $alert['id']) }}" method="POST" class="absolute top-2 right-2">
+        <div class="flex items-start space-x-3 p-2 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors mb-2">
+            <div class="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg mt-0.5">
+                <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <h3 class="font-semibold text-sm text-gray-900 dark:text-gray-100">Anomaly Detected</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ $alert['message'] }}</p>
+                @if(isset($alert['date']))
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ $alert['date'] }}</p>
+                @endif
+            </div>
+            @if(isset($alert['id']))
+                <form action="{{ route('notifications.read', $alert['id']) }}" method="POST" class="ml-2">
                     @csrf
                     @method('PATCH')
-                    <button type="submit" class="text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-300 transition-colors p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50" title="Dismiss">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    <button type="submit" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
                 </form>
-            </div>
-
-            <span class="text-[10px] text-red-500 dark:text-red-400 mt-2 self-end opacity-80">
-                {{ $alert['date'] }}
-            </span>
-        </li>
+            @endif
+        </div>
     @empty
-        <li class="text-sm text-gray-500 dark:text-gray-400 italic text-center py-4">
-            No current anomalies detected.
-        </li>
+        <div class="text-center py-6">
+            <p class="text-sm text-gray-500 dark:text-gray-400 italic">No anomalies detected. Everything looks good!</p>
+        </div>
     @endforelse
 </ul>
                 </div>

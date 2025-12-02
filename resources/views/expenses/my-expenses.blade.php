@@ -31,7 +31,7 @@
                                 <div class="ml-4">
                                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Expenses</p>
                                     <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
-                                        ${{ number_format($expenses->sum('amount'), 2) }}
+                                        ${{ number_format($totalExpenses, 2) }}
                                     </p>
                                 </div>
                             </div>
