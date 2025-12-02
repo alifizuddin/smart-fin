@@ -4,6 +4,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ChatController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome');
@@ -77,6 +78,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('budgets', BudgetController::class);
     Route::resource('expenses', ExpenseController::class);
     Route::get('/budgets/{budget}/json', [BudgetController::class, 'showJson'])->name('budgets.showJson');
+    Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
 
 });
 

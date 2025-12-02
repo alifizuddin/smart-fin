@@ -50,12 +50,18 @@ class ExpenseController extends Controller
         
         $expenses = $query->paginate(10);
         
-        // Calculate total expenses across all pages
+        // Calculate totals
         $totalExpenses = $user->expenses()->sum('amount');
+        $pendingCount = $user->expenses()->where('status', 'pending')->count();
+        $approvedCount = $user->expenses()->where('status', 'approved')->count();
+        $rejectedCount = $user->expenses()->where('status', 'rejected')->count();
         
         return view('expenses.my-expenses', [
             'expenses' => $expenses,
             'totalExpenses' => $totalExpenses,
+            'totalPending' => $pendingCount,
+            'totalApproved' => $approvedCount,
+            'totalRejected' => $rejectedCount,
             'statuses' => ['pending', 'approved', 'rejected']
         ]);
     }

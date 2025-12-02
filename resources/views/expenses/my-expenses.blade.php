@@ -48,7 +48,7 @@
                                 <div class="ml-4">
                                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Pending</p>
                                     <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
-                                        {{ $expenses->where('status', 'pending')->count() }}
+                                        {{ $totalPending }}
                                     </p>
                                 </div>
                             </div>
@@ -65,7 +65,7 @@
                                 <div class="ml-4">
                                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Approved</p>
                                     <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
-                                        {{ $expenses->where('status', 'approved')->count() }}
+                                        {{ $totalApproved }}
                                     </p>
                                 </div>
                             </div>
@@ -82,7 +82,7 @@
                                 <div class="ml-4">
                                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Rejected</p>
                                     <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
-                                        {{ $expenses->where('status', 'rejected')->count() }}
+                                        {{ $totalRejected }}
                                     </p>
                                 </div>
                             </div>

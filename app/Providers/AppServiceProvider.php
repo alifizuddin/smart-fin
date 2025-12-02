@@ -5,6 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use App\Models\Expense;
 use App\Observers\ExpenseObserver;
+use Illuminate\Support\Facades\Blade;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,5 +24,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Expense::observe(ExpenseObserver::class);
+        Blade::component('chatbot-widget', \App\View\Components\ChatbotWidget::class);
     }
 }

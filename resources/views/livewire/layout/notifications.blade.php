@@ -84,7 +84,7 @@ public function refreshNotifications()
         </svg>
 
         @if($this->unreadCount > 0)
-            <span class="absolute top-1.5 right-1.5 block h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-800"></span>
+            <span class="absolute -top-0.5 -right-0.5 block h-2 w-2 rounded-full bg-red-500 ring-1 ring-white dark:ring-gray-800"></span>
         @endif
     </button>
 
@@ -183,22 +183,22 @@ public function refreshNotifications()
                                                                             </div>
                                                                         @endif
                                                                     </div>
-                                                                    <div class="flex-1 min-w-0">
-                                                                        <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                                                            {{ $notification->data['title'] ?? ($isExpenseApproved ? 'Expense Approved' : 'New Expense Submission') }}
-                                                                        </p>
-                                                                        <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
-                                                                            {{ $notification->data['message'] ?? ($isExpenseApproved ? 'Your expense has been approved' : 'A new expense requires your approval') }}
-                                                                        </p>
-                                                                        <p class="mt-1 text-xs text-gray-400">
-                                                                            {{ $notification->created_at->diffForHumans() }}
-                                                                        </p>
-                                                                    </div>
-                                                                    @if(!$notification->read_at)
-                                                                        <div class="flex-shrink-0">
-                                                                            <span class="h-2.5 w-2.5 rounded-full bg-indigo-600"></span>
+                                                                    <div class="flex-1 min-w-0 flex items-start justify-between gap-2">
+                                                                        <div>
+                                                                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                                                {{ $notification->data['title'] ?? ($isExpenseApproved ? 'Expense Approved' : 'New Expense Submission') }}
+                                                                            </p>
+                                                                            <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
+                                                                                {{ $notification->data['message'] ?? ($isExpenseApproved ? 'Your expense has been approved' : 'A new expense requires your approval') }}
+                                                                            </p>
+                                                                            <p class="mt-1 text-xs text-gray-400">
+                                                                                {{ $notification->created_at->diffForHumans() }}
+                                                                            </p>
                                                                         </div>
-                                                                    @endif
+                                                                        @if(!$notification->read_at)
+                                                                            <span class="h-2.5 w-2.5 rounded-full bg-indigo-600 flex-shrink-0 mt-1"></span>
+                                                                        @endif
+                                                                    </div>
                                                                 </div>
                                                             </a>
                                                         </li>
