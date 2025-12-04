@@ -94,49 +94,8 @@ class DashboardController extends Controller
             $userExpenses = $userExpensesQuery->get();
 
             $totalDepartmentBudget = $userBudgets->sum('total_amount');
-            
-            // --- AI Logic should be INSIDE the Staff block ---
-            $aiServiceUrl = config('services.ai_suggester.url'); 
 
-            if ($aiServiceUrl) {
-                try {
-                    // 2. Prepare data for the AI
-                    $budgetData = [
-                        'total_budget' => $activeBudget->total_amount ?? 0,
-                        'spent' => $userExpenses->where('status', 'approved')->sum('amount'),
-                    ];
-
-                    $expenseData = $userExpenses->map(fn($exp) => [
-                        'category' => $exp->category,
-                        'amount' => $exp->amount,
-                        'status' => $exp->status,
-                        'date' => $exp->created_at->toIso8601String(),
-                    ]);
-
-                    // 3. Call the AI service
-                    $response = Http::timeout(15)->post($aiServiceUrl, [
-                        'user_id' => $user->id,
-                        'budget' => $budgetData,
-                        'expenses' => $expenseData,
-                    ]);
-
-                    // 4. Get the suggestion and add it to the array
-                    if ($response->successful()) {
-                    $suggestionText = trim($response->body());
-
-                    if (!empty($suggestionText) && strcasecmp($suggestionText, 'All clear.') !== 0) {
-                        $aiSuggestions[] = $suggestionText;
-                    }
-                    }
-
-                } catch (\Exception $e) {
-                    // 5. If AI fails, log the error and do nothing
-                    Log::error('AI Suggestion Service failed: ' . $e->getMessage());
-                }
-            }
-
-        } // <-- The 'if ($user->hasRole('Staff'))' block ends HERE
-        
+        } 
         // 3. Pass data to the view
         return view('dashboard', [
             'pendingExpenses' => $pendingExpenses,

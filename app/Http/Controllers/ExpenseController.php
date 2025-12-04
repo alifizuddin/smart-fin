@@ -217,7 +217,19 @@ class ExpenseController extends Controller
 
         $pendingExpenses = $query->orderBy('created_at', 'asc')->paginate(10);
 
-        return view('expenses.approval-index', compact('pendingExpenses','approvedExpenses'));
+        // Calculate stats for the department
+        $totalExpenses = Expense::where('department_id', $user->department_id)->sum('amount');
+        $totalPending = Expense::where('department_id', $user->department_id)
+            ->where('status', 'pending')
+            ->count();
+        $totalApproved = Expense::where('department_id', $user->department_id)
+            ->where('status', 'approved')
+            ->count();
+        $totalRejected = Expense::where('department_id', $user->department_id)
+            ->where('status', 'rejected')
+            ->count();
+
+        return view('expenses.approval-index', compact('pendingExpenses','approvedExpenses', 'totalExpenses', 'totalPending', 'totalApproved', 'totalRejected'));
     }
 
     public function approve(Expense $expense)

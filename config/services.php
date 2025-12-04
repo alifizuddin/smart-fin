@@ -35,6 +35,7 @@ return [
         'url' => env('N8N_WEBHOOK_URL'),
     ],
     'n8n' => [
+        'categorization_url' => env('N8N_CATEGORIZATION_WEBHOOK_URL'),
         'anomaly_url' => env('N8N_ANOMALY_WEBHOOK_URL'),
     ],
     'slack' => [

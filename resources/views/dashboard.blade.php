@@ -10,81 +10,7 @@
         x-data="dashboardComponent('{{ route('expenses.quickStore') }}', '{{ csrf_token() }}')"
         class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10"
     >
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            @php
-                // Calculation Logic for Stats
-                $avgDailySpending = $userExpenses->count() > 0 && $activeBudget ? 
-                    round($userExpenses->where('status', 'approved')->sum('amount') / max(1, now()->diffInDays(\Carbon\Carbon::parse($activeBudget->period_start))), 2) : 0;
-                
-                $totalSpent = $userExpenses->where('status', 'approved')->sum('amount');
-                $totalBudget = $activeBudget ? $activeBudget->total_amount : 0;
-                $percent = $totalBudget > 0 ? round(($totalSpent / $totalBudget) * 100, 2) : 0;
-            @endphp
-
-            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/30 text-blue-800 dark:text-blue-300 p-5 rounded-xl shadow-sm relative overflow-hidden">
-                <div class="flex justify-between items-start relative z-10">
-                    <div>
-                        <p class="text-sm font-medium text-blue-700 dark:text-blue-400">Total Expenses</p>
-                        <p class="text-3xl font-bold mt-1">{{ $userExpenses->count() }}</p>
-                        <div class="flex items-center text-xs mt-2 text-blue-700 dark:text-blue-400">
-                            <span class="font-bold mr-1">Submitted</span>
-                        </div>
-                    </div>
-                    <div class="bg-white/60 dark:bg-white/10 p-2 rounded-full text-blue-800 dark:text-blue-300">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-5 rounded-xl shadow-sm">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Avg Daily Spend</p>
-                        <p class="text-3xl font-bold mt-1 text-gray-900 dark:text-gray-100">${{ number_format($avgDailySpending, 2) }}</p>
-                        <div class="flex items-center text-xs mt-2 text-gray-500">
-                            <span>Per active day</span>
-                        </div>
-                    </div>
-                    <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-full text-gray-600 dark:text-gray-400">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-5 rounded-xl shadow-sm">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Budget Used</p>
-                        <p class="text-3xl font-bold mt-1 {{ $percent > 90 ? 'text-red-600' : ($percent > 75 ? 'text-yellow-600' : 'text-gray-900 dark:text-gray-100') }}">{{ $percent }}%</p>
-                        <div class="flex items-center text-xs mt-2 {{ $percent > 90 ? 'text-red-600' : 'text-green-600' }}">
-                            <span class="mr-1">{{ $percent > 90 ? '!' : '✓' }}</span>
-                            <span>{{ $percent > 90 ? 'Critical Level' : 'Healthy Level' }}</span>
-                        </div>
-                    </div>
-                    <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-full text-gray-600 dark:text-gray-400">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-                    </div>
-                </div>
-            </div>
-
-            @php
-                $remaining = max($totalBudget - $totalSpent, 0);
-            @endphp
-            <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-5 rounded-xl shadow-sm">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Remaining</p>
-                        <p class="text-3xl font-bold mt-1 text-gray-900 dark:text-gray-100">${{ number_format($remaining, 2) }}</p>
-                        <div class="flex items-center text-xs mt-2 text-gray-500">
-                            <span>Available funds</span>
-                        </div>
-                    </div>
-                    <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-full text-gray-600 dark:text-gray-400">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <livewire:dashboard-stats :activeBudget="$activeBudget" />
 
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-6">
             
@@ -94,74 +20,13 @@
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Budget Overview</h2>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Track your spending against active budgets</p>
                     </div>
-                    @if($userBudgets->count() > 1)
-                        <form action="{{ route('dashboard') }}" method="GET" id="budgetSelectorForm">
-                            <select name="budget_id" onchange="document.getElementById('budgetSelectorForm').submit()" class="text-xs rounded-lg border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 focus:ring-indigo-500 focus:border-indigo-500">
-                                @foreach($userBudgets as $budget)
-                                    <option value="{{ $budget->id }}" {{ $activeBudget && $activeBudget->id == $budget->id ? 'selected' : '' }}>{{ $budget->name }}</option>
-                                @endforeach
-                            </select>
-                        </form>
-                    @endif
+                    <livewire:budget-selector :active-budget-id="$activeBudget?->id" />
                 </div>
 
-                @if($activeBudget)
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div class="p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
-                            <span class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Total Limit</span>
-                            <span class="text-lg font-bold text-gray-900 dark:text-gray-100">${{ number_format($totalBudget, 2) }}</span>
-                        </div>
-                        <div class="p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
-                            <span class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Spent</span>
-                            <span class="text-lg font-bold text-gray-900 dark:text-gray-100">${{ number_format($totalSpent, 2) }}</span>
-                        </div>
-                        <div class="p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
-                            <span class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Remaining</span>
-                            <span class="text-lg font-bold text-gray-900 dark:text-gray-100">${{ number_format($remaining, 2) }}</span>
-                        </div>
-                    </div>
-
-                    <div class="space-y-2">
-                        <div class="flex justify-between text-sm">
-                            <span class="font-medium text-gray-700 dark:text-gray-300">Progress</span>
-                            <span class="font-bold {{ $percent > 90 ? 'text-red-600' : 'text-gray-900 dark:text-gray-100' }}">{{ $percent }}%</span>
-                        </div>
-                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
-                            <div class="h-2.5 rounded-full {{ $percent > 90 ? 'bg-red-600' : ($percent > 75 ? 'bg-yellow-500' : 'bg-green-600') }}" style="width: {{ $percent }}%"></div>
-                        </div>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 text-right mt-1">Valid until {{ \Carbon\Carbon::parse($activeBudget->period_end)->format('M d, Y') }}</p>
-                    </div>
-                @else
-                    <div class="text-center py-10 text-gray-500 dark:text-gray-400 italic">No active budget found.</div>
-                @endif
+                <livewire:budget-overview :activeBudget="$activeBudget" />
             </div>
 
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">AI Suggestions</h2>
-                    <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold px-2 py-1 rounded">
-                        Tips
-                    </span>
-                </div>
-                
-                <div class="space-y-4 max-h-[300px] overflow-y-auto pr-1">
-                    @forelse($aiSuggestions ?? [] as $suggestion)
-                        <div class="flex items-start space-x-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-700/30 rounded-lg transition-colors">
-                            <div class="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg mt-0.5">
-                                <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-sm text-gray-900 dark:text-gray-100">Optimization Tip</h3>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ $suggestion }}</p>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="text-center py-6">
-                            <p class="text-sm text-gray-500 dark:text-gray-400 italic">No suggestions available.</p>
-                        </div>
-                    @endforelse
-                </div>
-            </div>
+            <livewire:ai-suggestions :budget-id="$activeBudget?->id" lazy />
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
@@ -225,32 +90,14 @@
             </div>
 
             <div class="grid grid-rows-2 gap-6">
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col items-center justify-center relative">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 absolute top-6 left-6">Status</h2>
-                    <div class="relative w-32 h-32 mt-4">
-                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                            <path class="text-gray-100 dark:text-gray-700" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="3"></path>
-                            <path class="{{ $percent > 90 ? 'text-red-500' : 'text-green-500' }}" stroke-dasharray="{{ $percent }}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="3" stroke-linecap="round"></path>
-                        </svg>
-                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-                            <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $percent }}%</p>
-                            <p class="text-[10px] text-gray-400">Used</p>
-                        </div>
-                    </div>
-                    <div class="text-xs mt-6 text-center text-gray-500 dark:text-gray-400">
-                        Spending is {{ $percent > 80 ? 'high' : 'normal' }}
-                    </div>
-                </div>
+                <livewire:budget-status :activeBudget="$activeBudget" />
 
                 <div class="bg-gray-900 dark:bg-black p-6 rounded-xl shadow-lg flex flex-col justify-between text-white relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-24 h-24 bg-blue-500/20 rounded-full blur-2xl -mr-10 -mt-10"></div>
                     <h2 class="text-lg font-semibold relative z-10">Quick Action</h2>
                     <p class="text-sm text-gray-400 relative z-10 mt-1">Submit new expense</p>
                     
-                    <button @click="showModal = true" class="mt-4 w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-medium shadow-lg transition transform hover:scale-105 flex items-center justify-center relative z-10">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                        Submit Expense
-                    </button>
+                    <livewire:submit-expense />
                 </div>
             </div>
         </div>
@@ -377,9 +224,7 @@
                         <span class="px-3 py-1 text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 rounded-full">Monthly View</span>
                     </div>
                 </div>
-                <div class="h-64 w-full relative">
-                    <canvas id="spendingChart"></canvas>
-                </div>
+                <livewire:spending-chart />
             </div>
 
             <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
@@ -922,66 +767,6 @@
 <x-confirmation-modal />
 
 <script>
-    function dashboardComponent(postUrl, token) {
-        return {
-            showModal: false,
-            loading: false,
-            successMessage: '',
-            errorMessage: '',
-            form: { amount: '', description: '', receipt: null },
-            resetForm() { 
-                this.form = { amount: '', description: '', receipt: null };
-                // Reset file input
-                const fileInput = document.getElementById('receipt');
-                if (fileInput) fileInput.value = '';
-            },
-            async handleSubmit() {
-                this.loading = true;
-                this.successMessage = '';
-                this.errorMessage = '';
-                
-                try {
-                    // Validate receipt file
-                    if (!this.form.receipt) {
-                        throw new Error('Please upload a receipt.');
-                    }
-
-                    // Create FormData for file upload
-                    const formData = new FormData();
-                    formData.append('amount', this.form.amount);
-                    formData.append('description', this.form.description || '');
-                    formData.append('receipt', this.form.receipt);
-
-                    const response = await fetch(postUrl, {
-                        method: 'POST',
-                        headers: { 
-                            'X-CSRF-TOKEN': token, 
-                            'Accept': 'application/json' 
-                        },
-                        body: formData
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (!response.ok) {
-                        if (data.errors) {
-                            const errorMessages = Object.values(data.errors).flat().join(' ');
-                            throw new Error(errorMessages);
-                        }
-                        throw new Error(data.message || 'Submission failed.');
-                    }
-                    
-                    this.successMessage = data.message;
-                    this.resetForm();
-                    setTimeout(() => location.reload(), 1500);
-                } catch (err) {
-                    this.errorMessage = err.message;
-                } finally {
-                    this.loading = false;
-                }
-            }
-        };
-    }
     document.addEventListener('DOMContentLoaded', (event) => {
             const spendingCanvas = document.getElementById('spendingChart');
             

@@ -17,6 +17,77 @@
 
     <div class="py-10">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 gap-5 mb-8 sm:grid-cols-2 lg:grid-cols-4">
+                <!-- Total Expenses -->
+                <div class="p-5 bg-white rounded-lg shadow dark:bg-gray-800">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-indigo-500 bg-opacity-20">
+                            <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Expenses Submitted</p>
+                            <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
+                                ${{ number_format($totalExpenses, 2) }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pending -->
+                <div class="p-5 bg-white rounded-lg shadow dark:bg-gray-800">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-yellow-500 bg-opacity-20">
+                            <svg class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Pending</p>
+                            <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
+                                {{ $totalPending }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Approved -->
+                <div class="p-5 bg-white rounded-lg shadow dark:bg-gray-800">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-green-500 bg-opacity-20">
+                            <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Approved</p>
+                            <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
+                                {{ $totalApproved }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rejected -->
+                <div class="p-5 bg-white rounded-lg shadow dark:bg-gray-800">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-red-500 bg-opacity-20">
+                            <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Rejected</p>
+                            <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
+                                {{ $totalRejected }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Pending Expenses Section -->
             <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl transition duration-300 border border-gray-100 dark:border-gray-700">
                 <div class="flex items-center justify-between mb-6">
