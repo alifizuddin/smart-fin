@@ -27,8 +27,8 @@ class BudgetStats extends Component
             $q->where('status', 'approved');
         }]);
 
-    // If user is a manager, filter by their department
-    if (auth()->user()->hasRole('Manager')) {
+    // If user is a manager or staff, filter by their department
+    if (auth()->user()->hasRole('Manager') || auth()->user()->hasRole('Staff')) {
         $query->where('department_id', auth()->user()->department_id);
     } 
     // If user is admin and has selected a department
