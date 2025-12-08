@@ -70,9 +70,9 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6 my-10">
                 @php
                     $cards = [
-                        ['label' => 'Total Budget', 'value' => '$' . number_format($summary['totalBudget'], 2), 'color' => 'indigo'],
-                        ['label' => 'Total Spent', 'value' => '$' . number_format($summary['totalSpent'], 2), 'color' => 'blue'],
-                        ['label' => 'Remaining Funds', 'value' => '$' . number_format($summary['remainingFunds'], 2), 'color' => $summary['remainingFunds'] >= 0 ? 'green' : 'red'],
+                        ['label' => 'Total Budget', 'value' => 'RM ' . number_format($summary['totalBudget'], 2), 'color' => 'indigo'],
+                        ['label' => 'Total Spent', 'value' => 'RM ' . number_format($summary['totalSpent'], 2), 'color' => 'blue'],
+                        ['label' => 'Remaining Funds', 'value' => 'RM ' . number_format($summary['remainingFunds'], 2), 'color' => $summary['remainingFunds'] >= 0 ? 'green' : 'red'],
                         ['label' => 'Over-Budget Depts', 'value' => $summary['overBudgetCount'], 'color' => 'red']
                     ];
                 @endphp
@@ -112,10 +112,10 @@
                             @endphp
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
                                 <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ $budget->department->name }}</td>
-                                <td class="px-6 py-4 text-right">${{ number_format($budget->total_amount, 2) }}</td>
-                                <td class="px-6 py-4 text-right">${{ number_format($budget->used_amount, 2) }}</td>
+                                <td class="px-6 py-4 text-right">RM {{ number_format($budget->total_amount, 2) }}</td>
+                                <td class="px-6 py-4 text-right">RM {{ number_format($budget->used_amount, 2) }}</td>
                                 <td class="px-6 py-4 text-right font-medium {{ $remaining >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                    ${{ number_format(max($remaining, 0), 2) }}
+                                    RM {{ number_format(max($remaining, 0), 2) }}
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-1 overflow-hidden">
