@@ -15,6 +15,7 @@ services:
       - db
     networks:
       - smartfin-net
+    mem_limit: 1024m
     
   queue:
     build:
@@ -31,6 +32,7 @@ services:
       - db
     networks:
       - smartfin-net
+    mem_limit: 512m
     
   n8n:
     image: n8nio/n8n
@@ -47,6 +49,7 @@ services:
       - DB_TYPE=sqlite
     networks:
       - smartfin-net
+    mem_limit: 1024m
 
 
   # 2. Nginx Web Server Service
@@ -80,6 +83,7 @@ services:
       - smartfin-db-data:/var/lib/mysql
     networks:
       - smartfin-net
+    mem_limit: 2048m
 
   # 4. Python Flask API Service
   python_api:
@@ -92,6 +96,7 @@ services:
       - "5010:5010" # Expose the Python API at http://localhost:5000
     networks:
       - smartfin-net
+    mem_limit: 512m
 
 # Define the network
 networks:
