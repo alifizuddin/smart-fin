@@ -43,7 +43,7 @@
                     <div class="overflow-x-auto">
                         <table class="min-w-full">
                             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                                @foreach ($userExpenses->take(5) as $expense)
+                                @foreach ($userExpenses->take(6) as $expense)
                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition">
                                         <td class="py-3 pl-2">
                                             <div class="flex items-center space-x-3">
@@ -285,7 +285,7 @@
                 
                 @if($pendingExpenses->count() > 0)
                     <div class="space-y-4">
-                        @foreach ($pendingExpenses as $expense)
+                        @foreach ($pendingExpenses->take(5) as $expense)
                             <div class="flex justify-between items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-700/30 rounded-lg transition border border-transparent hover:border-gray-100 dark:hover:border-gray-700">
                                 <div class="flex items-center space-x-3">
                                     <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
