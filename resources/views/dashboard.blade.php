@@ -57,7 +57,7 @@
                                             </div>
                                         </td>
                                         <td class="py-3 text-right pr-4">
-                                            <p class="font-bold text-sm text-gray-900 dark:text-gray-100">${{ number_format($expense->amount, 2) }}</p>
+                                            <p class="font-bold text-sm text-gray-900 dark:text-gray-100">RM {{ number_format($expense->amount, 2) }}</p>
                                             @php
                                                 $statusColors = [
                                                     'pending'  => 'text-yellow-600 dark:text-yellow-400',
@@ -168,7 +168,7 @@
                 <div class="flex justify-between items-start">
                     <div>
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Pending Amount</p>
-                        <p class="text-3xl font-bold mt-1 text-gray-900 dark:text-gray-100">${{ number_format($pendingExpenses->sum('amount'), 2) }}</p>
+                        <p class="text-3xl font-bold mt-1 text-gray-900 dark:text-gray-100">RM {{ number_format($pendingExpenses->sum('amount'), 2) }}</p>
                         <div class="flex items-center text-xs mt-2 text-blue-600 dark:text-blue-400">
                             <span class="mr-1">↑</span>
                             <span>Awaiting review</span>
@@ -299,7 +299,7 @@
                                 
                                 <div class="flex items-center space-x-4">
                                     <div class="text-right hidden sm:block">
-                                        <p class="font-bold text-sm text-gray-900 dark:text-gray-100">${{ number_format($expense->amount, 2) }}</p>
+                                        <p class="font-bold text-sm text-gray-900 dark:text-gray-100">RM {{ number_format($expense->amount, 2) }}</p>
                                         <p class="text-xs text-gray-500 dark:text-gray-400">{{ $expense->category }}</p>
                                     </div>
                                     <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300">

@@ -40,7 +40,7 @@
 
                 // Department Pie Chart
                 // In the initCharts() function, update the pie chart section
-@if(auth()->user()->hasRole('Admin'))
+@if(auth()->user()->hasRole('Finance Admin|Admin'))
 const pieCtx = document.getElementById('departmentPieChart')?.getContext('2d');
 if (pieCtx && @js($this->pieChartData) && Object.keys(@js($this->pieChartData)).length > 0) {
     const pieData = {
@@ -164,7 +164,7 @@ if (pieCtx && @js($this->pieChartData) && Object.keys(@js($this->pieChartData)).
                                     beginAtZero: true,
                                     ticks: {
                                         callback: function(value) {
-                                            return '$' + value.toLocaleString();
+                                            return 'RM' + value.toLocaleString();
                                         }
                                     }
                                 },

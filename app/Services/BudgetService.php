@@ -21,7 +21,7 @@ class BudgetService
         $query = $this->buildFilteredQuery($request);
 
         // Apply role-based visibility
-        if (!Auth::user()->hasRole('Admin')) {
+        if (!Auth::user()->hasRole('Finance Admin')) {
             $query->where('budgets.department_id', Auth::user()->department_id);
         }
 
@@ -49,7 +49,7 @@ class BudgetService
         $query = $this->buildFilteredQuery($request);
 
         // Apply role-based visibility
-        if (!Auth::user()->hasRole('Admin')) {
+        if (!Auth::user()->hasRole('Finance Admin')) {
             $query->where('budgets.department_id', Auth::user()->department_id);
         }
 

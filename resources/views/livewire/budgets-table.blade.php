@@ -45,7 +45,7 @@
                     @endphp
                     
                     <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                        @role('Admin')
+                        @role('Finance Admin|Admin')
                         <td class="w-4 p-4">
                             <div class="flex items-center">
                                 <input type="checkbox" class="budget-checkbox w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
@@ -58,7 +58,7 @@
                         </td>
                         
                         <td class="px-6 py-4">
-                            ${{ number_format($budget->total_amount, 2) }}
+                            RM {{ number_format($budget->total_amount, 2) }}
                         </td>
                         
                         <td class="px-6 py-4">
@@ -68,7 +68,7 @@
                                 </div>
                             </div>
                             <div class="text-xs mt-1 {{ $isOverBudget ? 'text-red-500' : 'text-gray-500 dark:text-gray-400' }}">
-                                {{ $percentage }}% ({{ $isOverBudget ? 'Exceeded by' : 'Remaining' }} ${{ number_format(abs($remaining), 2) }})
+                                {{ $percentage }}% ({{ $isOverBudget ? 'Exceeded by' : 'Remaining' }} RM {{ number_format(abs($remaining), 2) }})
                             </div>
                         </td>
                         
@@ -184,16 +184,16 @@
                             </div>
                             <div>
                                 <p class="text-sm text-gray-500 dark:text-gray-400">Total Amount</p>
-                                <p class="font-medium text-gray-900 dark:text-white">${{ $budgetDetails['total_amount'] }}</p>
+                                <p class="font-medium text-gray-900 dark:text-white">RM {{ $budgetDetails['total_amount'] }}</p>
                             </div>
                             <div>
                                 <p class="text-sm text-gray-500 dark:text-gray-400">Used Amount</p>
-                                <p class="font-medium text-gray-900 dark:text-white">${{ $budgetDetails['used_amount'] }}</p>
+                                <p class="font-medium text-gray-900 dark:text-white">RM {{ $budgetDetails['used_amount'] }}</p>
                             </div>
                             <div>
                                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ $budgetDetails['is_over_budget'] ? 'Over Budget By' : 'Remaining' }}</p>
                                 <p class="font-medium {{ $budgetDetails['is_over_budget'] ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }}">
-                                    ${{ $budgetDetails['remaining'] }}
+                                    RM {{ $budgetDetails['remaining'] }}
                                 </p>
                             </div>
                         </div>

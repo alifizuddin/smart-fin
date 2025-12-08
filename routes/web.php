@@ -31,16 +31,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // --- ADMIN-ONLY ROUTES ---
-    Route::middleware('role:Admin')->group(function () {
+    Route::middleware('role:Finance Admin|Admin')->group(function () {
         // Route::resource already creates index, edit, update, etc.
         // The individual routes before it were redundant.
         Route::patch('budgets/{budget}/approve', [BudgetController::class, 'approve'])
         ->name('budgets.approve')
-        ->middleware('role:Admin'); // Only Admins can access
+        ->middleware('role:Finance Admin'); // Only Admins can access
 
         Route::patch('budgets/{budget}/reject', [BudgetController::class, 'reject'])
         ->name('budgets.reject')
-        ->middleware('role:Admin'); // Only Admins can access
+        ->middleware('role:Finance Admin'); // Only Admins can access
         
         Route::resource('users', UserController::class);
 
@@ -49,7 +49,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // --- ADMIN & MANAGER ROUTES ---
-    Route::middleware('role:Admin|Manager')->group(function () {
+    Route::middleware('role:Admin|Finance Admin|Manager')->group(function () {
         // This single definition now works for both roles
         Route::patch('expenses/{expense}/approve', [ExpenseController::class, 'approve'])
         ->name('expenses.approve')
