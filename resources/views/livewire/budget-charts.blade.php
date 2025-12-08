@@ -27,7 +27,7 @@
 
 @push('scripts')
     <script>
-        document.addEventListener('livewire:initialized', () => {
+        document.addEventListener('livewire:navigated', () => {
             let pieChart = null;
             let barChart = null;
             let doughnutChart = null;
