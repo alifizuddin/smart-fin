@@ -51,7 +51,7 @@
                     @endphp
                     
                     <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                        @role('Admin')
+                        @role('Finance Admin|Admin')
                         <td class="w-4 p-4">
                             <div class="flex items-center">
                                 <input type="checkbox" class="budget-checkbox w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
@@ -64,7 +64,7 @@
                         </td>
                         
                         <td class="px-6 py-4">
-                            ${{ number_format($budget->total_amount, 2) }}
+                            RM {{ number_format($budget->total_amount, 2) }}
                         </td>
                         
                         <td class="px-6 py-4">
@@ -74,7 +74,7 @@
                                 </div>
                             </div>
                             <div class="text-xs mt-1 {{ $isOverBudget ? 'text-red-500' : 'text-gray-500 dark:text-gray-400' }}">
-                                {{ $percentage }}% ({{ $isOverBudget ? 'Exceeded by' : 'Remaining' }} ${{ number_format(abs($remaining), 2) }})
+                                {{ $percentage }}% ({{ $isOverBudget ? 'Exceeded by' : 'Remaining' }} RM {{ number_format(abs($remaining), 2) }})
                             </div>
                         </td>
                         
@@ -182,74 +182,74 @@
                 ][$budgetDetails['status']] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
             @endphp
 
-            <div class="space-y-4">
-                <div class="flex justify-between items-center">
-                    <h4 class="text-lg font-medium text-gray-900 dark:text-white">{{ $budgetDetails['name'] }}</h4>
-                    <span class="px-2.5 py-0.5 text-xs font-medium rounded-full {{ $statusColors }}">
-                        {{ ucfirst($budgetDetails['status']) }}
-                    </span>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Department</p>
-                        <p class="font-medium text-gray-900 dark:text-white">{{ $budgetDetails['department'] }}</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Total Amount</p>
-                        <p class="font-medium text-gray-900 dark:text-white">${{ $budgetDetails['total_amount'] }}</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Used Amount</p>
-                        <p class="font-medium text-gray-900 dark:text-white">${{ $budgetDetails['used_amount'] }}</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $budgetDetails['is_over_budget'] ? 'Over Budget By' : 'Remaining' }}</p>
-                        <p class="font-medium {{ $budgetDetails['is_over_budget'] ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }}">
-                            ${{ $budgetDetails['remaining'] }}
-                        </p>
-                    </div>
-                </div>
-                
-                <div class="pt-2">
-                    <div class="flex justify-between text-sm text-gray-600 dark:text-gray-300 mb-1">
-                        <span>Budget Usage</span>
-                        <span>{{ $budgetDetails['percentage'] }}%</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                        <div class="h-2.5 rounded-full {{ $budgetDetails['is_over_budget'] ? 'bg-red-500' : 'bg-green-500' }}" 
-                                style="width: {{ min($budgetDetails['percentage'], 100) }}%; max-width: 100%;">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h4 class="text-lg font-medium text-gray-900 dark:text-white">{{ $budgetDetails['name'] }}</h4>
+                            <span class="px-2.5 py-0.5 text-xs font-medium rounded-full {{ $statusColors }}">
+                                {{ ucfirst($budgetDetails['status']) }}
+                            </span>
                         </div>
-                    </div>
-                </div>
-                
-                @if(!empty($budgetDetails['notes']))
-                    <div class="pt-2">
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Notes</p>
-                        <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ $budgetDetails['notes'] }}</p>
-                    </div>
-                @endif
-                
-                <div class="pt-4 border-t border-gray-100 dark:border-gray-700">
-                    <div class="flex justify-between items-center">
-                        <div class="text-sm text-gray-500 dark:text-gray-400">
-                            Created by {{ $budgetDetails['creator'] }} on {{ $budgetDetails['created_at'] }}
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Department</p>
+                                <p class="font-medium text-gray-900 dark:text-white">{{ $budgetDetails['department'] }}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Total Amount</p>
+                                <p class="font-medium text-gray-900 dark:text-white">${{ $budgetDetails['total_amount'] }}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Used Amount</p>
+                                <p class="font-medium text-gray-900 dark:text-white">${{ $budgetDetails['used_amount'] }}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $budgetDetails['is_over_budget'] ? 'Over Budget By' : 'Remaining' }}</p>
+                                <p class="font-medium {{ $budgetDetails['is_over_budget'] ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }}">
+                                    ${{ $budgetDetails['remaining'] }}
+                                </p>
+                            </div>
                         </div>
-                        @if(isset($viewingBudget) && auth()->user()->can('update', $viewingBudget))
-                            <button wire:click="editBudget({{ $budgetDetails['id'] }})" x-on:click="show = false; $dispatch('open-edit-budget-modal')" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                Edit Budget
-                            </button>
+                        
+                        <div class="pt-2">
+                            <div class="flex justify-between text-sm text-gray-600 dark:text-gray-300 mb-1">
+                                <span>Budget Usage</span>
+                                <span>{{ $budgetDetails['percentage'] }}%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                                <div class="h-2.5 rounded-full {{ $budgetDetails['is_over_budget'] ? 'bg-red-500' : 'bg-green-500' }}" 
+                                     style="width: {{ min($budgetDetails['percentage'], 100) }}%; max-width: 100%;">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        @if(!empty($budgetDetails['notes']))
+                            <div class="pt-2">
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Notes</p>
+                                <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ $budgetDetails['notes'] }}</p>
+                            </div>
                         @endif
+                        
+                        <div class="pt-4 border-t border-gray-100 dark:border-gray-700">
+                            <div class="flex justify-between items-center">
+                                <div class="text-sm text-gray-500 dark:text-gray-400">
+                                    Created by {{ $budgetDetails['creator'] }} on {{ $budgetDetails['created_at'] }}
+                                </div>
+                                @can('update', $viewingBudget)
+                                    <a href="{{ route('budgets.edit', $viewingBudget) }}" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                        Edit Budget
+                                    </a>
+                                @endcan
+                            </div>
+                        </div>
                     </div>
+                @else
+                    <div class="text-center py-8">
+                    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mx-auto"></div>
+                    <p class="mt-2 text-gray-600 dark:text-gray-400">Loading budget details...</p>
                 </div>
+                @endif
             </div>
-        @else
-            <div class="text-center py-8 text-gray-500">
-                No budget details available.
-            </div>
-        @endif
-    </div>
-</div>
         </div>
     </div>
     <!-- Edit Budget Modal -->

@@ -46,7 +46,7 @@ class BudgetController extends Controller
         $summary = $this->budgetService->getBudgetSummary($allFilteredBudgets);
         $charts = $this->budgetService->getBudgetChartData($allFilteredBudgets);
         $categoryData = [] ;
-        if (!Auth::user()->hasRole('Admin')) {
+        if (!Auth::user()->hasRole('Finance Admin')) {
             $budgetIds = $allFilteredBudgets->pluck('id');
             $categoryData = Expense::whereIn('budget_id', $budgetIds)
                 ->where('status', 'approved')
@@ -298,7 +298,7 @@ public function store(Request $request)
     $message = 'Budget submitted for approval.';
     
     // Admins can auto-approve their own created budgets
-    if (Auth::user()->hasRole('Admin')) {
+    if (Auth::user()->hasRole('Finance Admin')) {
         $data['status'] = 'active'; // Add 'active' status to the data array
         $message = 'Budget created and activated successfully.';
     }
@@ -416,6 +416,38 @@ public function reject(Budget $budget)
         ->route('budgets.index')
         ->with('success', 'Budget rejected and removed.');
 }
+
+public function destroy(Budget $budget)
+    {
+        // ============================================================
+        // 1️⃣ Authorization (Hanya Finance Admin atau pengguna dibenarkan)
+        // ============================================================
+        $this->authorize('delete', $budget);
+        
+        // Cek jika bajet ini ada perbelanjaan yang telah diluluskan
+        if ($budget->expenses()->where('status', 'approved')->exists()) {
+            return back()->with('error', 'Gagal memadam bajet. Terdapat perbelanjaan yang telah diluluskan di bawah bajet ini.');
+        }
+
+        // ============================================================
+        // 2️⃣ Delete Budget Record
+        // ============================================================
+        try {
+            $budget->delete();
+
+            // ============================================================
+            // 3️⃣ Redirect with Success Message
+            // ============================================================
+            return redirect()
+                ->route('budgets.index')
+                ->with('success', 'Bajet "' . $budget->name . '" berjaya dipadamkan.');
+                             
+        } catch (\Exception $e) {
+            \Log::error("Error deleting budget ID {$budget->id}: " . $e->getMessage()); 
+            
+            return back()->with('error', 'Gagal memadam bajet. Sila cuba lagi.');
+        }
+    }
 
 /**
  * Update the specified budget in the database.
