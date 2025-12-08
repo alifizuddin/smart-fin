@@ -51,7 +51,7 @@ class ExpenseApproved extends Notification implements ShouldQueue
             ->line('**Expense Details:**')
             ->line('Amount: **$' . number_format($this->expense->amount, 2) . '**')
             ->line('Category: **' . ucfirst($this->expense->category) . '**')
-            ->line('Date: **' . \Carbon\Carbon::parse($this->expense->transaction_date)->format('M d, Y') . '**')
+            ->line('Date: **' . \Carbon\Carbon::parse($this->expense->created_at)->format('M d, Y') . '**')
             ->line('Description: ' . ($this->expense->description ?: 'No description provided'))
             ->action('View Expense Details', $this->getExpenseUrl())
             ->line('If you have any questions, please contact your manager.')
@@ -69,10 +69,10 @@ class ExpenseApproved extends Notification implements ShouldQueue
             return [
                 'title' => 'Expense Approved',
                 'message' => sprintf(
-                    'Your %s expense of $%s from %s has been approved.',
+                    'Your %s expense of $%s submitted on %s has been approved.',
                     $this->expense->category,
                     number_format($this->expense->amount, 2),
-                    $formattedDate
+                    $this->expense->created_at->format('M d, Y')
                 ),
                 'amount' => $this->expense->amount,
                 'expense_id' => $this->expense->id,
@@ -92,9 +92,10 @@ class ExpenseApproved extends Notification implements ShouldQueue
             return [
                 'title' => 'Expense Approved',
                 'message' => sprintf(
-                    'Your %s expense of $%s has been approved.',
+                    'Your %s expense of $%s submitted on %s has been approved.',
                     $this->expense->category,
-                    number_format($this->expense->amount, 2)
+                    number_format($this->expense->amount, 2),
+                    $this->expense->created_at->format('M d, Y')
                 ),
                 'amount' => $this->expense->amount,
                 'expense_id' => $this->expense->id,
