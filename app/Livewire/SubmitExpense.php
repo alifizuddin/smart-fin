@@ -3,8 +3,10 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use Livewire\WithFileUploads; // [1] Needed for file uploads
-use App\Models\Expense; // Assuming this model exists based on your files
+use Livewire\WithFileUploads;
+use App\Models\Expense;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class SubmitExpense extends Component
 {
@@ -12,43 +14,88 @@ class SubmitExpense extends Component
 
     public $amount;
     public $description;
-    public $receipt; // This will handle the file temporary upload
-    public $showModal = false; // We move the modal state here
+    public $receipt; 
+    public $showModal = false;
+    public $isProcessing = false; // Controls the "Processing..." UI
 
-    // Validation rules
     protected $rules = [
         'amount' => 'required|numeric|min:0.01',
         'description' => 'nullable|string|max:255',
-        'receipt' => 'required|image|max:10240', // 10MB max
+        'receipt' => 'required|image|max:10240', // 10MB Max
     ];
 
-    public function save()
+    // This function runs automatically as soon as a file is selected
+    public function updatedReceipt()
     {
-        $this->validate();
+        $this->validateOnly('receipt');
+        $this->isProcessing = true; // Turn on loading state
 
-        // Save logic (similar to your Controller)
-        $path = $this->receipt->store('receipts', 'public');
+        try {
+            // 1. Prepare the file for sending
+            $filePath = $this->receipt->getRealPath();
+            $fileName = $this->receipt->getClientOriginalName();
 
-        Expense::create([
-            'user_id' => auth()->id(),
-            'amount' => $this->amount,
-            'description' => $this->description,
-            'receipt_path' => $path,
-            'status' => 'pending',
-            'date' => now(),
-        ]);
+            // 2. Send to Python API (Note: 'python_api' is the docker service name)
+            $response = Http::attach(
+                'receipt', file_get_contents($filePath), $fileName
+            )->post('http://python_api:5010/process-receipt');
 
-        // Reset form and close modal
-        $this->reset(['amount', 'description', 'receipt']);
-        $this->showModal = false;
+            // 3. Handle the response
+            if ($response->successful()) {
+                $data = $response->json();
+                
+                // Auto-fill amount if found
+                if (isset($data['data']['amount']) && $data['data']['amount']) {
+                    $this->amount = $data['data']['amount'];
+                }
 
-        // Dispatch browser event to show success message (optional)
-        $this->dispatch('expense-created', message: 'Expense submitted successfully!');
-        
-        // If you want to refresh the parent dashboard's list, you can emit an event
-        // $this->dispatch('refresh-dashboard'); 
+                // Auto-fill description/summary if found
+                if (isset($data['description']) && $data['description']) {
+                    $this->description = $data['description'];
+                }
+            } else {
+                Log::error('Receipt processing error: ' . $response->body());
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Could not connect to Python API: ' . $e->getMessage());
+        } finally {
+            $this->isProcessing = false; // Turn off loading state
+        }
     }
 
+    public function save()
+{
+    $this->validate();
+
+    // Store the file
+    $path = $this->receipt->store('receipts', 'public');
+
+    // Create the expense record with ALL required fields
+    Expense::create([
+        'user_id' => auth()->id(),
+        // [FIX 1] Get department from the authenticated user
+        'department_id' => auth()->user()->department_id ?? 1, 
+        
+        'amount' => $this->amount,
+        
+        // [FIX 2] Provide a default category (since the form doesn't have a dropdown yet)
+        'category' => 'Uncategorized', 
+        
+        'description' => $this->description,
+        'receipt_path' => $path,
+        'status' => 'pending',
+        
+        // [FIX 3] Use the correct column name 'transaction_date' instead of 'date'
+        'transaction_date' => now(), 
+    ]);
+
+    // Reset form and close modal
+    $this->reset(['amount', 'description', 'receipt']);
+    $this->showModal = false;
+
+    $this->dispatch('expense-created', message: 'Expense submitted successfully!');
+}
     public function render()
     {
         return view('livewire.submit-expense');

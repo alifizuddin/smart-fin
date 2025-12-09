@@ -140,7 +140,7 @@
 
     {{-- JS for preview & loading --}}
     <script>
-        const receiptInput = document.getElementById('receipt');
+        var receiptInput = document.getElementById('receipt');
         const fileNameDisplay = document.getElementById('fileNameDisplay');
         const previewContainer = document.getElementById('previewContainer');
         const previewImage = document.getElementById('previewImage');

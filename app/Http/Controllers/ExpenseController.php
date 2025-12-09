@@ -352,6 +352,7 @@ class ExpenseController extends Controller
 
         // 2. Handle the file upload
         $path = $request->file('receipt')->store('receipts', 'public');
+        $n8nWebhookUrl = 'http://n8n:5678/webhook/process-receipt';
 
         try {
             // 3. Process receipt with Python API
@@ -360,7 +361,7 @@ class ExpenseController extends Controller
                     'receipt',
                     file_get_contents($request->file('receipt')),
                     $request->file('receipt')->getClientOriginalName()
-                )->post('http://python_api:5010/process-receipt');
+                )->post($n8nWebhookUrl);
 
             if (!$response->successful()) {
                 logger()->error('Receipt processing failed', ['response' => $response->body()]);
