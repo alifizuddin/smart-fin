@@ -79,6 +79,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('expenses', ExpenseController::class);
     Route::get('/budgets/{budget}/json', [BudgetController::class, 'showJson'])->name('budgets.showJson');
     Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
+    
+    // Reporting routes (handled by Livewire)
+    Route::middleware('role:Admin|Finance Admin')->group(function () {
+        Route::get('/reporting', \App\Livewire\Reporting::class)->name('reporting.index');
+    });
 
 });
 

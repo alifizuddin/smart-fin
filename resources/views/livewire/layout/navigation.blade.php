@@ -94,6 +94,11 @@ new class extends Component
                 {{ __('User Management') }}
             </x-responsive-nav-link>
             @endrole
+            @role('Admin|Finance Admin')
+            <x-responsive-nav-link :href="route('reporting.index')" :active="request()->routeIs('reporting.*')" wire:navigate>
+                {{ __('Reporting') }}
+            </x-responsive-nav-link>
+            @endrole
         </div>
     </div>
 </div>
