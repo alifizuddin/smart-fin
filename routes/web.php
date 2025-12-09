@@ -83,6 +83,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Reporting routes (handled by Livewire)
     Route::middleware('role:Admin|Finance Admin')->group(function () {
         Route::get('/reporting', \App\Livewire\Reporting::class)->name('reporting.index');
+        Route::get('/reporting/export', [\App\Livewire\Reporting::class, 'exportReport'])->name('reporting.export');
     });
 
 });
