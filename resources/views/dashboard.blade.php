@@ -583,31 +583,35 @@
     @endhasrole
 
 @hasrole('Finance Admin')
-<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">   
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         <!-- Budget Overview (Annual Financial Budget) -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700 md:col-span-2">
-            <div class="flex items-center mb-4">
-                <div class="bg-green-100 dark:bg-green-900/40 p-3 rounded-full">
-                    <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Budget Overview</h2>
+        <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Budget</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-1">$5,000,000</p>
             </div>
-            <p class="text-sm text-gray-700 dark:text-gray-300 mb-4">
-                <strong>Total Annual Budget:</strong> $5,000,000 |
-                <strong>Spent:</strong> $3,200,000 (64%) |
-                <strong>Remaining:</strong> $1,800,000
-            </p>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Spent Budget</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-1">$3,750,000</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Remaining Budget</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-1">$1,250,000</p>
+            </div>
+        </div>
+
+        <div class="lg:col-span-1 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 flex justify-center items-center">
             <div class="relative w-full h-[260px]">
                 <canvas id="budgetChart"></canvas>
             </div>
-            <button class="mt-4 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-400">View Details</button>
         </div>
+    </div>
+
 
         <!-- Budget Alerts -->
+        <div class="grid grid-cols-1 lg:grid-cols-1 gap-6 p-4">
         <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700">
             <div class="flex items-center mb-4">
                 <div class="bg-red-100 dark:bg-red-900/40 p-3 rounded-full">
@@ -625,10 +629,12 @@
                     Alert: IT Dept approaching 80% limit.
                 </li>
             </ul>
-            <button class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-400">Acknowledge Alerts</button>
+            <!--<button class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-400">Acknowledge Alerts</button>-->
         </div>
 
         <!-- Departmental Budget Approval -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-4">
+            
         <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700">
             <div class="flex items-center mb-4">
                 <div class="bg-blue-100 dark:bg-blue-900/40 p-3 rounded-full">
@@ -636,7 +642,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
-                <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Dept Budget Approval</h2>
+                <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Departmental Budget Approval</h2>
             </div>
             <ul class="space-y-2 mb-3">
                 <li class="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/40 p-3 rounded-md border border-gray-200 dark:border-gray-600 shadow-sm">
@@ -676,7 +682,9 @@
             <button class="mt-4 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-400">Reallocate Funds</button>
         </div>
 
-        <!-- Financial Reports & Analytics -->
+        
+
+        <!-- Financial Reports & Analytics --> 
         <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700 md:col-span-2">
             <div class="flex items-center mb-4">
                 <div class="bg-indigo-100 dark:bg-indigo-900/40 p-3 rounded-full">
@@ -698,10 +706,10 @@
                 <button class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-400">Download Report</button>
                 <button class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-400">View Analytics</button>
             </div>
-        </div>
-
+        </div> 
     </div>
 </main>
+
 
 
 @push('scripts')
@@ -716,7 +724,7 @@
             labels: ['Spent', 'Remaining'],
             datasets: [{
                 data: [3200000, 1800000],
-                backgroundColor: ['#ef4444', '#10b981'],
+                backgroundColor: ['#4c669a', '#e7ebf3'],
                 borderWidth: 1,
             }]
         },
@@ -725,7 +733,11 @@
             maintainAspectRatio: false,
             cutout: '70%',
             plugins: {
-                legend: { position: 'bottom' }
+                legend: { position: 'bottom', align: 'center', 
+                    labels: {
+                        padding: 20
+                    }
+                 }
             }
         }
     });
