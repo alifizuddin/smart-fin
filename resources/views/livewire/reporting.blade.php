@@ -110,73 +110,51 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <!-- Expense Trends -->
-            <div class="lg:col-span-2 bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-medium text-gray-900 dark:text-white">Expense Trends</h2>
-                    <div class="flex space-x-2">
-                        <button class="px-3 py-1 text-sm font-medium rounded-md bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300">6 Months</button>
-                        <button class="px-3 py-1 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">1 Year</button>
-                    </div>
-                </div>
-                <div class="h-64">
-                    <canvas id="expenseTrendsChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Expenses by Category -->
-            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-                <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Expenses by Category</h2>
-                <div class="space-y-4">
-                    @foreach($expensesByCategory as $category)
-                        <div>
-                            <div class="flex justify-between text-sm mb-1">
-                                <span class="font-medium text-gray-700 dark:text-gray-300">{{ $category['category'] }}</span>
-                                <span class="font-medium text-gray-900 dark:text-white">RM {{ number_format($category['total'], 2) }}</span>
+        <div class="mt-8">
+            <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Report Center</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                @foreach($availableReports as $report)
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-200 border border-gray-100 dark:border-gray-700">
+                    <div class="p-6">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <div class="p-3 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg text-indigo-600 dark:text-indigo-400">
+                                    @if($report['icon'] == 'chart-pie')
+                                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
+                                    @elseif($report['icon'] == 'briefcase')
+                                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                    @elseif($report['icon'] == 'table')
+                                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                    @else
+                                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                                    @endif
+                                </div>
                             </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-                                @if(isset($stats['totalExpenses']) && $stats['totalExpenses'] > 0)
-                                <div class="bg-indigo-600 h-2 rounded-full" style="width: {{ ($category['total'] / $stats['totalExpenses']) * 100 }}%"></div>
-                                @endif
+                            <div class="ml-4 flex-1">
+                                <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                                    {{ $report['title'] }}
+                                </h3>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                    {{ $report['description'] }}
+                                </p>
+                                <div class="mt-4">
+                                    <button wire:click="generateReport('{{ $report['id'] }}')" 
+                                            wire:loading.attr="disabled"
+                                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-900 dark:text-indigo-300 dark:hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition">
+                                        <svg class="-ml-1 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                        </svg>
+                                        <span wire:loading.remove wire:target="generateReport('{{ $report['id'] }}')">Download PDF</span>
+                                        <span wire:loading wire:target="generateReport('{{ $report['id'] }}')">Processing...</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    @endforeach
+                    </div>
                 </div>
+                @endforeach
             </div>
         </div>
-
-        <!-- Recent Activities -->
-        <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h2 class="text-lg font-medium text-gray-900 dark:text-white">Recent Activities</h2>
-            </div>
-            <div class="divide-y divide-gray-200 dark:divide-gray-700">
-                @forelse($recentActivities as $activity)
-                    <div class="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                                <span class="text-indigo-600 dark:text-indigo-400 font-medium">{{ substr($activity['user']['name'] ?? '--', 0, 2) }}</span>
-                            </div>
-                            <div class="ml-4">
-                                <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                    {{ $activity['user']['name'] ?? 'Unknown User' }} spent RM{{ number_format($activity['amount'], 2) }} on {{ $activity['category'] }}
-                                </div>
-                                <div class="text-sm text-gray-500 dark:text-gray-400">
-                                    {{ \Carbon\Carbon::parse($activity['created_at'])->diffForHumans() }} • {{ $activity['budget']['name'] ?? 'No Budget' }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @empty
-                    <div class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                        No recent activities found.
-                    </div>
-                @endforelse
-            </div>
-            <div class="px-6 py-3 bg-gray-50 dark:bg-gray-700/30 text-right text-sm">
-                <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">View all activities</a>
-            </div>
         </div>
         </div>
     </div>
