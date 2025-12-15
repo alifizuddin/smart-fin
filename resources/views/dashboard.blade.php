@@ -583,192 +583,165 @@
     @endhasrole
 
 @hasrole('Finance Admin')
-<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">   
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        <!-- Budget Overview (Annual Financial Budget) -->
-        <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Budget</p>
-                <p class="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-1">$5,000,000</p>
-            </div>
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Spent Budget</p>
-                <p class="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-1">$3,750,000</p>
-            </div>
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Remaining Budget</p>
-                <p class="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-1">$1,250,000</p>
-            </div>
-        </div>
-
-        <div class="lg:col-span-1 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 flex justify-center items-center">
-            <div class="relative w-full h-[260px]">
-                <canvas id="budgetChart"></canvas>
-            </div>
-        </div>
-    </div>
-
-
-        <!-- Budget Alerts -->
-        <div class="grid grid-cols-1 lg:grid-cols-1 gap-6 p-4">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700">
-            <div class="flex items-center mb-4">
-                <div class="bg-red-100 dark:bg-red-900/40 p-3 rounded-full">
-                    <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                    </svg>
-                </div>
-                <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Budget Alerts</h2>
-            </div>
-            <ul class="space-y-2 mb-3">
-                <li class="text-sm text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 p-3 rounded-md border border-red-100 dark:border-red-800/40 shadow-sm">
-                    Alert: Marketing Dept budget at 95% limit ($950,000 spent).
-                </li>
-                <li class="text-sm text-yellow-700 dark:text-yellow-300 bg-yellow-50 dark:bg-yellow-900/30 p-3 rounded-md border border-yellow-100 dark:border-yellow-800/40 shadow-sm">
-                    Alert: IT Dept approaching 80% limit.
-                </li>
-            </ul>
-            <!--<button class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-400">Acknowledge Alerts</button>-->
-        </div>
-
-        <!-- Departmental Budget Approval -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-4">
-            
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700">
-            <div class="flex items-center mb-4">
-                <div class="bg-blue-100 dark:bg-blue-900/40 p-3 rounded-full">
-                    <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Departmental Budget Approval</h2>
-            </div>
-            <ul class="space-y-2 mb-3">
-                <li class="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/40 p-3 rounded-md border border-gray-200 dark:border-gray-600 shadow-sm">
-                    Marketing: Proposed $1,000,000 - <button class="text-green-600 hover:underline">Approve</button> | <button class="text-red-600 hover:underline">Reject</button>
-                </li>
-                <li class="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/40 p-3 rounded-md border border-gray-200 dark:border-gray-600 shadow-sm">
-                    IT: Proposed $800,000 - <button class="text-green-600 hover:underline">Approve</button> | <button class="text-red-600 hover:underline">Reject</button>
-                </li>
-            </ul>
-            <button class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400">Review All Proposals</button>
-        </div>
-
-        <!-- Fund Reallocation -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700">
-            <div class="flex items-center mb-4">
-                <div class="bg-purple-100 dark:bg-purple-900/40 p-3 rounded-full">
-                    <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-                    </svg>
-                </div>
-                <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Fund Reallocation</h2>
-            </div>
-            <p class="text-sm text-gray-700 dark:text-gray-300 mb-2">
-                <strong>Available for Reallocation:</strong> $500,000
-            </p>
-            <div class="space-y-2">
-                <input type="number" placeholder="Amount to Transfer" class="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
-                <select class="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
-                    <option>From: Marketing</option>
-                    <option>From: IT</option>
-                </select>
-                <select class="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
-                    <option>To: HR</option>
-                    <option>To: Operations</option>
-                </select>
-            </div>
-            <button class="mt-4 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-400">Reallocate Funds</button>
-        </div>
-
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         
-
-        <!-- Financial Reports & Analytics --> 
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700 md:col-span-2">
-            <div class="flex items-center mb-4">
-                <div class="bg-indigo-100 dark:bg-indigo-900/40 p-3 rounded-full">
-                    <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-5 rounded-xl shadow-sm">
+                <div class="flex justify-between items-start relative z-10">
+                    <div>
+                        <p class="text-sm font-medium text-gay-700 dark:text-gray-400">Pending Dept. Approvals</p>
+                        <p class="text-3xl font-bold mt-1 text-gray-900 dark:text-gray-100">5</p>
+                        <div class="flex items-center text-xs mt-2 text-blue-700 dark:text-blue-400">
+                            <span>Action Required</span>
+                        </div>
+                    </div>
+                    <div class="bg-white/60 dark:bg-white/10 p-2 rounded-full text-green-800 dark:text-gray-300">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
                 </div>
-                <h2 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Financial Reports & Analytics</h2>
             </div>
-            <p class="text-sm text-gray-700 dark:text-gray-300 mb-4">
-                <strong>Revenue Growth:</strong> +15% YoY |
-                <strong>Expense Ratio:</strong> 65% |
-                <strong>Profit Margin:</strong> 20%
-            </p>
-            <div class="relative w-full h-[260px]">
-                <canvas id="analyticsChart"></canvas>
+
+            <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-5 rounded-xl shadow-sm">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Budget Utilization</p>
+                        <p class="text-3xl font-bold mt-1 text-gray-900 dark:text-gray-100">75%</p>
+                        <div class="flex items-center text-xs mt-2 text-blue-600 dark:text-blue-400">
+                            <span>Total annual spent</span>
+                        </div>
+                    </div>
+                    <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-full text-gray-600 dark:text-gray-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+                                d="M21 12A9 9 0 113 12a9 9 0 0118 0z" />
+                            <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 3v9l7.8 4.5" />
+                        </svg>
+                    </div>
+                </div>
             </div>
-            <div class="mt-4 space-x-2">
-                <button class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-400">Download Report</button>
-                <button class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-400">View Analytics</button>
+
+            <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-5 rounded-xl shadow-sm">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Budget Alerts</p>
+                        <p class="text-3xl font-bold mt-1 text-gray-900 dark:text-gray-100">3</p>
+                        <div class="flex items-center text-xs mt-2 text-blue-600 dark:text-blue-400">
+                            <span>Depts nearing limits</span>
+                        </div>
+                    </div>
+                    <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-full text-gray-600 dark:text-gray-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+                    </div>
+                </div>
             </div>
-        </div> 
-    </div>
-</main>
+
+            <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-5 rounded-xl shadow-sm">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Pending Reallocation</p>
+                        <p class="text-3xl font-bold mt-1 text-gray-900 dark:text-gray-100">2</p>
+                        <div class="flex items-center text-xs mt-2 text-blue-600 dark:text-blue-400">
+                            <span>Transfering awaiting review</span>
+                        </div>
+                    </div>
+                    <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-full text-gray-600 dark:text-gray-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                d="M7 7h14M7 7l4-4M7 7l4 4M17 17H3m14 0l-4-4m4 4l-4 4"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+            
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-6">
+                    <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-5 rounded-xl shadow-sm flex flex-col gap-6">
+                        <h3 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Departmental Budget Approval</h3>
+                        <div class="flex flex-col gap-3">
+                            <div class="flex items-center justify-between p-3 rounded-md bg-slate-50">
+                                <div>
+                                    <p class="font-semibold text-gray-900 dark:text-gray-100">Marketing Q3 Campaign</p>
+                                    <p class="text-sm text-gray-500">$25,000 - Submitted by O. Bennett</p>
+                                </div>
+                                <div class="flex gap-2">
+                                <button class="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-500 hover:bg-green-600 text-white text-sm font-medium shadow-sm transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    Approve
+                                </button>
+                                <button class="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-medium shadow-sm transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                    Reject
+                                </button>
+                                </div>
+                            </div>
+                        <div class="flex items-center justify-between p-3 rounded-md bg-slate-50">
+                            <div>
+                                <p class="font-semibold text-gray-900 dark:text-gray-100">Sales Team Software Upgrade</p>
+                                <p class="text-sm text-gray-500">$15,000 - Submitted by L. Harper</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-500 hover:bg-green-600 text-white text-sm font-medium shadow-sm transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    Approve
+                                </button>
+                                <button class="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-medium shadow-sm transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                    Reject
+                                </button>
+                            </div>
+                        </div>
+                        <button class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400">Review All Proposals</button>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-5 rounded-xl shadow-sm flex flex-col gap-6">
+                <h3 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Fund Reallocation</h3>
+                    <form class="flex flex-col gap-3">
+                        <div class="grid grid-cols-2 gap-3">
+                            <select class="w-full rounded-md border-gray-300 text-sm">
+                                <option>From: Finance</option>
+                                <option>From: Human Resources</option>
+                                <option>From: Information Technology</option>
+                                <option>From: Marketing</option>
+                                <option>From: Sales</option>
+                                <option>From: Operations</option>
+                            </select>
+                            <select class="w-full rounded-md border-gray-300 text-sm">
+                                <option>To: Finance</option>
+                                <option>To: Human Resources</option>
+                                <option>To: Information Technology</option>
+                                <option>To: Marketing</option>
+                                <option>To: Sales</option>
+                                <option>To: Operations</option>
+                            </select>
+                        </div>
+                        <input class="w-full rounded-md border-gray-300 text-sm" placeholder="Amount" type="text"/>
+                            <button class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400">Initiate Transfer</button>                    
+                    </form>
+                </div>
+            </div>
 
 
 
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script>
-    // Budget Chart
-    const budgetCtx = document.getElementById('budgetChart').getContext('2d');
-    new Chart(budgetCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Spent', 'Remaining'],
-            datasets: [{
-                data: [3200000, 1800000],
-                backgroundColor: ['#4c669a', '#e7ebf3'],
-                borderWidth: 1,
-            }]
-        },
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false,
-            cutout: '70%',
-            plugins: {
-                legend: { position: 'bottom', align: 'center', 
-                    labels: {
-                        padding: 20
-                    }
-                 }
-            }
-        }
-    });
 
-    // Analytics Chart
-    const analyticsCtx = document.getElementById('analyticsChart').getContext('2d');
-    new Chart(analyticsCtx, {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{
-                label: 'Revenue',
-                data: [400000, 450000, 500000, 550000, 600000, 650000],
-                borderColor: '#6366f1',
-                fill: false,
-                tension: 0.4
-            }]
-        },
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: true, position: 'bottom' }
-            },
-            scales: {
-                y: { beginAtZero: true }
-            }
-        }
-    });
-</script>
-@endpush
+
+
+
+
+                                                 
+    </main>
+
+    
 
 @endhasrole
 
