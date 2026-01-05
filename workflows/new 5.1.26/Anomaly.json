@@ -1,0 +1,196 @@
+{
+  "name": "Anomaly",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "http://smartfin-web/api/n8n/data",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {}
+      },
+      "name": "Get Financial Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -96,
+        80
+      ],
+      "id": "4f234c43-703a-40c8-bf93-211ff640da81",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "e3v2pmfvnZL6O2eZ",
+          "name": "Header Auth account"
+        },
+        "httpBearerAuth": {
+          "id": "LCcbkkeRxodmq6gW",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.content }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "name": "Anomaly Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        480,
+        80
+      ],
+      "id": "4ebb8110-cb11-4dbd-a233-17470f41182a"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://smartfin-web/api/n8n/alert",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"message\": \"{{ $json.content }}\",\n  \"severity\": \"warning\"\n}",
+        "options": {}
+      },
+      "name": "Send Alert to Laravel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        736,
+        -48
+      ],
+      "id": "146cb067-ff5b-4081-9971-7e67d322ca7b",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "e3v2pmfvnZL6O2eZ",
+          "name": "Header Auth account"
+        },
+        "httpBearerAuth": {
+          "id": "LCcbkkeRxodmq6gW",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 3
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -320,
+        80
+      ],
+      "id": "b22f1962-c341-46e1-b38c-146c35b580e4",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "qwen3-coder:30b",
+          "mode": "list",
+          "cachedResultName": "qwen3-coder:30b"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a financial analyst. Analyze the JSON data provided. Look for: 1. Budgets exceeding 80%. 2. Duplicate transactions. 3. Unusual spending spikes. Output a single, concise alert message if issues are found, otherwise output 'No anomalies'.\"",
+              "role": "assistant"
+            },
+            {
+              "content": "={{ JSON.stringify($json) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.ollama",
+      "typeVersion": 1,
+      "position": [
+        128,
+        80
+      ],
+      "id": "c808074b-0a81-42cc-9113-1baa3b1d1219",
+      "name": "Message a model1",
+      "credentials": {
+        "ollamaApi": {
+          "id": "w8pYD400hgVBHWCS",
+          "name": "Ollama account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get Financial Data": {
+      "main": [
+        [
+          {
+            "node": "Message a model1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anomaly Found?": {
+      "main": [
+        [
+          {
+            "node": "Send Alert to Laravel",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Financial Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model1": {
+      "main": [
+        [
+          {
+            "node": "Anomaly Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "7bef4887-f8f7-4b64-8d84-4ae6807711b4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8812af9fcb3c0ba5b9c1cae6fb375b83eb901f68da76ce008d6dd13ada5975e4"
+  },
+  "id": "QkwcKKRHNsQFvEbN",
+  "tags": []
+}
