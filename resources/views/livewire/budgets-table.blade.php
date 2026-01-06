@@ -28,7 +28,6 @@
                     
                     <th scope="col" class="px-6 py-3">Usage</th>
                     <th scope="col" class="px-6 py-3">Budget Name</th>
-                    <th scope="col" class="px-6 py-3">Creator</th>
                     <th scope="col" class="px-6 py-3">Status</th>
                     <th scope="col" class="px-6 py-3 text-right">Actions</th>
                 </tr>
@@ -68,10 +67,6 @@
                         </td>
                         
                         <td class="px-6 py-4">
-                            {{ $budget->creator->name ?? 'N/A' }}
-                        </td>
-                        
-                        <td class="px-6 py-4">
                             @php
                                 $statusColors = [
                                     'active' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
@@ -94,13 +89,11 @@
                             </button>
                             
                             @can('update', $budget)
-                                <button wire:click="editBudget({{ $budget->id }})" 
-                                    x-data 
-                                    x-on:click="$dispatch('open-edit-budget-modal')"
-                                    class="text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 transition-colors mr-2" 
-                                    title="Edit">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                                </button>
+                                <a href="{{ route('budgets.edit', $budget->id) }}" 
+                               class="text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 transition-colors mr-2" 
+                               title="Edit">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            </a>
                             @endcan
                             
                             @can('delete', $budget)
@@ -279,7 +272,7 @@
                                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                             <option value="">Select Department</option>
                             @foreach($departments as $department)
-                                <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                <option value="{{ $department->id }}" class="dark:bg-gray-800">{{ $department->name }}</option>
                             @endforeach
                         </select>
                         @error('form.department_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
@@ -338,7 +331,7 @@
             </div>
         @endif
     </div>
-</div>
+    </div>
     </div>
 </div>
 </div>

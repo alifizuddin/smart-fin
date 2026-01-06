@@ -303,30 +303,31 @@ class ExpenseController extends Controller
     }
 
     public function create()
-    {
-        // Get the single active budget for the current period from the user's department
-        $user = Auth::user();
-        $activeBudget = Budget::where('department_id', $user->department_id)
-            ->where('status', 'active')
-            ->where('period_start', '<=', now())
-            ->where('period_end', '>=', now())
-            ->first();
+{
+    $user = Auth::user();
 
-        if (!$activeBudget) {
-            return redirect()->route('dashboard')
-                ->with('error', 'No active budget found for your department. Please contact your manager.');
-        }
-        $allActiveBudgets = Budget::where('department_id', $user->department_id)    
-            ->where('status', 'active')
-            ->where('period_end', '>=', now())
-            ->with(['expenses' => function ($query) {
-                $query->whereIn('status', ['approved', 'pending']);
-            }])
-            ->orderBy('period_end', 'asc')
-            ->get();
+    // 1. Attempt to find a currently active budget (for default selection or context)
+    // We keep this query, but we WON'T redirect if it returns null.
+    $activeBudget = Budget::where('department_id', $user->department_id)
+        ->where('status', 'active')
+        ->where('period_start', '<=', now())
+        ->where('period_end', '>=', now())
+        ->first();
 
-        return view('expenses.create', compact('activeBudget', 'allActiveBudgets'));
-    }
+    // [DELETED] The redirect block that was here is removed.
+
+    // 2. Get list of all valid budgets for the dropdown
+    $allActiveBudgets = Budget::where('department_id', $user->department_id)    
+        ->where('status', 'active')
+        ->where('period_end', '>=', now()) // Show budgets that haven't expired yet
+        ->with(['expenses' => function ($query) {
+            $query->whereIn('status', ['approved', 'pending']);
+        }])
+        ->orderBy('period_end', 'asc')
+        ->get();
+
+    return view('expenses.create', compact('activeBudget', 'allActiveBudgets'));
+}
 
     /**
      * Store a newly created expense in storage.

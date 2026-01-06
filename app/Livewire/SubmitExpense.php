@@ -7,6 +7,7 @@ use Livewire\WithFileUploads;
 use App\Models\Expense;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class SubmitExpense extends Component
 {
@@ -14,88 +15,101 @@ class SubmitExpense extends Component
 
     public $amount;
     public $description;
+    public $transaction_date;
+    public $category; // [NEW] To store the AI-detected category
     public $receipt; 
+    
     public $showModal = false;
-    public $isProcessing = false; // Controls the "Processing..." UI
+    public $isProcessing = false;
+    public $isReviewing = false; 
 
     protected $rules = [
         'amount' => 'required|numeric|min:0.01',
         'description' => 'nullable|string|max:255',
-        'receipt' => 'required|image|max:10240', // 10MB Max
+        'category' => 'required|string|max:100', // [NEW] Validate category
+        'transaction_date' => 'required|date',
+        'receipt' => 'required|image|max:10240',
     ];
 
-    // This function runs automatically as soon as a file is selected
     public function updatedReceipt()
     {
         $this->validateOnly('receipt');
-        $this->isProcessing = true; // Turn on loading state
+        $this->isProcessing = true;
+        $this->isReviewing = false;
 
         try {
-            // 1. Prepare the file for sending
             $filePath = $this->receipt->getRealPath();
             $fileName = $this->receipt->getClientOriginalName();
 
-            // 2. Send to Python API (Note: 'python_api' is the docker service name)
+            // [UPDATED] Use N8N Webhook URL
             $response = Http::attach(
                 'receipt', file_get_contents($filePath), $fileName
-            )->post('http://python_api:5010/process-receipt');
+            )->post('http://n8n:5678/webhook/process-receipt');
 
-            // 3. Handle the response
             if ($response->successful()) {
                 $data = $response->json();
                 
-                // Auto-fill amount if found
-                if (isset($data['data']['amount']) && $data['data']['amount']) {
+                // 1. Amount
+                if (isset($data['data']['amount']) && is_numeric($data['data']['amount'])) {
                     $this->amount = $data['data']['amount'];
                 }
 
-                // Auto-fill description/summary if found
-                if (isset($data['description']) && $data['description']) {
+                // 2. Description
+                if (isset($data['description'])) {
                     $this->description = $data['description'];
                 }
+
+                // 3. Category (Aligning with ExpenseController logic)
+                $this->category = $data['category'] ?? 'Uncategorized';
+
+                // 4. Date
+                $extractedDate = $data['data']['date'] ?? null;
+                $this->transaction_date = $extractedDate 
+                    ? Carbon::parse($extractedDate)->format('Y-m-d') 
+                    : now()->format('Y-m-d');
+
+                // Show the review section
+                $this->isReviewing = true; 
+
             } else {
-                Log::error('Receipt processing error: ' . $response->body());
+                Log::error('N8N processing error: ' . $response->body());
+                // Fallback: still show the form so user can enter data manually
+                $this->isReviewing = true;
+                $this->transaction_date = now()->format('Y-m-d');
+                $this->category = 'Uncategorized';
             }
 
         } catch (\Exception $e) {
-            Log::error('Could not connect to Python API: ' . $e->getMessage());
+            Log::error('Could not connect to N8N: ' . $e->getMessage());
+            $this->isReviewing = true; // Fallback to manual entry
         } finally {
-            $this->isProcessing = false; // Turn off loading state
+            $this->isProcessing = false;
         }
     }
 
     public function save()
-{
-    $this->validate();
+    {
+        $this->validate();
 
-    // Store the file
-    $path = $this->receipt->store('receipts', 'public');
+        $path = $this->receipt->store('receipts', 'public');
 
-    // Create the expense record with ALL required fields
-    Expense::create([
-        'user_id' => auth()->id(),
-        // [FIX 1] Get department from the authenticated user
-        'department_id' => auth()->user()->department_id ?? 1, 
-        
-        'amount' => $this->amount,
-        
-        // [FIX 2] Provide a default category (since the form doesn't have a dropdown yet)
-        'category' => 'Uncategorized', 
-        
-        'description' => $this->description,
-        'receipt_path' => $path,
-        'status' => 'pending',
-        
-        // [FIX 3] Use the correct column name 'transaction_date' instead of 'date'
-        'transaction_date' => now(), 
-    ]);
+        Expense::create([
+            'user_id' => auth()->id(),
+            'department_id' => auth()->user()->department_id ?? 1, 
+            'amount' => $this->amount,
+            'category' => $this->category, // [UPDATED] Use the variable
+            'description' => $this->description,
+            'receipt_path' => $path,
+            'status' => 'pending',
+            'transaction_date' => $this->transaction_date, 
+        ]);
 
-    // Reset form and close modal
-    $this->reset(['amount', 'description', 'receipt']);
-    $this->showModal = false;
+        $this->reset(['amount', 'description', 'receipt', 'transaction_date', 'category', 'isReviewing']);
+        $this->showModal = false;
 
-    $this->dispatch('expense-created', message: 'Expense submitted successfully!');
-}
+        $this->dispatch('expense-created', message: 'Expense submitted successfully!');
+    }
+
     public function render()
     {
         return view('livewire.submit-expense');

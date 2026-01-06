@@ -7,42 +7,97 @@
     @if($showModal)
     <div class="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-lg shadow-2xl border border-gray-100 dark:border-gray-700">
-            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Quick Expense Submission</h2>
+            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">New Expense Submission</h2>
 
             @if (session()->has('message'))
-                <div class="mt-3 text-sm text-green-600 bg-green-50 p-3 rounded-md">
+                <div class="mb-4 text-sm text-green-600 bg-green-50 p-3 rounded-md">
                     {{ session('message') }}
                 </div>
             @endif
 
-            <form wire:submit="save" class="mt-4 space-y-4">
-                <div>
-                    <x-input-label for="amount" value="Amount ($)" />
-                    <x-text-input wire:model="amount" id="amount" type="number" step="0.01" class="w-full mt-1" />
-                    <x-input-error :messages="$errors->get('amount')" class="mt-2" />
-                </div>
-
+            <form wire:submit="save">
+                
+                {{-- STEP 1: Upload Receipt --}}
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Upload Receipt</label>
-                    <input type="file" wire:model="receipt" class="mt-1 block w-full text-sm text-gray-700 dark:text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        1. Upload Receipt to Scan
+                    </label>
+                    <div class="relative group">
+                        <input type="file" wire:model="receipt" accept="image/*" 
+                               class="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-gray-300 transition-all cursor-pointer border border-gray-300 dark:border-gray-600 rounded-lg">
+                    </div>
                     <x-input-error :messages="$errors->get('receipt')" class="mt-2" />
-                    
-                    <div wire:loading wire:target="receipt" class="text-xs text-blue-600 mt-1">Uploading...</div>
+
+                    @if($isProcessing)
+                    <div class="mt-4 p-4 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg flex items-center gap-3 animate-pulse">
+                        <svg class="w-5 h-5 text-indigo-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                        </svg>
+                        <span class="text-sm font-medium text-indigo-700 dark:text-indigo-300">
+                            N8N is analyzing your receipt...
+                        </span>
+                    </div>
+                    @endif
                 </div>
 
-                <div>
-                    <x-input-label for="description" value="Description (Optional)" />
-                    <textarea wire:model="description" rows="3" class="w-full mt-1 rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"></textarea>
-                    <x-input-error :messages="$errors->get('description')" class="mt-2" />
-                </div>
-
-                <div class="mt-6 flex justify-end items-center">
-                    <x-secondary-button type="button" wire:click="$set('showModal', false)">Cancel</x-secondary-button>
+                {{-- STEP 2: Review & Confirm --}}
+                @if($isReviewing && !$isProcessing)
+                <div class="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4 animate-in fade-in slide-in-from-bottom-2">
                     
-                    <x-primary-button type="submit" class="ms-3" wire:loading.attr="disabled">
-                        <span wire:loading.remove>Submit Expense</span>
-                        <span wire:loading>Processing...</span>
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                            2. Review Extracted Details
+                        </h3>
+                        <span class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">
+                            Analysis Complete
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        {{-- Amount --}}
+                        <div>
+                            <x-input-label for="amount" value="Amount ($)" />
+                            <x-text-input wire:model="amount" id="amount" type="number" step="0.01" class="w-full mt-1 font-bold text-gray-900" />
+                            <x-input-error :messages="$errors->get('amount')" class="mt-2" />
+                        </div>
+
+                        {{-- Date --}}
+                        <div>
+                            <x-input-label for="transaction_date" value="Date" />
+                            <x-text-input wire:model="transaction_date" id="transaction_date" type="date" class="w-full mt-1" />
+                            <x-input-error :messages="$errors->get('transaction_date')" class="mt-2" />
+                        </div>
+                    </div>
+
+                    {{-- Category (New Field) --}}
+                    <div>
+                        <x-input-label for="category" value="Category" />
+                        <x-text-input wire:model="category" id="category" type="text" class="w-full mt-1" placeholder="e.g. Meals, Transport" />
+                        <x-input-error :messages="$errors->get('category')" class="mt-2" />
+                    </div>
+
+                    {{-- Description --}}
+                    <div>
+                        <x-input-label for="description" value="Description" />
+                        <textarea wire:model="description" rows="2" class="w-full mt-1 rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm"></textarea>
+                        <x-input-error :messages="$errors->get('description')" class="mt-2" />
+                    </div>
+                </div>
+                @endif
+
+                {{-- Footer Actions --}}
+                <div class="mt-6 flex justify-end items-center gap-3">
+                    <x-secondary-button type="button" wire:click="$set('showModal', false)">
+                        Cancel
+                    </x-secondary-button>
+                    
+                    @if($isReviewing)
+                    <x-primary-button type="submit" wire:loading.attr="disabled">
+                        <span wire:loading.remove>Confirm & Save</span>
+                        <span wire:loading>Saving...</span>
                     </x-primary-button>
+                    @endif
                 </div>
             </form>
         </div>
