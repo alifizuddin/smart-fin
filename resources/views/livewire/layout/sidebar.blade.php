@@ -24,7 +24,7 @@ new class extends Component
         <!-- Logo -->
         <div class="flex items-center justify-between h-16 px-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
             <a href="{{ route('dashboard') }}" class="flex items-center" wire:navigate>
-                <x-application-logo class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
+                <img src="{{ asset('images/kodewave_logo.jpg') }}" alt="Logo" class="h-9 w-9">
                 <span x-show="sidebarOpen" class="ml-2 text-xl font-semibold text-gray-800 dark:text-white">SmartFin360</span>
             </a>
             <button @click="sidebarOpen = !sidebarOpen" class="p-1 rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
