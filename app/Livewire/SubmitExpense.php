@@ -16,17 +16,18 @@ class SubmitExpense extends Component
     public $amount;
     public $description;
     public $transaction_date;
-    public $category; // [NEW] To store the AI-detected category
+    public $category;
     public $receipt; 
     
+    // State variables for modals
     public $showModal = false;
+    public $confirmingExpenseSubmission = false;
     public $isProcessing = false;
-    public $isReviewing = false; 
 
     protected $rules = [
         'amount' => 'required|numeric|min:0.01',
         'description' => 'nullable|string|max:255',
-        'category' => 'required|string|max:100', // [NEW] Validate category
+        'category' => 'required|string|max:100',
         'transaction_date' => 'required|date',
         'receipt' => 'required|image|max:10240',
     ];
@@ -35,13 +36,12 @@ class SubmitExpense extends Component
     {
         $this->validateOnly('receipt');
         $this->isProcessing = true;
-        $this->isReviewing = false;
 
         try {
             $filePath = $this->receipt->getRealPath();
             $fileName = $this->receipt->getClientOriginalName();
 
-            // [UPDATED] Use N8N Webhook URL
+            // Send to N8n Webhook
             $response = Http::attach(
                 'receipt', file_get_contents($filePath), $fileName
             )->post('http://n8n:5678/webhook/process-receipt');
@@ -49,39 +49,39 @@ class SubmitExpense extends Component
             if ($response->successful()) {
                 $data = $response->json();
                 
-                // 1. Amount
+                // 1. Extract Amount
                 if (isset($data['data']['amount']) && is_numeric($data['data']['amount'])) {
                     $this->amount = $data['data']['amount'];
                 }
 
-                // 2. Description
+                // 2. Extract Description
                 if (isset($data['description'])) {
                     $this->description = $data['description'];
                 }
 
-                // 3. Category (Aligning with ExpenseController logic)
+                // 3. Extract Category
                 $this->category = $data['category'] ?? 'Uncategorized';
 
-                // 4. Date
+                // 4. Extract Date
                 $extractedDate = $data['data']['date'] ?? null;
                 $this->transaction_date = $extractedDate 
                     ? Carbon::parse($extractedDate)->format('Y-m-d') 
                     : now()->format('Y-m-d');
 
-                // Show the review section
-                $this->isReviewing = true; 
+                // [UPDATED] Open the modal instead of showing inline form
+                $this->confirmingExpenseSubmission = true; 
 
             } else {
                 Log::error('N8N processing error: ' . $response->body());
-                // Fallback: still show the form so user can enter data manually
-                $this->isReviewing = true;
+                // Fallback: Open modal with empty/default data so user can fill it manually
                 $this->transaction_date = now()->format('Y-m-d');
                 $this->category = 'Uncategorized';
+                $this->confirmingExpenseSubmission = true;
             }
 
         } catch (\Exception $e) {
             Log::error('Could not connect to N8N: ' . $e->getMessage());
-            $this->isReviewing = true; // Fallback to manual entry
+            $this->confirmingExpenseSubmission = true; // Fallback
         } finally {
             $this->isProcessing = false;
         }
@@ -97,16 +97,17 @@ class SubmitExpense extends Component
             'user_id' => auth()->id(),
             'department_id' => auth()->user()->department_id ?? 1, 
             'amount' => $this->amount,
-            'category' => $this->category, // [UPDATED] Use the variable
+            'category' => $this->category,
             'description' => $this->description,
             'receipt_path' => $path,
             'status' => 'pending',
             'transaction_date' => $this->transaction_date, 
         ]);
 
-        $this->reset(['amount', 'description', 'receipt', 'transaction_date', 'category', 'isReviewing']);
-        $this->showModal = false;
-
+        // Reset everything and close modal
+        $this->reset(['amount', 'description', 'receipt', 'transaction_date', 'category', 'confirmingExpenseSubmission']);
+        
+        // Close the main entry modal (if you are using one) or just flash message
         $this->dispatch('expense-created', message: 'Expense submitted successfully!');
     }
 

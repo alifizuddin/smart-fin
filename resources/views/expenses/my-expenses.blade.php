@@ -29,7 +29,7 @@
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Expenses</p>
                             <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
-                                ${{ number_format($totalExpenses, 2) }}
+                                RM{{ number_format($totalExpenses, 2) }}
                             </p>
                         </div>
                     </div>
@@ -221,7 +221,7 @@
                                                 <!-- Amount -->
                                                 <td class="px-6 py-4 whitespace-nowrap text-right">
                                                     <span class="text-sm font-semibold text-gray-900 dark:text-white">
-                                                        ${{ number_format($expense->amount, 2) }}
+                                                        RM{{ number_format($expense->amount, 2) }}
                                                     </span>
                                                     <div class="text-xs text-gray-500 dark:text-gray-400">
                                                         {{ $expense->budget->name ?? 'No Budget' }}

@@ -9,15 +9,15 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div class="p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
                 <span class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Total Limit</span>
-                <span class="text-lg font-bold text-gray-900 dark:text-gray-100">${{ number_format($totalBudget, 2) }}</span>
+                <span class="text-lg font-bold text-gray-900 dark:text-gray-100">RM{{ number_format($totalBudget, 2) }}</span>
             </div>
             <div class="p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
                 <span class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Spent</span>
-                <span class="text-lg font-bold text-gray-900 dark:text-gray-100">${{ number_format($totalSpent, 2) }}</span>
+                <span class="text-lg font-bold text-gray-900 dark:text-gray-100">RM{{ number_format($totalSpent, 2) }}</span>
             </div>
             <div class="p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
                 <span class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Remaining</span>
-                <span class="text-lg font-bold text-gray-900 dark:text-gray-100">${{ number_format($remaining, 2) }}</span>
+                <span class="text-lg font-bold text-gray-900 dark:text-gray-100">RM{{ number_format($remaining, 2) }}</span>
             </div>
         </div>
 

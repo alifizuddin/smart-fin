@@ -18,7 +18,7 @@
         <div class="flex justify-between items-start">
             <div>
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Avg Daily Spend</p>
-                <p class="text-3xl font-bold mt-1 text-gray-900 dark:text-gray-100">${{ number_format($stats['avg_daily'], 2) }}</p>
+                <p class="text-3xl font-bold mt-1 text-gray-900 dark:text-gray-100">RM{{ number_format($stats['avg_daily'], 2) }}</p>
                 <div class="flex items-center text-xs mt-2 text-gray-500">
                     <span>Per active day</span>
                 </div>
@@ -49,7 +49,7 @@
         <div class="flex justify-between items-start">
             <div>
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Remaining</p>
-                <p class="text-3xl font-bold mt-1 text-gray-900 dark:text-gray-100">${{ number_format($stats['remaining'], 2) }}</p>
+                <p class="text-3xl font-bold mt-1 text-gray-900 dark:text-gray-100">RM{{ number_format($stats['remaining'], 2) }}</p>
                 <div class="flex items-center text-xs mt-2 text-gray-500">
                     <span>Available funds</span>
                 </div>

@@ -65,7 +65,42 @@ class ExpenseController extends Controller
             'statuses' => ['pending', 'approved', 'rejected']
         ]);
     }
-    
+    public function analyzeReceipt(Request $request)
+    {
+        $request->validate([
+            'receipt' => 'required|file|mimes:jpg,png,pdf|max:10240',
+        ]);
+
+        // Send to N8N
+        $n8nWebhookUrl = 'http://n8n:5678/webhook/process-receipt';
+
+        try {
+            $response = Http::timeout(30)
+                ->attach(
+                    'receipt',
+                    file_get_contents($request->file('receipt')),
+                    $request->file('receipt')->getClientOriginalName()
+                )->post($n8nWebhookUrl);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                
+                // Return structured JSON for the frontend
+                return response()->json([
+                    'success' => true,
+                    'amount' => $data['data']['amount'] ?? null,
+                    'date' => isset($data['data']['date']) ? Carbon::parse($data['data']['date'])->format('Y-m-d') : now()->format('Y-m-d'),
+                    'category' => $data['category'] ?? 'Uncategorized',
+                    'description' => $data['description'] ?? '',
+                ]);
+            }
+
+            return response()->json(['success' => false, 'message' => 'N8N processing failed'], 500);
+
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
     public function index()
     {
         //
@@ -335,111 +370,54 @@ class ExpenseController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
-        // 1. Validate only the required fields
+
+        // 1. Validate inputs (including the ones confirmed in the modal)
         $validated = $request->validate([
-            'budget_id' => [
-                'required',
-                'exists:budgets,id',
-                // This rule ensures the user belongs to the budget's department
-                function ($attribute, $value, $fail) use ($user) {
-                    $budget = Budget::find($value);
-                    if (!$budget || $budget->department_id !== $user->department_id) {
-                        $fail('You are not authorized to use this budget.');
-                    }
-                },
-            ],
-            'receipt' => 'required|file|mimes:jpg,png,pdf|max:2048', // Max 2MB as per your blade file
+            'budget_id' => 'required|exists:budgets,id',
+            'receipt' => 'required|file|mimes:jpg,png,pdf|max:10240',
+            'amount' => 'required|numeric|min:0.01',
+            'transaction_date' => 'required|date',
+            'category' => 'required|string',
+            'description' => 'nullable|string',
         ]);
 
-        // 2. Handle the file upload
+        // 2. Upload File
         $path = $request->file('receipt')->store('receipts', 'public');
-        $n8nWebhookUrl = 'http://n8n:5678/webhook/process-receipt';
 
+        // 3. Create Expense (No AI call here, we use the request data)
         try {
-            // 3. Process receipt with Python API
-            $response = Http::timeout(30) // Increased timeout for OCR processing
-                ->attach(
-                    'receipt',
-                    file_get_contents($request->file('receipt')),
-                    $request->file('receipt')->getClientOriginalName()
-                )->post($n8nWebhookUrl);
-
-            if (!$response->successful()) {
-                logger()->error('Receipt processing failed', ['response' => $response->body()]);
-                return redirect()->back()
-                    ->with('error', 'Could not process receipt. Please try again or contact support.')
-                    ->withInput();
-            }
-
-            $ai_data = $response->json();
-
-            // 4. Prepare data array for creation using AI-extracted data
-            $user = Auth::user();
-
-            // Convert amount to proper decimal
-            $amount = $ai_data['data']['amount'] ?? null;
-            if (!is_numeric($amount) || $amount <= 0) {
-                return redirect()->back()
-                    ->with('error', 'Could not detect a valid amount from the receipt. Please make sure the amount is clearly visible.')
-                    ->withInput();
-            }
-
-            // Parse and validate date
-            $transactionDate = $ai_data['data']['date'] ?? null;
-            try {
-                $parsedDate = $transactionDate ? Carbon::parse($transactionDate) : now();
-            } catch (\Exception $e) {
-                $parsedDate = now();
-            }
-
-            $data = [
+            $expense = Expense::create([
                 'budget_id'        => $validated['budget_id'],
                 'user_id'          => $user->id,
-                'department_id'    => $user->department_id,
+                'department_id'    => $user->department_id, // Ensure user has department
                 'receipt_path'     => $path,
                 'status'           => 'pending',
+                'amount'           => $validated['amount'],
+                'transaction_date' => $validated['transaction_date'],
+                'category'         => $validated['category'],
+                'description'      => $validated['description'],
+                'payment_method'   => 'Not specified',
+            ]);
 
-                // AI-extracted data with validation
-                'amount'           => $amount,
-                'transaction_date' => $parsedDate->format('Y-m-d'),
-                'payment_method'   => $ai_data['data']['payment_method'] ?? 'Not specified',
-                'category'         => $ai_data['category'] ?? 'Uncategorized',
-                'description'      => $ai_data['description'] ?? 'Receipt processed automatically',
-            ];
+            // Notify Managers
+            $managers = User::role('Manager')
+                ->where('department_id', $user->department_id)
+                ->get();
 
-            // 5. Create the expense
-            try {
-                $expense = Expense::create($data);
-
-                $managers = User::role('Manager')
-                    ->where('department_id', $user->department_id)
-                    ->get();
-                // After creating the expense, before sending notifications
-
-                if ($managers->isNotEmpty()) {
-                    Notification::send($managers, new NewExpenseSubmission($expense));
-                }
-
-                return redirect()->route('expenses.create')->with(
-                    'success',
-                    'Expense submitted successfully! ' .
-                        'Amount: $' . number_format($expense->amount, 2) . ', ' .
-                        'Category: ' . $expense->category
-                );
-            } catch (\Exception $e) {
-                logger()->error('Expense creation failed', ['error' => $e->getMessage(), 'data' => $data]);
-                return redirect()->back()
-                    ->with('error', 'Failed to submit expense. Please try again or contact support.')
-                    ->withInput();
+            if ($managers->isNotEmpty()) {
+                Notification::send($managers, new NewExpenseSubmission($expense));
             }
 
-        } catch (\Exception $e) { // This catch block is for the Http::post call
-            logger()->error('Receipt processing HTTP call failed', ['error' => $e->getMessage()]);
-            return redirect()->back()
-                ->with('error', 'Could not connect to the receipt processing service. Please try again later.')
-                ->withInput();
+            // Redirect back to create page with success
+            return redirect()->route('expenses.create')->with(
+                'success', 
+                'Expense submitted successfully! Amount: RM' . number_format($expense->amount, 2)
+            );
+
+        } catch (\Exception $e) {
+            logger()->error('Expense creation failed', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Failed to save expense.')->withInput();
         }
-        event(new ExpenseCreated($expense));
     }
 
 

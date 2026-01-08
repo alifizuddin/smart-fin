@@ -28,6 +28,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             
         Route::delete('/expenses/{id}', [ExpenseController::class, 'destroy'])
             ->name('expenses.delete');
+        Route::post('expenses/analyze', [ExpenseController::class, 'analyzeReceipt'])
+        ->name('expenses.analyze');
     });
 
     // --- ADMIN-ONLY ROUTES ---
