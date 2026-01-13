@@ -1,0 +1,85 @@
+{
+    "name": "SmartFin Expense Forecasting",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "forecast",
+                "options": {}
+            },
+            "id": "webhook-trigger",
+            "name": "Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                460,
+                360
+            ]
+        },
+        {
+            "parameters": {
+                "model": "gpt-4o",
+                "messages": {
+                    "values": [
+                        {
+                            "content": "You are a financial analyst AI. \n\nI will provide you with historical expense data in JSON format. \nYour task is to:\n1. Analyze the trend (linear, seasonal, or irregular).\n2. Predict the total expense amount for the NEXT month.\n3. Provide a confidence score (0.0 to 1.0) based on the data consistency.\n4. Provide a short \"insights\" sentence explaining why (e.g., \"Trend is increasing by 5% monthly\").\n\nInput Data:\n{{ $json.body.historical_data }}\n\nTarget Date: {{ $json.body.target_date }}\n\nOutput strictly JSON in this format, with no markdown:\n{\n  \"forecast_amount\": 1234.56,\n  \"confidence\": 0.85,\n  \"reasoning\": \"Linear growth detected.\"\n}"
+                        }
+                    ]
+                },
+                "jsonOutput": true
+            },
+            "id": "ai-forecast",
+            "name": "AI Forecast Agent",
+            "type": "n8n-nodes-base.openAi",
+            "typeVersion": 1,
+            "position": [
+                680,
+                360
+            ],
+            "credentials": {
+                "openAiApi": {
+                    "id": "YOUR_OPENAI_CREDENTIAL_ID",
+                    "name": "OpenAI Account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ $json }}"
+            },
+            "id": "respond-to-laravel",
+            "name": "Respond to Webhook",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                900,
+                360
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "AI Forecast Agent",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI Forecast Agent": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Webhook",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}
