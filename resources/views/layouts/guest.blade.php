@@ -15,7 +15,7 @@
     <body class="font-sans text-gray-900 antialiased">
         <div class="min-h-screen w-full flex items-center justify-center py-10 px-4 sm:px-6 lg:px-8" style="background-color: #393f81;">
             
-            <div class="w-full max-w-5xl">
+            <div class="w-full max-w-7xl">
                 <div class="bg-white rounded-[1rem] shadow-2xl overflow-hidden flex flex-col md:flex-row">
                     
                     <div class="hidden md:block md:w-5/12 lg:w-5/12 bg-gray-200">

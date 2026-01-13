@@ -1,11 +1,16 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                {{ __('My Expenses') }}
-            </h2>
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                    {{ __('My Expenses') }}
+                </h2>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    View and manage all your submitted expenses
+                </p>
+            </div>
             <a href="{{ route('expenses.create') }}" 
-               class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+               class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
@@ -291,7 +296,7 @@
                                                         @if($expense->status === 'pending')
 
                                                             <!-- Delete Button with Confirmation Modal -->
-                                                            <button onclick="showDeleteConfirmation('{{ $expense->id }}')" 
+                                                            <button data-delete-url="{{ route('expenses.destroy', $expense->id) }}" 
                                                                     class="p-1.5 text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 rounded-full hover:bg-red-50 dark:hover:bg-gray-700"
                                                                     title="Delete Expense">
                                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -306,42 +311,7 @@
                                             <!-- Expense Details Modal Component -->
                                             <x-expense-details-modal :id="'expense-details-' . $expense->id" />
 
-                                            <!-- Delete Confirmation Modal Component -->
-                                            <div id="delete-expense-{{ $expense->id }}" 
-                                                 class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center transition-opacity duration-300">
-                                                <div id="delete-expense-{{ $expense->id }}Card"
-                                                     class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl transform scale-95 opacity-0 transition-all duration-300 w-full max-w-md relative">
-                                                    
-                                                    <div class="w-16 h-16 flex items-center justify-center mx-auto rounded-full mb-4 bg-red-100 dark:bg-red-900/30">
-                                                        <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                                                        </svg>
-                                                    </div>
-                                                    
-                                                    <h3 class="text-2xl font-bold text-center text-gray-800 dark:text-gray-100 mb-3">
-                                                        Delete Expense
-                                                    </h3>
-                                                    <p class="text-center text-gray-600 dark:text-gray-400 mb-6">
-                                                        Are you sure you want to delete this expense? This action cannot be undone.
-                                                    </p>
 
-                                                    <div class="flex justify-center gap-4">
-                                                        <button type="button" 
-                                                                onclick="closeModal('delete-expense-{{ $expense->id }}')" 
-                                                                class="px-5 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition font-medium">
-                                                            Cancel
-                                                        </button>
-                                                        <form id="delete-expense-{{ $expense->id }}Form" method="POST" action="{{ route('expenses.destroy', $expense->id) }}" class="inline">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" 
-                                                                    class="px-5 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition font-medium">
-                                                                Delete
-                                                            </button>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
                                         @endforeach
                                     </tbody>
                                 </table>
@@ -392,160 +362,207 @@
         </div>
     </div>
 
+    {{-- Single Confirmation Modal --}}
+    <x-confirmation-modal 
+        id="deleteConfirmationModal" 
+        title="Delete Expense" 
+        message="Are you sure you want to delete this expense? This action cannot be undone."
+    />
+
     @push('scripts')
-    <script>
-        // Function to show delete confirmation modal
-        function showDeleteConfirmation(expenseId) {
-            const modal = document.getElementById(`delete-expense-${expenseId}`);
-            const modalCard = document.getElementById(`delete-expense-${expenseId}Card`);
-            
-            if (!modal || !modalCard) return;
-            
-            // Show modal with animation
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modalCard.classList.remove('scale-95', 'opacity-0');
-                modalCard.classList.add('scale-100', 'opacity-100');
-            }, 10);
+<script>
+    // Function to show delete confirmation modal
+    function showDeleteConfirmation(actionUrl) {
+        const modalId = 'deleteConfirmationModal';
+        const modal = document.getElementById(modalId);
+        const modalCard = document.getElementById(`${modalId}Card`);
+        const form = document.getElementById(`${modalId}Form`);
+        const methodDiv = document.getElementById(`${modalId}Method`);
+        const iconDiv = document.getElementById(`${modalId}Icon`);
+        const confirmBtn = document.getElementById(`${modalId}ConfirmButton`);
+        
+        if (!modal || !modalCard || !form) return;
+        
+        // Setup Form
+        form.action = actionUrl;
+        
+        // Set Method to DELETE
+        if (methodDiv) {
+            methodDiv.innerHTML = '<input type="hidden" name="_method" value="DELETE">';
         }
 
-        // Function to open the details modal
-        function openDetailsModal(expenseId, expenseData) {
-            const modalId = `expense-details-${expenseId}`;
-            const modal = document.getElementById(modalId);
-            const modalCard = document.getElementById(`${modalId}Card`);
-            
-            if (!modal || !modalCard) return;
-
-            // Set the content dynamically
-            const contentDiv = document.getElementById(`${modalId}Content`);
-            if (contentDiv) {
-                contentDiv.innerHTML = `
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Amount</p>
-                            <p class="mt-1 text-sm text-gray-900 dark:text-gray-200">$${parseFloat(expenseData.amount).toFixed(2)}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Category</p>
-                            <p class="mt-1 text-sm text-gray-900 dark:text-gray-200">${expenseData.category.charAt(0).toUpperCase() + expenseData.category.slice(1)}</p>
-                        </div>
-                    </div>
-
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Description</p>
-                        <p class="mt-1 text-sm text-gray-900 dark:text-gray-200">${expenseData.description || 'No description'}</p>
-                    </div>
-
-                    ${expenseData.receipt_path ? `
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Receipt</p>
-                        <a href="${expenseData.receipt_url}" target="_blank" class="mt-1 text-sm text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center">
-                            <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                            View Receipt
-                        </a>
-                    </div>` : ''}
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Submitted</p>
-                            <p class="mt-1 text-sm text-gray-900 dark:text-gray-200">
-                                ${new Date(expenseData.created_at).toLocaleString('en-US', { 
-                                    month: 'short', 
-                                    day: 'numeric', 
-                                    year: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                    hour12: true 
-                                })}
-                            </p>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Status</p>
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(expenseData.status)}">
-                                ${expenseData.status.charAt(0).toUpperCase() + expenseData.status.slice(1)}
-                            </span>
-                        </div>
-                    </div>
-
-                    ${expenseData.status === 'rejected' && expenseData.rejection_reason ? `
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Rejection Reason</p>
-                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">${expenseData.rejection_reason}</p>
-                    </div>` : ''}
-                `;
-            }
-
-            // Show modal with animation
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modalCard.classList.remove('scale-95', 'opacity-0');
-                modalCard.classList.add('scale-100', 'opacity-100');
-            }, 10);
+        // Setup Icon (Red Trash)
+        if (iconDiv) {
+            iconDiv.className = "w-16 h-16 flex items-center justify-center mx-auto rounded-full mb-4 bg-red-100 dark:bg-red-900/30";
+            iconDiv.innerHTML = `
+                <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            `;
         }
 
-        // Function to close the details modal
-        function closeModal(modalId) {
-            const modal = document.getElementById(modalId);
-            const modalCard = document.getElementById(`${modalId}Card`);
-            
-            if (!modal || !modalCard) return;
+        // Style Confirm Button
+        if (confirmBtn) {
+            confirmBtn.className = "px-5 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition font-medium";
+            confirmBtn.textContent = 'Delete';
+        }
 
-            // Hide modal with animation
-            modalCard.classList.remove('scale-100', 'opacity-100');
-            modalCard.classList.add('scale-95', 'opacity-0');
-            
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300);
+        // Show modal with animation
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modalCard.classList.remove('scale-95', 'opacity-0');
+            modalCard.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    // Function to open the details modal
+    function openDetailsModal(expenseId, expenseData) {
+        const modalId = `expense-details-${expenseId}`;
+        const modal = document.getElementById(modalId);
+        const modalCard = document.getElementById(`${modalId}Card`);
+        
+        if (!modal || !modalCard) return;
+
+        // Set the content dynamically
+        const contentDiv = document.getElementById(`${modalId}Content`);
+        if (contentDiv) {
+            contentDiv.innerHTML = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Amount</p>
+                        <p class="mt-1 text-sm text-gray-900 dark:text-gray-200">RM${parseFloat(expenseData.amount).toFixed(2)}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Category</p>
+                        <p class="mt-1 text-sm text-gray-900 dark:text-gray-200">${expenseData.category.charAt(0).toUpperCase() + expenseData.category.slice(1)}</p>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Description</p>
+                    <p class="mt-1 text-sm text-gray-900 dark:text-gray-200">${expenseData.description || 'No description'}</p>
+                </div>
+
+                ${expenseData.receipt_path ? `
+                <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Receipt</p>
+                    <a href="${expenseData.receipt_url}" target="_blank" class="mt-1 text-sm text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center">
+                        <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        View Receipt
+                    </a>
+                </div>` : ''}
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Submitted</p>
+                        <p class="mt-1 text-sm text-gray-900 dark:text-gray-200">
+                            ${new Date(expenseData.created_at).toLocaleString('en-US', { 
+                                month: 'short', 
+                                day: 'numeric', 
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: true 
+                            })}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Status</p>
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(expenseData.status)}">
+                            ${expenseData.status.charAt(0).toUpperCase() + expenseData.status.slice(1)}
+                        </span>
+                    </div>
+                </div>
+
+                ${expenseData.status === 'rejected' && expenseData.rejection_reason ? `
+                <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Rejection Reason</p>
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">${expenseData.rejection_reason}</p>
+                </div>` : ''}
+            `;
+        }
+
+        // Show modal with animation
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modalCard.classList.remove('scale-95', 'opacity-0');
+            modalCard.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    // Function to close any modal
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        const modalCard = document.getElementById(`${modalId}Card`);
+        
+        if (!modal || !modalCard) return;
+        
+        // Close modal with animation
+        modalCard.classList.remove('scale-100', 'opacity-100');
+        modalCard.classList.add('scale-95', 'opacity-0');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 200);
+    }
+
+    // Helper function to get status color classes
+    function getStatusColor(status) {
+        const colors = {
+            'pending': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+            'approved': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+            'rejected': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+        };
+        return colors[status] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+    }
+
+    // Event delegation
+    document.addEventListener('click', function(e) {
+        // Handle view button clicks
+        const viewButton = e.target.closest('button[data-expense-id]');
+        if (viewButton) {
+            e.preventDefault();
+            const expenseId = viewButton.getAttribute('data-expense-id');
+            const expenseData = JSON.parse(viewButton.getAttribute('data-expense'));
+            openDetailsModal(expenseId, expenseData);
+            return;
         }
         
-        // Alias for backward compatibility
-        function closeDetailsModal(modalId) {
+        // Handle delete button clicks
+        const deleteButton = e.target.closest('button[data-delete-url]');
+        if (deleteButton) {
+            e.preventDefault();
+            const url = deleteButton.getAttribute('data-delete-url');
+            showDeleteConfirmation(url);
+            return;
+        }
+        
+        // Handle close button clicks
+        const closeButton = e.target.closest('button[onclick^="closeModal"]');
+        if (closeButton) {
+            e.preventDefault();
+            const modalId = closeButton.getAttribute('onclick').match(/'([^']+)'/)[1];
             closeModal(modalId);
+            return;
         }
-
-        // Helper function to get status color classes
-        function getStatusColor(status) {
-            const colors = {
-                'pending': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-                'approved': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-                'rejected': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-            };
-            return colors[status] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
-        }
-
+        
         // Close modal when clicking outside
-        document.addEventListener('click', function(event) {
-            if (event.target.classList.contains('backdrop-blur-sm')) {
-                const modal = event.target;
-                closeDetailsModal(modal.id);
-            }
-        });
+        if (e.target.classList.contains('backdrop-blur-sm')) {
+            closeModal(e.target.id);
+        }
+    });
 
-        // Close modal with Escape key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                const openModal = document.querySelector('.backdrop-blur-sm:not(.hidden)');
-                if (openModal) {
-                    closeDetailsModal(openModal.id);
-                }
-            }
-        });
-
-        // Initialize event listeners when the page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            // Update all view buttons to use the new modal
-            document.querySelectorAll('[data-expense-id]').forEach(button => {
-                button.addEventListener('click', function() {
-                    const expenseId = this.getAttribute('data-expense-id');
-                    const expenseData = JSON.parse(this.getAttribute('data-expense'));
-                    openDetailsModal(expenseId, expenseData);
-                });
+    // Close modals with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const openModals = document.querySelectorAll('.backdrop-blur-sm:not(.hidden)');
+            openModals.forEach(modal => {
+                closeModal(modal.id);
             });
-        });
-    </script>
-    @endpush
+        }
+    });
+</script>
+@endpush
 </x-app-layout>

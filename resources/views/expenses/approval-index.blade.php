@@ -1,17 +1,14 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-2xl text-gray-800 dark:text-gray-200 leading-tight">
-                {{ __('Expense Approvals') }}
-            </h2>
-
-            <!-- Search bar -->
-            <form method="GET" action="{{ route('expenses.approvals.index') }}" class="flex items-center space-x-2">
-                <input type="text" name="search" value="{{ request('search') }}"
-                    placeholder="Search by user or category..."
-                    class="rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-indigo-500 focus:border-indigo-500 text-sm px-3 py-1.5 w-64">
-                <x-primary-button>Search</x-primary-button>
-            </form>
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                    {{ __('Expense Approvals') }}
+                </h2>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Review and manage pending and approved expense requests
+                </p>
+            </div>
         </div>
     </x-slot>
 
@@ -412,11 +409,8 @@
                     </table>
                 </div>
 
-                <div class="mt-4 text-right">
-                    <a href="{{ route('expenses.approvals.index') }}"
-                    class="text-sm text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300">
-                        View all approved expenses →
-                    </a>
+                <div class="mt-5">
+                    {{ $approvedExpenses->links() }}
                 </div>
             @else
                 <p class="text-gray-500 dark:text-gray-400 text-center py-4">

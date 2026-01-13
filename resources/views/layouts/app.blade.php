@@ -35,8 +35,8 @@
     }
 }" x-init="window.addEventListener('resize', () => { sidebarOpen = window.innerWidth >= 1024 }); if (darkMode) { document.documentElement.classList.add('dark') }">
         @auth
-        <div class="flex-1 flex flex-col">
-            <div class="flex flex-1">
+        <div class="flex-1 flex flex-col min-h-0">
+            <div class="flex flex-1 overflow-hidden">
                 @livewire('layout.sidebar')
             
                 <!-- Page Content -->
