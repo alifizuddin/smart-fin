@@ -26,6 +26,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('expenses/quick-store', [ExpenseController::class, 'quickStore'])
             ->name('expenses.quickStore');
             
+        Route::get('analytics', \App\Livewire\Staff\Analytics::class)
+            ->name('staff.analytics');
+            
         Route::delete('/expenses/{id}', [ExpenseController::class, 'destroy'])
             ->name('expenses.delete');
         Route::post('expenses/analyze', [ExpenseController::class, 'analyzeReceipt'])
@@ -60,6 +63,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('expenses/{expense}/reject', [ExpenseController::class, 'reject'])
         ->name('expenses.reject')
         ->middleware('role:Manager');
+        
+        // Forecasting
+        Route::get('/forecasting', \App\Livewire\Forecasting\Index::class)
+            ->name('forecasting.index');
         
         Route::get('budgets/report', [BudgetController::class, 'report'])->name('budgets.report');
     });

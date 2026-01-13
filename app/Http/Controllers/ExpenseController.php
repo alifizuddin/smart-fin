@@ -226,8 +226,7 @@ class ExpenseController extends Controller
                 ->where('status', 'approved')
                 ->with('user', 'budget')
                 ->latest()
-                ->take(10) // Show last 10 approved expenses
-                ->get();
+                ->paginate(10, ['*'], 'approved_page');
         }
 
         if (!$user->department_id) {
@@ -250,7 +249,7 @@ class ExpenseController extends Controller
             });
         }
 
-        $pendingExpenses = $query->orderBy('created_at', 'asc')->paginate(10);
+        $pendingExpenses = $query->orderBy('created_at', 'asc')->paginate(10, ['*'], 'pending_page');
 
         // Calculate stats for the department
         $totalExpenses = Expense::where('department_id', $user->department_id)->sum('amount');
