@@ -1,0 +1,297 @@
+{
+  "name": "SmartFin Anomaly Detector",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 3
+            }
+          ]
+        }
+      },
+      "id": "a2890bd7-d2e1-4a70-a94d-b3c1be72ed68",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -2368,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://smartfin-web/api/n8n/data",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {}
+      },
+      "id": "a1082b5a-7567-4126-adfb-196cfabd9d3e",
+      "name": "Get Financial Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -2160,
+        400
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "KFXVAcNPGg1IoGp4",
+          "name": "Manager Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.suspicious }}"
+            }
+          ]
+        }
+      },
+      "id": "5eb420c6-c4e3-419b-93fd-d42e0bb04d4e",
+      "name": "Suspicious?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -1520,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-oss:20b",
+          "mode": "list",
+          "cachedResultName": "gpt-oss:20b"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are a financial anomaly detection system. Respond ONLY in JSON.",
+              "role": "assistant"
+            },
+            {
+              "content": "Analyze the following expenses data.\nDetect:\n1. Budget usage above 80%\n2. Duplicate transactions (include user name in it instead of ID)\n3. Unusual spending spikes\n4. Use MYR (RM) only for the currency sign.\n5. Do not include any transaction ID in your output\n\n\nReturn:\n{\n  \"anomaly\": true|false,\n  \"severity\": \"info|warning|critical\",\n  \"summary\": \"concise alert\"\n}",
+              "role": "assistant"
+            },
+            {
+              "content": "={{ JSON.stringify($json.expenses) }}"
+            }
+          ]
+        },
+        "simplify": false,
+        "options": {
+          "temperature": 0.6,
+          "num_predict": 1024
+        }
+      },
+      "id": "1f8d3a32-7604-4282-b55c-ce4f18f84a60",
+      "name": "AI Analyzer (Structured)",
+      "type": "@n8n/n8n-nodes-langchain.ollama",
+      "typeVersion": 1,
+      "position": [
+        -1296,
+        400
+      ],
+      "credentials": {
+        "ollamaApi": {
+          "id": "w8pYD400hgVBHWCS",
+          "name": "SERVER PC"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.anomaly }}",
+              "operation": "notEqual"
+            }
+          ]
+        }
+      },
+      "id": "190bf080-9c4f-4061-8449-9a131c720e40",
+      "name": "Anomaly Detected?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -848,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://smartfin-web/api/n8n/alert",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"message\": \"{{ $json.summary }}\", \"severity\": \"{{ $json.severity }}\" }",
+        "options": {}
+      },
+      "id": "afa6e2cd-b580-4920-929a-ed0b8f86796e",
+      "name": "Send Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -624,
+        272
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "KFXVAcNPGg1IoGp4",
+          "name": "Manager Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = items[0].json;\n\n// Try all known Ollama output locations\nconst content =\n  data.content ??\n  data.text ??\n  data.output ??\n  data.message?.content;\n\nif (content === undefined) {\n  throw new Error(\n    \"AI output missing. Available keys: \" + Object.keys(data).join(\", \")\n  );\n}\n\n// Already parsed object\nif (typeof content === \"object\") {\n  return [{ json: content }];\n}\n\n// String → clean & parse\nif (typeof content === \"string\") {\n  const cleaned = content\n    .replace(/```json/gi, \"\")\n    .replace(/```/g, \"\")\n    .trim();\n\n  const match = cleaned.match(/\\{[\\s\\S]*\\}/);\n\n  if (!match) {\n    throw new Error(\"No JSON object found in AI output: \" + cleaned);\n  }\n\n  return [{ json: JSON.parse(match[0]) }];\n}\n\nthrow new Error(\n  \"Unexpected AI output type: \" +\n  Object.prototype.toString.call(content)\n);\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1008,
+        400
+      ],
+      "id": "609a1fff-9f3a-489d-9a63-1c74cb1925a1",
+      "name": "Parse"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = items[0].json;\n\nif (!data.expenses || !Array.isArray(data.expenses)) {\n  throw new Error(\"Invalid expenses data\");\n}\n\nconst cleaned = data.expenses.map(e => ({\n  id: String(e.id),\n  amount: Number(e.amount),\n  user: String(e.user),\n  category: String(e.category),\n  date: e.date\n}));\n\nreturn [\n  {\n    json: {\n      expenses: cleaned,\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1920,
+        400
+      ],
+      "id": "050cd7d6-40fe-40ca-b893-6edb62edd5ef",
+      "name": "Data Normalize"
+    },
+    {
+      "parameters": {
+        "jsCode": "const expenses = items[0].json.expenses;\nlet suspicious = false;\n\nconst seen = new Set();\n\nfor (const e of expenses) {\n  // Budget usage above 90%\n  if (e.amount > e.budget_limit * 0.9) {\n    suspicious = true;\n  }\n\n  // Duplicate transaction\n  if (seen.has(e.id)) {\n    suspicious = true;\n  }\n\n  seen.add(e.transaction_id);\n}\n\nreturn [\n  {\n    json: {\n      expenses,\n      suspicious\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1712,
+        400
+      ],
+      "id": "1ec28b58-10c9-4962-b54f-1a6d1e54b699",
+      "name": "Rule-based Anomaly Check"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Financial Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Suspicious?": {
+      "main": [
+        [
+          {
+            "node": "AI Analyzer (Structured)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anomaly Detected?": {
+      "main": [
+        [
+          {
+            "node": "Send Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Get Financial Data": {
+      "main": [
+        [
+          {
+            "node": "Data Normalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Analyzer (Structured)": {
+      "main": [
+        [
+          {
+            "node": "Parse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse": {
+      "main": [
+        [
+          {
+            "node": "Anomaly Detected?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Normalize": {
+      "main": [
+        [
+          {
+            "node": "Rule-based Anomaly Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rule-based Anomaly Check": {
+      "main": [
+        [
+          {
+            "node": "Suspicious?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6fbe5c9f-aee2-4d5b-9376-71aaf749224f",
+  "meta": {
+    "instanceId": "8812af9fcb3c0ba5b9c1cae6fb375b83eb901f68da76ce008d6dd13ada5975e4"
+  },
+  "id": "9bpWvq43ch0kRi0o",
+  "tags": []
+}

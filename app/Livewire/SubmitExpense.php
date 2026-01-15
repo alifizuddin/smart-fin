@@ -44,7 +44,7 @@ class SubmitExpense extends Component
             // Send to N8n Webhook
             $response = Http::attach(
                 'receipt', file_get_contents($filePath), $fileName
-            )->post('http://n8n:5678/webhook/process-receipt');
+            )->post('http://n8n:5678/webhook/receipt_process');
 
             if ($response->successful()) {
                 $data = $response->json();

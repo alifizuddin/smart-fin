@@ -1,0 +1,165 @@
+{
+  "name": "SmartFin Receipt Processor",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "process-receipt",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        416
+      ],
+      "id": "fe622347-120f-4d7a-820f-e84b3c23787c",
+      "name": "Webhook",
+      "webhookId": "bbefbd91-9d20-416e-8872-7d02c980152e"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the text output from the previous Gemini node\n// Note: 'text' matches the key we saw in your log: {\"text\": \"```json...\"}\nconst aiResponse = $input.first().json.message.content;\n\n// 1. Remove the Markdown code blocks (```json and ```)\nlet cleanJson = aiResponse.replace(/```json/g, \"\").replace(/```/g, \"\").trim();\n\n// 2. Parse the string into a real JSON object\ntry {\n  const parsedData = JSON.parse(cleanJson);\n  \n  // 3. Return the clean object\n  return { json: parsedData };\n} catch (error) {\n  // Fallback if AI returned bad JSON\n  return { json: { error: \"Failed to parse JSON\", raw: aiResponse } };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        416
+      ],
+      "id": "025d142c-32d3-4e3e-9c62-93c38ad9b21c",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        672,
+        416
+      ],
+      "id": "b4f8ae93-2245-4303-9070-e46e1ba2bcda",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "text": "=Read this image and extract the important data from this receipt image like category, short, 1-2 sentences description, amount, transaction date, and merchant. Output ONLY a single JSON object with this shape: { \"category\": \"...\", \"description\": \"...\", \"data\": { \"amount\": \"...\", \"date\": \"...\", \"merchant\": \"...\" } }. Categories that you must provide are: Travel, Food & Drink, Office Supplies, Software & Subscriptions, Utilities, Client Entertainment, Other.",
+        "inputType": "binary",
+        "binaryPropertyName": "receipt",
+        "simplify": false,
+        "options": {
+          "maxOutputTokens": 300
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        0,
+        592
+      ],
+      "id": "24afe5a6-e72c-4d5a-9c8b-26afe99c8746",
+      "name": "Analyze an image",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "sQZ5nG8glupegsm9",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "modelId": {
+          "__rl": true,
+          "value": "qwen3-vl:8b",
+          "mode": "list",
+          "cachedResultName": "qwen3-vl:8b"
+        },
+        "text": "Read this image and extract the important data from this receipt image like category, short, 1-2 sentences description, amount without currency sign, transaction date, and merchant. Output ONLY a single JSON object with this shape: { \"category\": \"...\", \"description\": \"...\", \"data\": { \"amount\": \"...\", \"date\": \"...\", \"merchant\": \"...\" } }. Categories that you must provide are: Travel, Food & Drink, Office Supplies, Software & Subscriptions, Utilities, Client Entertainment, Other. ",
+        "binaryPropertyName": "receipt",
+        "simplify": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.ollama",
+      "typeVersion": 1,
+      "position": [
+        224,
+        416
+      ],
+      "id": "8050ab5e-d941-445a-acff-564cf111a553",
+      "name": "Analyze image",
+      "alwaysOutputData": false,
+      "credentials": {
+        "ollamaApi": {
+          "id": "w8pYD400hgVBHWCS",
+          "name": "SERVER PC"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Analyze image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze an image": {
+      "main": [
+        []
+      ]
+    },
+    "Analyze image": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "26459e10-967c-4253-9e29-472bc97cd8df",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8812af9fcb3c0ba5b9c1cae6fb375b83eb901f68da76ce008d6dd13ada5975e4"
+  },
+  "id": "tkDBb3mi9F41pcHU",
+  "tags": []
+}

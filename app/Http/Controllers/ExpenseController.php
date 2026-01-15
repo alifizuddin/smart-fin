@@ -68,7 +68,7 @@ class ExpenseController extends Controller
     public function analyzeReceipt(Request $request)
     {
         $request->validate([
-            'receipt' => 'required|file|mimes:jpg,png,pdf|max:10240',
+            'receipt' => 'required|file|mimes:jpg,jpeg,png,pdf|max:10240',
         ]);
 
         // Send to N8N

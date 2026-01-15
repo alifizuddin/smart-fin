@@ -1,0 +1,132 @@
+{
+  "name": "SmartFin Expense Forecasting",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const rawResponse = $input.first().json.message.content;\n// Simple JSON extraction that works with different response formats\nconst jsonMatch = rawResponse.match(/\\{[\\s\\S]*\\}/) || [];\nif (jsonMatch.length === 0) {\n  throw new Error('No valid JSON found in response');\n}\ntry {\n  return JSON.parse(jsonMatch[0]);\n} catch (e) {\n  // Fallback to mock data if parsing fails\n  return {\n    projections: [\n      { date: new Date().toISOString().slice(0, 7) + '-01', amount: 5000, reasoning: 'Fallback projection' }\n    ],\n    confidence_score: 0.7\n  };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1424,
+        112
+      ],
+      "id": "4ff77da3-cb90-44d3-b0b8-393477d4a771",
+      "name": "Parse JSON"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "forecast",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "286fbd62-c4c9-4bdd-90e0-7636e1811b85",
+      "name": "Webhook1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        848,
+        112
+      ],
+      "webhookId": "d55e3b5f-ba3d-4155-9989-647d428f09d1"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-oss:20b",
+          "mode": "list",
+          "cachedResultName": "gpt-oss:20b"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a financial analyst AI. Analyze the provided expense data and predict the next 3 months of expenses. Be concise.\n\nInput Data:\n{{ JSON.stringify($json.body.historical_data) }}\n\nCategory: {{ $json.body.category == 'all' ? 'All Categories' : $json.body.category }}\n\nOutput ONLY valid JSON in this format:\n{\n  \"projections\": [\n    { \"date\": \"YYYY-MM-01\", \"amount\": 1234.56, \"reasoning\": \"Brief reason...\" }\n  ],\n  \"confidence_score\": 0.85\n}\nDo not output your thinking into the output.\n"
+            }
+          ]
+        },
+        "simplify": false,
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.ollama",
+      "typeVersion": 1,
+      "position": [
+        1072,
+        112
+      ],
+      "id": "caa32d5a-0dfe-493d-ba19-f9af57a7d795",
+      "name": "FORECASTER1",
+      "credentials": {
+        "ollamaApi": {
+          "id": "w8pYD400hgVBHWCS",
+          "name": "SERVER PC"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "d4a25a54-b1ca-4a4f-9934-38b8c8b29e0e",
+      "name": "Respond to Webhook1",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1648,
+        112
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Parse JSON": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "FORECASTER1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FORECASTER1": {
+      "main": [
+        [
+          {
+            "node": "Parse JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5ad0cbfa-c62c-4669-99de-9cc9587bdc98",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8812af9fcb3c0ba5b9c1cae6fb375b83eb901f68da76ce008d6dd13ada5975e4"
+  },
+  "id": "5mUO1d4k5QmhaaQm",
+  "tags": []
+}
