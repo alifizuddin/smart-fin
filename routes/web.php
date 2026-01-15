@@ -48,13 +48,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('role:Finance Admin'); // Only Admins can access
         
         Route::resource('users', UserController::class);
-
+        
         // This route is Admin-only, so it must be in this group
         Route::post('budgets/bulk-action', [BudgetController::class, 'bulkAction'])->name('budgets.bulkAction');
     });
 
     // --- ADMIN & MANAGER ROUTES ---
-    Route::middleware('role:Admin|Finance Admin|Manager')->group(function () {
+    Route::middleware('role:Finance Admin|Manager')->group(function () {
         // This single definition now works for both roles
         Route::post('expenses/{expense}/approve', [ExpenseController::class, 'approve'])
         ->name('expenses.approve')
@@ -90,7 +90,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
     
     // Reporting routes (handled by Livewire)
-    Route::middleware('role:Admin|Finance Admin')->group(function () {
+    Route::middleware('role:Finance Admin')->group(function () {
         Route::get('/reporting', \App\Livewire\Reporting::class)->name('reporting.index');
         Route::get('/reporting/export', [\App\Livewire\Reporting::class, 'exportReport'])->name('reporting.export');
     });
