@@ -48,7 +48,24 @@ class N8NService
             }
 
             // 3. Save Forecast to DB
-            if (isset($data['forecast_amount'])) {
+            // 3. Save Forecast to DB
+            if (isset($data['projections']) && is_array($data['projections'])) {
+                foreach ($data['projections'] as $projection) {
+                    Forecast::updateOrCreate(
+                        [
+                            'forecast_date' => Carbon::parse($projection['date']),
+                            'category' => $category
+                        ],
+                        [
+                            'amount' => $projection['amount'],
+                            'confidence_score' => $data['confidence_score'] ?? 0.85,
+                            'insights' => $projection['reasoning'] ?? 'Generated via N8N Service'
+                        ]
+                    );
+                }
+                return true;
+            } elseif (isset($data['forecast_amount'])) {
+                // Fallback for single month
                 Forecast::updateOrCreate(
                     [
                         'forecast_date' => Carbon::parse($data['target_date'] ?? Carbon::now()->addMonth()),
@@ -72,16 +89,33 @@ class N8NService
 
     private function mockN8NResponse($payload)
     {
-        // Simple mock logic: Average of last 3 months * 1.05 (5% growth)
+        // Simple mock logic: Average of last 3 months with slight growth
         $history = collect($payload['historical_data']);
         $last3 = $history->take(-3);
         $avg = $last3->avg('total') ?: 5000;
         
+        $projections = [];
+        $startDate = Carbon::parse($payload['target_date']);
+        $growthRate = 1.05; // 5% monthly growth
+
+        for ($i = 0; $i < 3; $i++) {
+            $monthDate = $startDate->copy()->addMonths($i);
+            $growthFactor = 1 + ($i * 0.02) + 0.05; // Base 5% + 2% per month
+            
+            $projections[] = [
+                'date' => $startDate->format('Y-m-01'),
+                'amount' => round($avg * pow($growthRate, $i), 2),
+                'reasoning' => sprintf('Projected %s based on historical average with %.1f%% monthly growth', 
+                    $startDate->format('F Y'), 
+                    ($growthRate - 1) * 100
+                )
+            ];
+            $startDate->addMonth();
+        }
+        
         return [
-            'forecast_amount' => round($avg * 1.05, 2),
-            'confidence' => 0.88,
-            'reasoning' => 'Based on linear regression of past 12 months data, specifically the recent uptrend.',
-            'target_date' => $payload['target_date']
+            'projections' => $projections,
+            'confidence_score' => 0.88,
         ];
     }
 }

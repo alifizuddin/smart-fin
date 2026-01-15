@@ -39,11 +39,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:Finance Admin|Admin')->group(function () {
         // Route::resource already creates index, edit, update, etc.
         // The individual routes before it were redundant.
-        Route::patch('budgets/{budget}/approve', [BudgetController::class, 'approve'])
+        Route::post('budgets/{budget}/approve', [BudgetController::class, 'approve'])
         ->name('budgets.approve')
         ->middleware('role:Finance Admin'); // Only Admins can access
 
-        Route::patch('budgets/{budget}/reject', [BudgetController::class, 'reject'])
+        Route::post('budgets/{budget}/reject', [BudgetController::class, 'reject'])
         ->name('budgets.reject')
         ->middleware('role:Finance Admin'); // Only Admins can access
         
@@ -56,11 +56,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // --- ADMIN & MANAGER ROUTES ---
     Route::middleware('role:Admin|Finance Admin|Manager')->group(function () {
         // This single definition now works for both roles
-        Route::patch('expenses/{expense}/approve', [ExpenseController::class, 'approve'])
+        Route::post('expenses/{expense}/approve', [ExpenseController::class, 'approve'])
         ->name('expenses.approve')
         ->middleware('role:Manager');
 
-        Route::patch('expenses/{expense}/reject', [ExpenseController::class, 'reject'])
+        Route::post('expenses/{expense}/reject', [ExpenseController::class, 'reject'])
         ->name('expenses.reject')
         ->middleware('role:Manager');
         

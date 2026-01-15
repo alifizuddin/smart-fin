@@ -16,12 +16,54 @@ class Index extends Component
     public $loading = false;
     public $lastUpdated;
     public $latestForecast;
+    public $upcomingForecasts = [];
+    public $category = null;
+    public $categories = []; // List of available categories
+    public $projectionMonths = 3;
     
     public function mount()
     {
-        $this->latestForecast = Forecast::whereNull('category')
-            ->orderBy('created_at', 'desc')
-            ->first();
+        // Load available categories from Expenses
+        $this->categories = Expense::distinct()
+            ->whereNotNull('category')
+            ->orderBy('category')
+            ->pluck('category')
+            ->toArray();
+
+        $this->loadLatestForecast();
+    }
+
+    public function updatedCategory()
+    {
+        $this->loadLatestForecast();
+        // Dispatch event to update the chart component
+        $this->dispatch('forecast-updated', category: $this->category);
+    }
+
+    public function loadLatestForecast()
+    {
+        $query = Forecast::query();
+
+        if ($this->category) {
+            $query->where('category', $this->category);
+        } else {
+            $query->whereNull('category');
+        }
+
+        // Get all future forecasts
+        $forecasts = $query
+            ->where('forecast_date', '>=', Carbon::now()->startOfMonth())
+            ->orderBy('forecast_date', 'asc')
+            ->limit(3) // Get up to 3 months of forecasts
+            ->get();
+
+        $this->upcomingForecasts = $forecasts->all();
+        $this->latestForecast = $forecasts->first();
+
+        // Fallback: if no future forecasts, get the most recent one
+        if ($forecasts->isEmpty()) {
+            $this->latestForecast = $query->orderBy('created_at', 'desc')->first();
+        }
 
         $this->lastUpdated = $this->latestForecast ? $this->latestForecast->updated_at->diffForHumans() : 'Never';
     }
@@ -31,14 +73,11 @@ class Index extends Component
         $this->loading = true;
         
         $service = new N8NService();
-        $success = $service->generateForecast(); // Global forecast
+        $success = $service->generateForecast($this->category); // Pass selected category
 
         if ($success) {
-            $this->latestForecast = Forecast::whereNull('category')
-                ->orderBy('created_at', 'desc')
-                ->first();
-            $this->lastUpdated = Carbon::now()->diffForHumans();
-            $this->dispatch('forecast-updated'); // Event to refresh chart
+            $this->loadLatestForecast();
+            $this->dispatch('forecast-updated', category: $this->category); 
         } else {
             // Flash error
             session()->flash('error', 'Failed to generate forecast. Check logs for details.');

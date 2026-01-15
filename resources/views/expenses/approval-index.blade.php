@@ -442,10 +442,14 @@
             const message = document.getElementById(modalId + 'Message');
             const confirmButton = document.getElementById(modalId + 'ConfirmButton');
             const form = document.getElementById(modalId + 'Form');
-
-            form.action = url;
-            modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
+            const methodInput = document.getElementById(modalId + 'Method');
+    
+                form.action = url;
+                form.method = 'POST'; // This is the actual form submission method
+                methodInput.innerHTML = '<input type="hidden" name="_method" value="PATCH">'; // This tells Laravel to treat it as PATCH
+                methodInput.innerHTML += '<input type="hidden" name="_token" value="' + document.querySelector('meta[name="csrf-token"]').getAttribute('content') + '">';
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
 
             setTimeout(() => {
                 card.classList.remove('scale-95', 'opacity-0');

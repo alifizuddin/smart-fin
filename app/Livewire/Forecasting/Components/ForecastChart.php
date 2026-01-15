@@ -12,10 +12,12 @@ use Livewire\Attributes\On;
 class ForecastChart extends Component
 {
     public $chartData = [];
+    public $category = null;
 
     #[On('forecast-updated')] 
-    public function updateChart()
+    public function updateChart($category = null)
     {
+        $this->category = $category;
         $this->loadData();
         $this->dispatch('chart-data-updated', data: $this->chartData);
     }
@@ -28,16 +30,29 @@ class ForecastChart extends Component
     public function loadData()
     {
         // 1. Historical Data (Last 12 Months)
-        $history = Expense::where('status', 'approved')
-            ->where('created_at', '>=', Carbon::now()->subMonths(11)->startOfMonth())
+        $historyQuery = Expense::where('status', 'approved')
+            ->where('created_at', '>=', Carbon::now()->subMonths(11)->startOfMonth());
+            
+        if ($this->category) {
+            $historyQuery->where('category', $this->category);
+        }
+
+        $history = $historyQuery
             ->selectRaw('DATE_FORMAT(created_at, "%Y-%m-01") as month, SUM(amount) as total')
             ->groupBy('month')
             ->orderBy('month')
             ->get();
 
         // 2. Forecast Data (Future)
-        $forecasts = Forecast::whereNull('category')
-            ->where('forecast_date', '>=', Carbon::now()->startOfMonth())
+        $forecastQuery = Forecast::where('forecast_date', '>=', Carbon::now()->startOfMonth());
+
+        if ($this->category) {
+            $forecastQuery->where('category', $this->category);
+        } else {
+            $forecastQuery->whereNull('category');
+        }
+
+        $forecasts = $forecastQuery
             ->orderBy('forecast_date')
             ->get();
 

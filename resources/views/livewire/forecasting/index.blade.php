@@ -1,20 +1,37 @@
 <div>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Financial Forecasting') }}
-        </h2>
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                    {{ __('Financial Forecasting') }}
+                </h2>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Overview of your financial activities and key metrics
+                </p>
+            </div>
+        </div>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             
             <!-- Control Panel -->
-            <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 flex flex-col md:flex-row justify-between items-center">
-                <div>
+            <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex-1">
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">AI-Powered Predictions</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
                         Last Updated: {{ $lastUpdated }}
                     </p>
+                </div>
+
+                <!-- Category Selector -->
+                <div class="w-full md:w-64">
+                    <select wire:model.live="category" class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                        <option value="">Global Overview (All)</option>
+                        @foreach($categories as $cat)
+                            <option value="{{ $cat }}">{{ $cat }}</option>
+                        @endforeach
+                    </select>
                 </div>
                 
                 <button wire:click="generateForecast" wire:loading.attr="disabled" class="mt-4 md:mt-0 flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:border-indigo-900 focus:ring ring-indigo-300 disabled:opacity-25 transition ease-in-out duration-150">
@@ -23,7 +40,7 @@
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     <span wire:loading.remove>Generate New Forecast</span>
-                    <span wire:loading>Processing with N8N...</span>
+                    <span wire:loading>Processing...</span>
                 </button>
             </div>
 
@@ -50,10 +67,21 @@
                     @if($latestForecast)
                         <div class="space-y-4">
                             <div>
-                                <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Predicted Next Month</p>
-                                <p class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
-                                    RM {{ number_format($latestForecast->amount, 2) }}
-                                </p>
+                                <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Projected Spending</p>
+                                <div class="space-y-4 mt-2">
+                                    @forelse($upcomingForecasts as $forecast)
+                                        <div class="border-l-2 border-indigo-400 pl-3">
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                                {{ $forecast->forecast_date->format('M Y') }}
+                                            </p>
+                                            <p class="text-xl font-bold text-indigo-600 dark:text-indigo-400">
+                                                RM {{ number_format($forecast->amount, 2) }}
+                                            </p>
+                                        </div>
+                                    @empty
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">No forecast data available</p>
+                                    @endforelse
+                                </div>
                             </div>
 
                              <div>
@@ -67,10 +95,19 @@
                             </div>
 
                             <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
-                                <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2">Why this prediction?</p>
-                                <p class="text-sm text-gray-700 dark:text-gray-300 italic">
-                                    "{{ $latestForecast->insights }}"
-                                </p>
+                                <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2">Analysis Insights</p>
+                                @if(count($upcomingForecasts) > 0)
+                                    <p class="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                                        {{ $latestForecast->insights }}
+                                    </p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                        Based on analysis of historical data and trends.
+                                    </p>
+                                @else
+                                    <p class="text-sm text-gray-700 dark:text-gray-300 italic">
+                                        Generate a forecast to see detailed insights.
+                                    </p>
+                                @endif
                             </div>
                         </div>
                     @else
