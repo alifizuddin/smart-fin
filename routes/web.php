@@ -49,6 +49,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         
         Route::resource('users', UserController::class);
         
+        // Department management
+        Route::resource('departments', \App\Http\Controllers\DepartmentController::class);
+        
         // This route is Admin-only, so it must be in this group
         Route::post('budgets/bulk-action', [BudgetController::class, 'bulkAction'])->name('budgets.bulkAction');
     });

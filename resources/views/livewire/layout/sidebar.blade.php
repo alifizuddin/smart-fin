@@ -93,6 +93,13 @@ new class extends Component
                     </svg>
                     <span x-show="sidebarOpen" class="ml-3">{{ __('User Management') }}</span>
                 </x-sidebar-link>
+
+                <x-sidebar-link :href="route('departments.index')" :active="request()->routeIs('departments.*')">
+                    <svg class="flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    <span x-show="sidebarOpen" class="ml-3">{{ __('Departments') }}</span>
+                </x-sidebar-link>
                 @endrole
 
                 @role('Finance Admin')
