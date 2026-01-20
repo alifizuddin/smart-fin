@@ -1,9 +1,16 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-2xl text-gray-800 dark:text-gray-200 leading-tight">
-                {{ __('Department Details') }}
-            </h2>
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                    {{ __('Department Details') }}
+                </h2>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    View detailed information about the department, including staff members and statistics.
+                </p>
+            </div>
+        </div>
             <div class="flex space-x-2">
                 <a href="{{ route('departments.edit', $department) }}" class="inline-flex items-center text-white bg-indigo-600 border border-transparent focus:outline-none hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 font-medium rounded-lg text-sm px-4 py-2 shadow-sm transition">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
