@@ -15,6 +15,7 @@ services:
       - db
     networks:
       - smartfin-net
+    mem_limit: 1024m
     
   queue:
     build:
@@ -31,6 +32,7 @@ services:
       - db
     networks:
       - smartfin-net
+    mem_limit: 512m
     
   n8n:
     image: n8nio/n8n
@@ -47,6 +49,7 @@ services:
       - DB_TYPE=sqlite
     networks:
       - smartfin-net
+    mem_limit: 1024m
 
 
   # 2. Nginx Web Server Service
@@ -56,6 +59,7 @@ services:
     restart: unless-stopped
     ports:
       - "8000:80" # Access the app at http://localhost:8000
+      - "5173:5173"
     volumes:
       - ./:/var/www/html
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
@@ -80,18 +84,7 @@ services:
       - smartfin-db-data:/var/lib/mysql
     networks:
       - smartfin-net
-
-  # 4. Python Flask API Service
-  python_api:
-    build:
-      context: ./receipt_processor # Assumes app.py is in this folder
-      dockerfile: Dockerfile.python
-    container_name: smartfin-python-api
-    restart: unless-stopped
-    ports:
-      - "5010:5010" # Expose the Python API at http://localhost:5000
-    networks:
-      - smartfin-net
+    mem_limit: 2048m
 
 # Define the network
 networks:

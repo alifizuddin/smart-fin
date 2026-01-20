@@ -20,9 +20,9 @@
             {{ $message }}
         </p>
 
-        <form id="{{ $id }}Form" method="POST" class="flex justify-center gap-4">
+        <form id="{{ $id }}Form" method="POST" action="" class="flex justify-center gap-4">
             @csrf
-            @method('PATCH')
+            <div id="{{ $id }}Method"></div>
             <button type="button" onclick="closeModal('{{ $id }}')" 
                 class="px-5 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition font-medium">
                 Cancel

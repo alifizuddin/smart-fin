@@ -25,10 +25,10 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN apt-get remove -y nodejs npm || true
 
 # Install Node.js 20.x
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-RUN apt-get install -y nodejs
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
 
-# Verify version (optional but helpful)
+# Verify version
 RUN node -v
 RUN npm -v
 
@@ -38,7 +38,11 @@ WORKDIR /var/www/html
 # Copy existing application files
 COPY . .
 
-# Fix permissions for storage and cache
+# 👉 Install PHP dependencies including laravel-dompdf
+RUN composer install --no-interaction --prefer-dist
+RUN composer require barryvdh/laravel-dompdf
+
+# Fix permissions
 RUN chown -R www-data:www-data storage bootstrap/cache
 RUN chmod -R 775 storage bootstrap/cache
 

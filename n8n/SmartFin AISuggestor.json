@@ -1,10 +1,10 @@
 {
-  "name": "aiSuggestion",
+  "name": "SmartFin AISuggestor",
   "nodes": [
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "8d2970f9-14ef-4741-96da-74228240b9eb",
+        "path": "suggestor",
         "responseMode": "responseNode",
         "options": {}
       },
@@ -12,11 +12,46 @@
       "typeVersion": 2.1,
       "position": [
         0,
-        0
+        32
       ],
       "id": "f87f92a1-0635-417f-bc2d-e0c8d86cb513",
       "name": "Webhook",
       "webhookId": "8d2970f9-14ef-4741-96da-74228240b9eb"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-oss:20b",
+          "mode": "list",
+          "cachedResultName": "gpt-oss:20b"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are SmartFin, a professional financial assistant for staff expense management.\n\nAnalyze the financial data provided below and generate exactly ONE actionable financial suggestion.\n\nRules you MUST follow:\n1. The suggestion must be 1–2 sentences only.\n2. Be specific and practical based on the data.\n3. Always include a currency symbol (use RM).\n4. Do NOT use bullet points, emojis, formatting, or line breaks.\n5. Do NOT explain your reasoning.\n6. Do NOT ask questions.\n7. Do NOT mention AI, models, or analysis.\n8. If spending is normal, provide a small optimization tip.\n9. If overspending or anomalies exist, prioritize cost reduction advice.\n10. If data is insufficient, give a general budgeting tip.\n\nFinancial data:\n{{ JSON.stringify($json.body) }}\n"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.4,
+          "num_predict": 1024
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.ollama",
+      "typeVersion": 1,
+      "position": [
+        224,
+        32
+      ],
+      "id": "28cc19e6-4aa1-4a67-a6f9-f44b64fc88cb",
+      "name": "AI Analyzer (Suggestion)",
+      "credentials": {
+        "ollamaApi": {
+          "id": "w8pYD400hgVBHWCS",
+          "name": "SERVER PC"
+        }
+      }
     },
     {
       "parameters": {
@@ -45,73 +80,41 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        464,
-        0
+        576,
+        32
       ],
       "id": "12cd6365-d539-464f-80e1-dd4ebb1119d8",
-      "name": "If"
+      "name": "IF NODE"
     },
     {
       "parameters": {
         "respondWith": "text",
-        "responseBody": "=\n  {{ $('Google Gemini').item.json.content.parts[0].text }}",
+        "responseBody": "=\n  {{ $('AI Analyzer (Suggestion)').item.json.content.parts[0].text }}\n",
         "options": {}
       },
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        640,
-        -32
-      ],
-      "id": "67825fc7-0231-481a-8198-e4b19c153d41",
-      "name": "Respond to Webhook"
-    },
-    {
-      "parameters": {
-        "respondWith": "text",
-        "responseBody": "=\n  {{ $('Google Gemini').item.json.content.parts[0].text }}\n",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.4,
-      "position": [
-        624,
-        112
+        800,
+        128
       ],
       "id": "89f13a9f-b8da-41a0-8750-4f406b5025a8",
-      "name": "Respond to Webhook1"
+      "name": "RESPOND IF FALSE"
     },
     {
       "parameters": {
-        "modelId": {
-          "__rl": true,
-          "value": "models/gemini-2.5-flash",
-          "mode": "list",
-          "cachedResultName": "models/gemini-2.5-flash"
-        },
-        "messages": {
-          "values": [
-            {
-              "content": "=You are a friendly financial assistant. Your job is to analyze a staff member's financial data and provide one, actionable tip starting with \"Tip:\" or \"Notice:\". Do not forget to put currency sign before any amount.\n\nHere is the data:\n- Budget: {{ JSON.stringify($json.body.budget) }}\n- Expenses: {{ JSON.stringify($json.body.expenses) }}\n\nAnalyze this data.\n- Always provide a tip or analysis for the budget for users, the length should be short to medium length. "
-            }
-          ]
-        },
+        "respondWith": "text",
+        "responseBody": "=\n  {{ $('AI Analyzer (Suggestion)').item.json.content.parts[0].text }}",
         "options": {}
       },
-      "type": "@n8n/n8n-nodes-langchain.googleGemini",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
       "position": [
-        176,
-        0
+        800,
+        -64
       ],
-      "id": "cecc48dc-1623-41d5-a0a9-6ad75c2df496",
-      "name": "Google Gemini",
-      "credentials": {
-        "googlePalmApi": {
-          "id": "sQZ5nG8glupegsm9",
-          "name": "Google Gemini(PaLM) Api account"
-        }
-      }
+      "id": "67825fc7-0231-481a-8198-e4b19c153d41",
+      "name": "RESPOND IF TRUE"
     }
   ],
   "pinData": {},
@@ -120,36 +123,36 @@
       "main": [
         [
           {
-            "node": "Google Gemini",
+            "node": "AI Analyzer (Suggestion)",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "If": {
+    "AI Analyzer (Suggestion)": {
       "main": [
         [
           {
-            "node": "Respond to Webhook",
+            "node": "IF NODE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF NODE": {
+      "main": [
+        [
+          {
+            "node": "RESPOND IF TRUE",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Respond to Webhook1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Google Gemini": {
-      "main": [
-        [
-          {
-            "node": "If",
+            "node": "RESPOND IF FALSE",
             "type": "main",
             "index": 0
           }
@@ -163,7 +166,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "availableInMCP": false
   },
-  "versionId": "13ba1e6c-5efb-4bdf-9c68-4e6a28b6af43",
+  "versionId": "d16dfad8-9f4d-480f-8240-2219445e2714",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "8812af9fcb3c0ba5b9c1cae6fb375b83eb901f68da76ce008d6dd13ada5975e4"

@@ -131,7 +131,6 @@ public function viewBudget($id)
     // Small delay to ensure the loading state is shown
     usleep(500000); // 100ms delay
     
-    
     try {
         $budget = Budget::with(['department', 'expenses' => function($q) {
             $q->where('status', 'approved');
@@ -165,8 +164,21 @@ public function viewBudget($id)
     $this->dispatch('open-budget-modal');
 }
 
-    public function editBudget($budgetId)
-    {
+    // app/Livewire/BudgetsTable.php
+
+// In BudgetsTable.php
+public $isLoading = false;
+
+public function editBudget($budgetId)
+{
+    $this->isLoading = true;
+    $this->editingBudget = null;
+    $this->reset('form');
+    
+    // Small delay to show loading state
+    usleep(300000); // 300ms
+    
+    try {
         $this->editingBudget = Budget::findOrFail($budgetId);
         $this->form = [
             'name' => $this->editingBudget->name,
@@ -175,8 +187,17 @@ public function viewBudget($id)
             'notes' => $this->editingBudget->notes,
             'status' => $this->editingBudget->status
         ];
+    } finally {
+        $this->isLoading = false;
     }
+}
 
+public function cancelEdit()
+{
+    $this->editingBudget = null;
+    $this->isLoading = false;
+    $this->reset('form');
+}
 public function updateBudget()
 {
     $this->validate([

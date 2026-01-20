@@ -16,10 +16,11 @@
         <style>
             [x-cloak] { display: none !important; }
         </style>
+        <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
         
         @livewireScripts
     </head>
-    <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900 h-full" x-data="{ 
+    <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900 min-h-screen flex flex-col" x-data="{ 
     sidebarOpen: window.innerWidth >= 1024,
     darkMode: localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches),
     toggleTheme() {
@@ -34,13 +35,16 @@
     }
 }" x-init="window.addEventListener('resize', () => { sidebarOpen = window.innerWidth >= 1024 }); if (darkMode) { document.documentElement.classList.add('dark') }">
         @auth
-            @livewire('layout.sidebar')
-        
-        <!-- Page Content -->
-        <main 
-            class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 dark:bg-gray-900 transition-all duration-300 ease-in-out"
-            :class="sidebarOpen ? 'ml-64' : 'ml-20'"
-        >
+        <div class="flex-1 flex flex-col min-h-0">
+            <div class="flex flex-1 overflow-hidden">
+                @livewire('layout.sidebar')
+            
+                <!-- Page Content -->
+                <div class="flex-1 flex flex-col min-h-screen">
+                    <main 
+                        class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 dark:bg-gray-900 transition-all duration-300 ease-in-out"
+                        :class="sidebarOpen ? 'ml-64' : 'ml-20'"
+                    >
             @if (isset($header))
                 <header class="bg-white dark:bg-gray-800 shadow">
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -49,8 +53,14 @@
                 </header>
             @endif
 
-            {{ $slot }}
-        </main>
+                        {{ $slot }}
+                    </main>
+                    
+                    <!-- Footer -->
+                    <x-footer class="mt-auto" />
+                </div>
+            </div>
+        </div>
         @else
             <div class="min-h-screen flex flex-col">
                 @if (Route::has('login'))

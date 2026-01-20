@@ -27,7 +27,7 @@
 
 @push('scripts')
     <script>
-        document.addEventListener('livewire:initialized', () => {
+        document.addEventListener('livewire:navigated', () => {
             let pieChart = null;
             let barChart = null;
             let doughnutChart = null;
@@ -40,7 +40,7 @@
 
                 // Department Pie Chart
                 // In the initCharts() function, update the pie chart section
-@if(auth()->user()->hasRole('Admin'))
+@if(auth()->user()->hasRole('Finance Admin|Admin'))
 const pieCtx = document.getElementById('departmentPieChart')?.getContext('2d');
 if (pieCtx && @js($this->pieChartData) && Object.keys(@js($this->pieChartData)).length > 0) {
     const pieData = {
@@ -72,7 +72,7 @@ if (pieCtx && @js($this->pieChartData) && Object.keys(@js($this->pieChartData)).
                             const value = context.raw || 0;
                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
                             const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                            return `${label}: $${value.toLocaleString()} (${percentage}%)`;
+                            return `${label}: RM${value.toLocaleString()} (${percentage}%)`;
                         }
                     }
                 }
@@ -113,7 +113,7 @@ if (pieCtx && @js($this->pieChartData) && Object.keys(@js($this->pieChartData)).
                                             const value = context.raw || 0;
                                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                             const percentage = Math.round((value / total) * 100);
-                                            return `${label}: $${value.toLocaleString()} (${percentage}%)`;
+                                            return `${label}: RM${value.toLocaleString()} (${percentage}%)`;
                                         }
                                     }
                                 }
@@ -164,7 +164,7 @@ if (pieCtx && @js($this->pieChartData) && Object.keys(@js($this->pieChartData)).
                                     beginAtZero: true,
                                     ticks: {
                                         callback: function(value) {
-                                            return '$' + value.toLocaleString();
+                                            return 'RM' + value.toLocaleString();
                                         }
                                     }
                                 },
@@ -181,7 +181,7 @@ if (pieCtx && @js($this->pieChartData) && Object.keys(@js($this->pieChartData)).
                                 tooltip: {
                                     callbacks: {
                                         label: function(context) {
-                                            return '$' + context.raw.toLocaleString();
+                                            return 'RM' + context.raw.toLocaleString();
                                         }
                                     }
                                 }

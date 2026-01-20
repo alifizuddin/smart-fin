@@ -34,12 +34,17 @@ class AiSuggestions extends Component
 
     public function fetchAiSuggestions()
     {
+        Log::info('AI Suggestions: Starting fetch process for budgetId: ' . $this->budgetId);
+        
         $user = Auth::user();
         $budget = Budget::find($this->budgetId);
 
         if (!$budget) {
+            Log::warning('AI Suggestions: Budget not found for ID: ' . $this->budgetId);
             return;
         }
+
+        Log::info('AI Suggestions: Found budget: ' . $budget->name);
 
         // Fetch expenses specifically for the AI context
         // We re-query here so this component is self-contained
@@ -49,7 +54,10 @@ class AiSuggestions extends Component
             ->take(20) // Limit context to recent items to save tokens/bandwidth
             ->get();
 
+        Log::info('AI Suggestions: Found ' . $expenses->count() . ' expenses');
+
         $aiServiceUrl = config('services.ai_suggester.url');
+        Log::info('AI Suggestions: Service URL: ' . $aiServiceUrl);
 
         if ($aiServiceUrl) {
             try {
@@ -66,22 +74,36 @@ class AiSuggestions extends Component
                     'date' => $exp->created_at->toIso8601String(),
                 ]);
 
-                $response = Http::timeout(15)->post($aiServiceUrl, [
+                $requestData = [
                     'user_id' => $user->id,
                     'budget' => $budgetData,
                     'expenses' => $expenseData,
-                ]);
+                ];
+
+                Log::info('AI Suggestions: Request data', $requestData);
+
+                $response = Http::timeout(15)->post($aiServiceUrl, $requestData);
+
+                Log::info('AI Suggestions: Response status: ' . $response->status());
+                Log::info('AI Suggestions: Response body: ' . $response->body());
 
                 if ($response->successful()) {
                     $text = trim($response->body());
                     if (!empty($text) && strcasecmp($text, 'All clear.') !== 0) {
                         $this->suggestions[] = $text;
+                        Log::info('AI Suggestions: Added suggestion: ' . $text);
+                    } else {
+                        Log::info('AI Suggestions: Response was empty or "All clear"');
                     }
+                } else {
+                    Log::error('AI Suggestions: HTTP error ' . $response->status() . ': ' . $response->body());
                 }
             } catch (\Exception $e) {
                 Log::error('AI Suggestion Service failed: ' . $e->getMessage());
                 $this->suggestions[] = "AI service temporarily unavailable.";
             }
+        } else {
+            Log::error('AI Suggestions: Service URL not configured');
         }
     }
 

@@ -1,0 +1,191 @@
+{
+  "name": "SmartFin Receipt Processor v2",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "b2e1444e-8329-4ee2-9f99-5e105d1089ce",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        416
+      ],
+      "id": "5d6a2252-cb0d-4071-9d48-c37e5bbf49dc",
+      "name": "Webhook",
+      "webhookId": "b2e1444e-8329-4ee2-9f99-5e105d1089ce"
+    },
+    {
+      "parameters": {
+        "jsCode": "const aiResponse = $input.first().json.message.content;\n\n// Find the JSON block even if there is text before/after it\nconst jsonMatch = aiResponse.match(/\\{[\\s\\S]*\\}/);\n\nif (jsonMatch) {\n  try {\n    return { json: JSON.parse(jsonMatch[0]) };\n  } catch (e) {\n    return { json: { error: \"Invalid JSON format\", raw: aiResponse } };\n  }\n}\nreturn { json: { error: \"No JSON found\", raw: aiResponse } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        416
+      ],
+      "id": "6c6424cb-9bff-4398-bd89-0091c83e0e37",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1024,
+        416
+      ],
+      "id": "f188cc12-70f6-4d33-afc3-119c3038f425",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "modelId": {
+          "__rl": true,
+          "value": "qwen3-vl:8b",
+          "mode": "list",
+          "cachedResultName": "qwen3-vl:8b"
+        },
+        "text": "=You are a receipt parsing system for SmartFin.\n\nRead the receipt image and extract the data accurately.\n\nRules:\n1. Output ONLY valid JSON.\n2. Do NOT include markdown, code blocks, or explanations.\n3. Amount must be numeric with decimals and WITH (RM) currency symbols.\n4. Date must be in YYYY-MM-DD format if visible.\n5. Description must be 1–2 short sentences.\n6. Merchant name must be concise.\n7. Choose ONE category from this exact list:\nTravel, Food & Drink, Office Supplies, Software & Subscriptions, Utilities, Client Entertainment, Other.\n8. If a field is unclear, use null.\n\nJSON format:\n{\n  \"category\": \"...\",\n  \"description\": \"...\",\n  \"data\": {\n    \"amount\": 0.00,\n    \"date\": \"DD-MM-YYYY\",\n    \"merchant\": \"...\"\n  }\n}\n",
+        "binaryPropertyName": "receipt",
+        "simplify": false,
+        "options": {
+          "num_predict": 1024
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.ollama",
+      "typeVersion": 1,
+      "position": [
+        224,
+        416
+      ],
+      "id": "3f1a4492-f463-451b-9ab3-a7fe26ccb0c5",
+      "name": "Analyze image",
+      "alwaysOutputData": false,
+      "credentials": {
+        "ollamaApi": {
+          "id": "w8pYD400hgVBHWCS",
+          "name": "SERVER PC"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are SmartFin’s receipt validation agent.\n\nYou receive structured receipt data extracted from OCR.\nYour job is to evaluate its quality and decide what should happen next.\n\nYou MUST:\n- Not modify the receipt values.\n- Not re-extract data.\n- Not explain your reasoning.\n\nEvaluate:\n1. Is the amount present and reasonable?\n2. Is the date valid or missing?\n3. Is the merchant meaningful?\n4. Does the category match the description?\n\nReturn ONLY this JSON:\n{\n  \"valid\": true | false,\n  \"confidence\": \"high\" | \"medium\" | \"low\",\n  \"action\": \"accept\" | \"request_reupload\" | \"manual_review\",\n  \"message\": \"short user-facing message\"\n}\n",
+        "options": {
+          "maxIterations": 1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        448,
+        416
+      ],
+      "id": "0b79a073-794d-4896-ab02-a56c8eec2d5d",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "gpt-oss:20b",
+        "options": {
+          "temperature": 0.3,
+          "numPredict": 1024
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        320,
+        624
+      ],
+      "id": "890a94b9-fa80-4be2-a5e3-abdf9928c7bb",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "w8pYD400hgVBHWCS",
+          "name": "SERVER PC"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Analyze image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze image": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f2e248cb-593f-4066-bb97-b8896e999a11",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8812af9fcb3c0ba5b9c1cae6fb375b83eb901f68da76ce008d6dd13ada5975e4"
+  },
+  "id": "bCIBTPpNxO32NQSO",
+  "tags": []
+}

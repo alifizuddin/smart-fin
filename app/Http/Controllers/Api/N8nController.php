@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Expense;
 use App\Models\Budget;
 use App\Models\User;
-use App\Notifications\NewAiAlert; // We will create this next
+use App\Notifications\NewAiAlert; 
 use Illuminate\Support\Facades\Log;
 
 class N8nController extends Controller

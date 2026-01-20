@@ -55,7 +55,7 @@ class UpdateProfileInformationForm extends Component
         $this->validate([
             'state.name' => ['required', 'string', 'max:255'],
             'state.email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($this->user->id)],
-            'photo' => ['nullable', 'mimes:jpg,jpeg,png', 'max:1024'],
+            'photo' => ['nullable', 'mimes:jpg,jpeg,png', 'max:2048'],
         ]);
 
         if ($this->photo) {

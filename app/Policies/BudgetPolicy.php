@@ -18,7 +18,7 @@ class BudgetPolicy
      */
     public function before(User $user, string $ability): ?bool
     {
-        if ($user->hasRole('Admin')) {
+        if ($user->hasRole('Finance Admin')) {
             return true;
         }
         

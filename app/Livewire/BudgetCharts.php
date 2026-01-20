@@ -36,16 +36,16 @@ class BudgetCharts extends Component
 
     #[On('filters-updated')]
     public function loadChartData()
-{
-    $request = request();
-    $allFilteredBudgets = $this->budgetService->getAllFilteredBudgets($request);
-    
-    // Get department data
-    $chartData = $this->budgetService->getBudgetChartData($allFilteredBudgets);
-    
-    // Initialize data structures
-    $this->departmentData = [
-        'budgets' => [],
+    {
+        $request = request();
+        $allFilteredBudgets = $this->budgetService->getAllFilteredBudgets($request);
+        
+        // Get department data
+        $chartData = $this->budgetService->getBudgetChartData($allFilteredBudgets);
+        
+        // Initialize data structures
+        $this->departmentData = [
+            'budgets' => [],
         'used' => []
     ];
     $this->departmentLabels = [];
