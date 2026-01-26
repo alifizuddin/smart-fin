@@ -2,18 +2,18 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl p-6 border border-gray-100 dark:border-gray-700">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                @hasrole('Admin')
-                    Budget Distribution
-                @else
-                    Spending By Category
-                @endhasrole
+                @hasanyrole('Admin|Finance Admin')
+                Budget Distribution
+            @else
+                Spending By Category
+            @endhasanyrole
             </h3>
             <div class="relative h-64">
-                @hasrole('Admin')
+                @hasanyrole('Admin|Finance Admin')
                     <canvas id="departmentPieChart" wire:ignore></canvas>
                 @else
                     <canvas id="categoryDoughnutChart" wire:ignore></canvas>
-                @endhasrole
+                @endhasanyrole
             </div>
         </div>
         <div class="lg:col-span-2 bg-white dark:bg-gray-800 shadow-sm rounded-xl p-6 border border-gray-100 dark:border-gray-700">
@@ -27,20 +27,29 @@
 
 @push('scripts')
     <script>
-        document.addEventListener('livewire:navigated', () => {
+        document.addEventListener('livewire:initialized', () => {
             let pieChart = null;
             let barChart = null;
             let doughnutChart = null;
 
             function initCharts() {
                 // Destroy existing charts if they exist
-                if (pieChart) pieChart.destroy();
-                if (barChart) barChart.destroy();
-                if (doughnutChart) doughnutChart.destroy();
+                if (pieChart) {
+                    pieChart.destroy();
+                    pieChart = null;
+                }
+                if (barChart) {
+                    barChart.destroy();
+                    barChart = null;
+                }
+                if (doughnutChart) {
+                    doughnutChart.destroy();
+                    doughnutChart = null;
+                }
 
                 // Department Pie Chart
                 // In the initCharts() function, update the pie chart section
-@if(auth()->user()->hasRole('Finance Admin|Admin'))
+@if(auth()->user()->hasAnyRole(['Admin', 'Finance Admin']))
 const pieCtx = document.getElementById('departmentPieChart')?.getContext('2d');
 if (pieCtx && @js($this->pieChartData) && Object.keys(@js($this->pieChartData)).length > 0) {
     const pieData = {
@@ -83,7 +92,7 @@ if (pieCtx && @js($this->pieChartData) && Object.keys(@js($this->pieChartData)).
 @endif
 
                 // Category Doughnut Chart
-                @if(!auth()->user()->hasRole('Admin'))
+                @if(!auth()->user()->hasAnyRole(['Admin', 'Finance Admin']))
                 const doughnutCtx = document.getElementById('categoryDoughnutChart')?.getContext('2d');
                 if (doughnutCtx && Object.keys(@js($this->categoryData) || {}).length > 0) {
                     doughnutChart = new Chart(doughnutCtx, {
@@ -195,11 +204,46 @@ if (pieCtx && @js($this->pieChartData) && Object.keys(@js($this->pieChartData)).
                 }
             }
 
-            if (@js($this->departmentData)?.budgets && @js($this->departmentLabels)?.length > 0) {
+            // Initialize charts when component is mounted
+            if (document.readyState === 'complete') {
                 initCharts();
-            }   
-
-            // Update charts when Livewire updates
+            } else {
+                window.addEventListener('load', initCharts);
+            }
+            
+            // Handle window resize with debounce
+            let resizeTimer;
+            const handleResize = () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    if (pieChart || barChart || doughnutChart) {
+                        initCharts();
+                    }
+                }, 250);
+            };
+            
+            window.addEventListener('resize', handleResize);
+            
+            // Clean up event listeners when component is destroyed
+            Livewire.on('destroy', () => {
+                window.removeEventListener('resize', handleResize);
+                window.removeEventListener('load', initCharts);
+                
+                if (pieChart) {
+                    pieChart.destroy();
+                    pieChart = null;
+                }
+                if (barChart) {
+                    barChart.destroy();
+                    barChart = null;
+                }
+                if (doughnutChart) {
+                    doughnutChart.destroy();
+                    doughnutChart = null;
+                }
+            });
+            
+            // Reinitialize charts when data is updated
             Livewire.on('charts-data-loaded', () => {
                 // Small delay to ensure DOM is updated
                 setTimeout(initCharts, 100);
