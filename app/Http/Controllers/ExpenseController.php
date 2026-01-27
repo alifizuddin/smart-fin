@@ -420,10 +420,15 @@ class ExpenseController extends Controller
     }
 
 
-    public function show(string $id)
-    {
-        //
+    public function show(Expense $expense)
+{
+    // Ensure the user can only view expenses from their department
+    if (auth()->user()->hasRole('Manager') && $expense->department_id !== auth()->user()->department_id) {
+        abort(403);
     }
+
+    return view('expenses.show', compact('expense'));
+}
 
 
     public function edit(string $id)
@@ -438,6 +443,68 @@ class ExpenseController extends Controller
     {
         //
     }
+    // Add this method to ExpenseController.php
+public function departmentExpenses(Request $request)
+{
+    $user = Auth::user();
+    
+    if (!$user->department_id) {
+        return redirect()->route('dashboard')
+            ->with('error', 'You must be associated with a department to view department expenses.');
+    }
+
+    $query = Expense::where('department_id', $user->department_id)
+        ->with(['user', 'budget'])
+        ->latest('transaction_date');
+
+    // Search functionality
+    if ($request->filled('search')) {
+        $searchTerm = $request->input('search');
+        $query->where(function($q) use ($searchTerm) {
+            $q->where('category', 'like', "%{$searchTerm}%")
+              ->orWhere('description', 'like', "%{$searchTerm}%")
+              ->orWhere('status', 'like', "%{$searchTerm}%")
+              ->orWhereHas('user', function($userQuery) use ($searchTerm) {
+                  $userQuery->where('name', 'like', "%{$searchTerm}%");
+              });
+        });
+    }
+
+    // Status filter
+    if ($request->filled('status') && $request->status !== 'all') {
+        $query->where('status', $request->status);
+    }
+
+    // Date range filter
+    if ($request->filled('start_date') && $request->filled('end_date')) {
+        $query->whereBetween('transaction_date', [
+            $request->start_date,
+            $request->end_date
+        ]);
+    }
+
+    $expenses = $query->paginate(15);
+
+    // Calculate department stats
+    $totalExpenses = Expense::where('department_id', $user->department_id)
+        ->sum('amount');
+    
+    $totalApproved = Expense::where('department_id', $user->department_id)
+        ->where('status', 'approved')
+        ->sum('amount');
+        
+    $pendingCount = Expense::where('department_id', $user->department_id)
+        ->where('status', 'pending')
+        ->count();
+
+    return view('expenses.department-expenses', [
+        'expenses' => $expenses,
+        'totalExpenses' => $totalExpenses,
+        'totalApproved' => $totalApproved,
+        'pendingCount' => $pendingCount,
+        'statuses' => ['all' => 'All Statuses', 'pending' => 'Pending', 'approved' => 'Approved', 'rejected' => 'Rejected']
+    ]);
+}
 
     /**
      * Remove the specified resource from storage.
