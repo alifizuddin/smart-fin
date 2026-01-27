@@ -81,7 +81,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         
         Route::patch('notifications/read/{id}', [DashboardController::class, 'markNotificationRead'])
             ->name('notifications.read');
-        Route::get('/manager/expenses', \App\Livewire\Manager\DepartmentExpenses::class)->name('manager.expenses');
+        Route::get('expenses/department', [ExpenseController::class, 'departmentExpenses'])
+            ->name('expenses.department');
+    
+        Route::get('/expenses/{expense}', [ExpenseController::class, 'show'])->name('expenses.show');
             
     });
     Route::middleware('role:Staff')->group(function () {
