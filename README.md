@@ -1,17 +1,13 @@
-# Smart Finance 360
+# SmartFin360
 
-## Prerequisites
+## 📌 Prerequisites
 
--   PHP >= 8.x
--   Composer
--   Node.js >= 14.x
--   MySQL or other database
--   Laravel 12
--   Python 3.8+
--   Pip (Python package manager)
--   Docker Desktop (Requires WSL 2 setup on Windows)
+-   Docker & Docker Compose
+-   Ollama (for local AI model hosting)
+-   Ngrok (for exposing webhooks to the internet)
+-   Node.js & NPM
 
-## Installation Guide
+## ⚙️ Environment Configuration
 
 1. Clone the repository:
 
@@ -19,53 +15,147 @@
    git clone https://github.com/alifizuddin/smart-fin
    cd repo-name
 ```
-1.  Set up environment variables:
+
+2.  Set up environment variables:
 
 ```bash
     cp .env.example .env
 ```
 
-2. Build and Start All Docker Services:
+3.  Update Database Credentials:
 
 ```bash
-    docker-compose up -d --build
+DB_HOST=db
+DB_DATABASE=smartfin
+DB_USERNAME=smartfin_user
+DB_PASSWORD=12345
 ```
 
-3.  Install PHP Dependencies:
+## 🐳 Docker Deployment
+
+SmartFin uses these containers:
+- Laravel app Container
+- n8n Automation
+- Nginx web server
+- mySQL database
+- Background Queue Worker
+
+1. Build and start services:
 
 ```bash
-    docker-compose exec app composer install
+   docker-compose up -d --build
 ```
 
-4.  Install JS dependencies and build assets:
+2. Verify Running Containers:
 
 ```bash
-    docker-compose exec app npm install
-    docker-compose exec app npm run build
+   docker ps
 ```
 
-5.  Generate application key:
+You should see:
+- smartfin-app ✅
+- smartfin-queue ✅
+- n8n_local ✅
+- smartfin-web ✅
+- smartfin-db ✅
+
+## 🚀 Application Initialization
+
+Run the following commands inside the smartfin-app container.
+
+1. Install PHP services:
 
 ```bash
-    docker-compose exec app php artisan key:generate
+   docker exec -it smartfin-app composer install
 ```
 
-6.  Run database migrations:
+2. Generate Laravel Application Key:
 
 ```bash
-    docker-compose exec app php artisan migrate
+   docker exec -it smartfin-app php artisan key:generate
 ```
 
-7.  Seed the database (with admin/user accounts)
+3. Run Database Migration & Seeder:
 
 ```bash
-    docker-compose exec app php artisan db:seed
+   docker exec -it smartfin-app php artisan migrate --seed
 ```
 
-8. Log In with:
+4. Compile Frontend Assets:
 
 ```bash
-    admin@example.com, pw: password
-    manager@example.com, pw: password
-    user@example.com, pw: password
+   npm install
+   npm run build
 ```
+
+## 🤖 Local AI Setup (Ollama)
+
+1. Pull Vision Model:
+
+```bash
+   ollama pull qwen3-vl:8b
+```
+
+2. Pull Language Model:
+
+```bash
+   ollama pull gpt-oss:20b
+```
+
+## 🔄 n8n Automation Setup
+
+1. Access n8n dashboard:
+
+```bash
+   http://localhost:5678
+```
+
+2. Import workflows:
+
+- Navigate to Workflows -> Import
+- Upload the following files into the workflows:
+
+```bash
+   - SmartFin Receipt Processor.json
+   - SmartFin Anomaly Detector.json
+   - SmartFin AISuggestor.json
+   - SmartFin Expense Forecasting.json
+   - SmartFin Chatbot.json
+```
+
+## 🌐 Ngrok Setup (External Webhooks)
+
+1. Expose n8n Port:
+
+```bash
+   ngrok http 5678
+```
+
+## 🖥 Accessing the System
+
+1. Main Application:
+
+```bash
+   http://localhost:8000
+```
+
+2. n8n Dashboard:
+
+```bash
+   http://localhost:5678
+```
+
+## 🔑 Default Test Accounts
+
+```bash
+   admin@axample.com, pw: password
+   financeadmin@example.com, pw: password
+   manager@example.com, pw: password
+   staff@example.com, pw: password
+```
+
+
+
+
+
+
