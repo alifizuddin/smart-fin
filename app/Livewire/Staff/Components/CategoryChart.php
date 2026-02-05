@@ -13,6 +13,11 @@ class CategoryChart extends Component
 
     public function mount()
     {
+        $this->updateChartData();
+    }
+
+    public function updateChartData()
+    {
         $user = Auth::user();
 
         // Group by category, sum amount

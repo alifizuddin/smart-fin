@@ -10,8 +10,15 @@ use Carbon\Carbon;
 class SpendingChart extends Component
 {
     public $chartData = [];
+    public $filter = 'all';
+    public $dateRange = 'all';
 
     public function mount()
+    {
+        $this->updateChartData();
+    }
+
+    public function updateChartData()
     {
         $user = Auth::user();
         
@@ -26,11 +33,12 @@ class SpendingChart extends Component
         });
 
         $data = $months->map(function ($date) use ($user) {
-            return Expense::where('user_id', $user->id)
+            $query = Expense::where('user_id', $user->id)
                 ->where('status', 'approved')
                 ->whereYear('created_at', $date->year)
-                ->whereMonth('created_at', $date->month)
-                ->sum('amount');
+                ->whereMonth('created_at', $date->month);
+            
+            return $query->sum('amount');
         });
 
         $this->chartData = [

@@ -7,10 +7,18 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Expense;
 use Carbon\Carbon;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
+use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
 class Analytics extends Component
 {
+    use WithPagination;
+    
+    public $filter = 'all';
+    public $dateRange = 'all';
+    public $perPage = 5;
+
     public function render()
     {
         $user = Auth::user();
@@ -19,6 +27,15 @@ class Analytics extends Component
         $totalSpent = Expense::where('user_id', $user->id)
             ->where('status', 'approved')
             ->sum('amount');
+            
+        // Handle pagination with filters
+        $query = Expense::where('user_id', $user->id)
+            ->when($this->filter !== 'all', function($q) {
+                return $q->where('status', $this->filter);
+            })
+            ->latest();
+            
+        $recentExpenses = $query->paginate($this->perPage);
 
         // 2. Pending Amount
         $pendingAmount = Expense::where('user_id', $user->id)
@@ -41,11 +58,21 @@ class Analytics extends Component
             $trend = (($thisMonth - $lastMonth) / $lastMonth) * 100;
         }
 
-        // 4. Recent Transactions
-        $recentExpenses = Expense::where('user_id', $user->id)
-            ->latest()
-            ->take(5)
-            ->get();
+        // Apply date range filter if needed
+        if ($this->dateRange !== 'all') {
+            $now = Carbon::now();
+            switch ($this->dateRange) {
+                case 'this_month':
+                    $query->whereYear('created_at', $now->year)
+                          ->whereMonth('created_at', $now->month);
+                    break;
+                case 'last_month':
+                    $lastMonth = $now->copy()->subMonth();
+                    $query->whereYear('created_at', $lastMonth->year)
+                          ->whereMonth('created_at', $lastMonth->month);
+                    break;
+            }
+        }
 
         return view('livewire.staff.analytics', [
             'totalSpent' => $totalSpent,
@@ -54,5 +81,46 @@ class Analytics extends Component
             'trend' => $trend,
             'recentExpenses' => $recentExpenses
         ]);
+    }
+
+    #[On('filter-by-status')]
+    public function filterByStatus($status)
+    {
+        $this->filter = $status;
+        $this->resetPage(); // Reset to first page when filtering
+    }
+
+    #[On('filter-by-date')]
+    public function filterByDate($dateRange)
+    {
+        $this->dateRange = $dateRange;
+        $this->resetPage(); // Reset to first page when filtering
+    }
+
+    public function resetFilters()
+    {
+        $this->filter = 'all';
+        $this->dateRange = 'all';
+        $this->resetPage(); // Reset to first page when resetting filters
+    }
+    
+    public function updatedFilter()
+    {
+        $this->resetPage();
+    }
+    
+    public function updatedDateRange()
+    {
+        $this->resetPage();
+    }
+
+    /**
+     * Check if a filter is currently being applied
+     */
+    public function isFiltering(): bool
+    {
+        return $this->getErrorBag()->has('filter') || 
+               $this->getErrorBag()->has('dateRange') ||
+               $this->getErrorBag()->has('perPage');
     }
 }
