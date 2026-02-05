@@ -41,53 +41,55 @@
             <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">My Expense Submissions</h2>
-                    <button class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                    <a href="{{ route('expenses.my-expenses') }}" class="bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition">
                         View All
-                    </button>
+                    </a>
                 </div>
                 
                 @if($userExpenses->count() > 0)
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full">
-                            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                                @foreach ($userExpenses->take(6) as $expense)
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition">
-                                        <td class="py-3 pl-2">
-                                            <div class="flex items-center space-x-3">
-                                                <div class="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg text-indigo-600 dark:text-indigo-400">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                                                </div>
-                                                <div>
-                                                    <p class="font-semibold text-sm text-gray-900 dark:text-gray-100">{{ $expense->category }}</p>
-                                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $expense->created_at->format('M d, Y') }}</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="py-3 text-right pr-4">
-                                            <p class="font-bold text-sm text-gray-900 dark:text-gray-100">RM {{ number_format($expense->amount, 2) }}</p>
-                                            @php
-                                                $statusColors = [
-                                                    'pending'  => 'text-yellow-600 dark:text-yellow-400',
-                                                    'approved' => 'text-green-600 dark:text-green-400',
-                                                    'rejected' => 'text-red-600 dark:text-red-400',
-                                                ];
-                                            @endphp
-                                            <p class="text-xs font-medium {{ $statusColors[$expense->status] ?? 'text-gray-500' }}">
-                                                {{ ucfirst($expense->status) }}
-                                            </p>
-                                        </td>
-                                        <td class="py-3 text-right w-10">
-                                            <form action="{{ route('expenses.delete', $expense->id) }}" method="POST" onsubmit="event.preventDefault(); confirmAction('{{ route('expenses.delete', $expense->id) }}', 'delete', 'confirmationModal', 'expense');" class="inline-block">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" class="text-gray-400 hover:text-red-500 transition">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4h6v3m-9 0h12" /></svg>
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                    <div class="space-y-4">
+                        @foreach ($userExpenses->take(5) as $expense)
+                            <div class="flex justify-between items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-700/30 rounded-lg transition border border-transparent hover:border-gray-100 dark:hover:border-gray-700">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
+                                        {{ strtoupper(substr($expense->category, 0, 2)) }}
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-sm text-gray-900 dark:text-gray-100">{{ $expense->category }}</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $expense->budget->name ?? 'No Budget' }}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center space-x-4">
+                                    <div class="text-right">
+                                        <p class="font-bold text-sm text-gray-900 dark:text-gray-100">RM {{ number_format($expense->amount, 2) }}</p>
+                                        @php
+                                            $statusColors = [
+                                                'pending'  => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
+                                                'approved' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
+                                                'rejected' => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
+                                            ];
+                                            $statusText = [
+                                                'pending'  => 'Pending',
+                                                'approved' => 'Approved',
+                                                'rejected' => 'Rejected',
+                                            ];
+                                        @endphp
+                                        <span class="text-xs font-semibold px-2.5 py-1 rounded-full {{ $statusColors[$expense->status] ?? 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300' }}">
+                                            {{ $statusText[$expense->status] ?? ucfirst($expense->status) }}
+                                        </span>
+                                    </div>
+                                    <form action="{{ route('expenses.delete', $expense->id) }}" method="POST" onsubmit="event.preventDefault(); confirmAction('{{ route('expenses.delete', $expense->id) }}', 'delete', 'confirmationModal', 'expense');" class="inline-block">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="text-gray-400 hover:text-red-500 transition p-1 -mr-1" title="Delete">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4h6v3m-9 0h12" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 @else
                     <div class="text-center py-10 text-gray-500 dark:text-gray-400 text-sm italic">
@@ -99,12 +101,39 @@
             <div class="grid grid-rows-2 gap-6">
                 <livewire:budget-status :activeBudget="$activeBudget" />
 
-                <div class="bg-gray-900 dark:bg-black p-6 rounded-xl shadow-lg flex flex-col justify-between text-white relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-24 h-24 bg-blue-500/20 rounded-full blur-2xl -mr-10 -mt-10"></div>
-                    <h2 class="text-lg font-semibold relative z-10">Quick Action</h2>
-                    <p class="text-sm text-gray-400 relative z-10 mt-1">Submit new expense</p>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden transition-colors duration-200">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-indigo-100 dark:bg-indigo-900/30 rounded-full blur-2xl -mr-10 -mt-10"></div>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white relative z-10">Quick Actions</h2>
+                    <p class="text-sm text-gray-600 dark:text-gray-300 relative z-10 mt-1 mb-4">Access common tasks quickly</p>
                     
-                    <livewire:submit-expense />
+                    <div class="space-y-3">
+                        <a href="{{ route('expenses.create') }}" class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200 border border-gray-100 dark:border-gray-700">
+                            <div class="p-2 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-300 rounded-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                </svg>
+                            </div>
+                            <span class="text-sm font-medium text-gray-800 dark:text-gray-200">New Expense</span>
+                        </a>
+                        
+                        <a href="{{ route('expenses.my-expenses') }}" class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200 border border-gray-100 dark:border-gray-700">
+                            <div class="p-2 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-300 rounded-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
+                            </div>
+                            <span class="text-sm font-medium text-gray-800 dark:text-gray-200">View My Submissions</span>
+                        </a>
+                        
+                        <a href="#" class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200 border border-gray-100 dark:border-gray-700">
+                            <div class="p-2 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-300 rounded-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                                </svg>
+                            </div>
+                            <span class="text-sm font-medium text-gray-800 dark:text-gray-200">Expense Reports</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -351,23 +380,47 @@
                     </div>
                 </div>
 
-                <div class="bg-gray-900 dark:bg-black p-6 rounded-xl shadow-lg flex flex-col justify-between text-white relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-24 h-24 bg-indigo-500/20 rounded-full blur-2xl -mr-10 -mt-10"></div>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden transition-colors duration-200">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-blue-100 dark:bg-blue-900/30 rounded-full blur-2xl -mr-10 -mt-10"></div>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white relative z-10">Manager Actions</h2>
+                    <p class="text-sm text-gray-600 dark:text-gray-300 relative z-10 mt-1 mb-4">Quick access to management tools</p>
                     
-                    <h2 class="text-lg font-semibold relative z-10">Quick Actions</h2>
-                    
-                    <div class="flex items-center justify-around mt-4 relative z-10">
-                        <button class="bg-white/10 hover:bg-white/20 p-3 rounded-full transition group" title="Download Reports">
-                            <svg class="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        </button>
+                    <div class="space-y-3">
+                        <a href="#" class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200 border border-gray-100 dark:border-gray-700">
+                            <div class="p-2 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 rounded-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <span class="text-sm font-medium text-gray-800 dark:text-gray-200 block">Approve Expenses</span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400">{{ $pendingExpenses->count() }} pending</span>
+                            </div>
+                        </a>
                         
-                        <button class="bg-indigo-600 hover:bg-indigo-500 p-4 rounded-full shadow-lg transform hover:scale-105 transition" title="New Budget">
-                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                        </button>
+                        <a href="#" class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200 border border-gray-100 dark:border-gray-700">
+                            <div class="p-2 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 rounded-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <span class="text-sm font-medium text-gray-800 dark:text-gray-200 block">Generate Reports</span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400">Monthly, quarterly, custom</span>
+                            </div>
+                        </a>
                         
-                        <button class="bg-white/10 hover:bg-white/20 p-3 rounded-full transition group" title="Settings">
-                            <svg class="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                        </button>
+                        <a href="#" class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200 border border-gray-100 dark:border-gray-700">
+                            <div class="p-2 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 rounded-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <span class="text-sm font-medium text-gray-800 dark:text-gray-200 block">View Analytics</span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400">Spending trends & insights</span>
+                            </div>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -592,32 +645,37 @@
 @hasrole('Finance Admin')
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         
+        <!-- Enhanced KPI Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-5 rounded-xl shadow-sm">
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800/30 text-blue-800 dark:text-blue-300 p-5 rounded-xl shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-20 h-20 bg-blue-400/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
                 <div class="flex justify-between items-start relative z-10">
                     <div>
-                        <p class="text-sm font-medium text-gay-700 dark:text-gray-400">Pending Dept. Approvals</p>
-                        <p class="text-3xl font-bold mt-1 text-gray-900 dark:text-gray-100">5</p>
+                        <p class="text-sm font-medium text-blue-700 dark:text-blue-400">Pending Approvals</p>
+                        <p class="text-3xl font-bold mt-1">{{ $pendingExpenses->count() ?? 5 }}</p>
                         <div class="flex items-center text-xs mt-2 text-blue-700 dark:text-blue-400">
-                            <span>Action Required</span>
+                            <span class="font-bold mr-1">{{ $pendingExpenses->count() > 0 ? '!' : '✓' }}</span>
+                            <span>{{ $pendingExpenses->count() > 0 ? 'Action Required' : 'All Clear' }}</span>
                         </div>
                     </div>
-                    <div class="bg-white/60 dark:bg-white/10 p-2 rounded-full text-green-800 dark:text-gray-300">
+                    <div class="bg-white/60 dark:bg-white/10 p-2 rounded-full text-blue-800 dark:text-blue-300">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-5 rounded-xl shadow-sm">
-                <div class="flex justify-between items-start">
+            <div class="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800/30 text-green-800 dark:text-green-300 p-5 rounded-xl shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-20 h-20 bg-green-400/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
+                <div class="flex justify-between items-start relative z-10">
                     <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Budget Utilization</p>
-                        <p class="text-3xl font-bold mt-1 text-gray-900 dark:text-gray-100">75%</p>
-                        <div class="flex items-center text-xs mt-2 text-blue-600 dark:text-blue-400">
-                            <span>Total annual spent</span>
+                        <p class="text-sm font-medium text-green-700 dark:text-green-400">Total Budget Utilization</p>
+                        <p class="text-3xl font-bold mt-1">73%</p>
+                        <div class="flex items-center text-xs mt-2 text-green-700 dark:text-green-400">
+                            <span class="font-bold mr-1">↑ 5%</span>
+                            <span>from last month</span>
                         </div>
                     </div>
-                    <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-full text-gray-600 dark:text-gray-400">
+                    <div class="bg-white/60 dark:bg-white/10 p-2 rounded-full text-green-800 dark:text-green-300">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
                                 d="M21 12A9 9 0 113 12a9 9 0 0118 0z" />
@@ -628,31 +686,35 @@
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-5 rounded-xl shadow-sm">
-                <div class="flex justify-between items-start">
+            <div class="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 border border-orange-200 dark:border-orange-800/30 text-orange-800 dark:text-orange-300 p-5 rounded-xl shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-20 h-20 bg-orange-400/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
+                <div class="flex justify-between items-start relative z-10">
                     <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Budget Alerts</p>
-                        <p class="text-3xl font-bold mt-1 text-gray-900 dark:text-gray-100">3</p>
-                        <div class="flex items-center text-xs mt-2 text-blue-600 dark:text-blue-400">
+                        <p class="text-sm font-medium text-orange-700 dark:text-orange-400">Budget Alerts</p>
+                        <p class="text-3xl font-bold mt-1">{{ count($anomalyAlerts) ?? 3 }}</p>
+                        <div class="flex items-center text-xs mt-2 text-orange-700 dark:text-orange-400">
+                            <span class="font-bold mr-1">⚠️</span>
                             <span>Depts nearing limits</span>
                         </div>
                     </div>
-                    <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-full text-gray-600 dark:text-gray-400">
+                    <div class="bg-white/60 dark:bg-white/10 p-2 rounded-full text-orange-800 dark:text-orange-300">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-5 rounded-xl shadow-sm">
-                <div class="flex justify-between items-start">
+            <div class="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800/30 text-purple-800 dark:text-purple-300 p-5 rounded-xl shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-20 h-20 bg-purple-400/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
+                <div class="flex justify-between items-start relative z-10">
                     <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Pending Reallocation</p>
-                        <p class="text-3xl font-bold mt-1 text-gray-900 dark:text-gray-100">2</p>
-                        <div class="flex items-center text-xs mt-2 text-blue-600 dark:text-blue-400">
-                            <span>Transfering awaiting review</span>
+                        <p class="text-sm font-medium text-purple-700 dark:text-purple-400">Monthly Savings</p>
+                        <p class="text-3xl font-bold mt-1">RM 45K</p>
+                        <div class="flex items-center text-xs mt-2 text-purple-700 dark:text-purple-400">
+                            <span class="font-bold mr-1">↑ 12%</span>
+                            <span>vs forecast</span>
                         </div>
                     </div>
-                    <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-full text-gray-600 dark:text-gray-400">
+                    <div class="bg-white/60 dark:bg-white/10 p-2 rounded-full text-purple-800 dark:text-purple-300">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                                 d="M7 7h14M7 7l4-4M7 7l4 4M17 17H3m14 0l-4-4m4 4l-4 4"/>
@@ -661,95 +723,215 @@
                 </div>
             </div>
         </div>
-            
-                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-6">
-                    <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-5 rounded-xl shadow-sm flex flex-col gap-6">
-                        <h3 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Departmental Budget Approval</h3>
-                        <div class="flex flex-col gap-3">
-                            <div class="flex items-center justify-between p-3 rounded-md bg-slate-50">
-                                <div>
-                                    <p class="font-semibold text-gray-900 dark:text-gray-100">Marketing Q3 Campaign</p>
-                                    <p class="text-sm text-gray-500">$25,000 - Submitted by O. Bennett</p>
-                                </div>
-                                <div class="flex gap-2">
-                                <button class="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-500 hover:bg-green-600 text-white text-sm font-medium shadow-sm transition">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                    Approve
-                                </button>
-                                <button class="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-medium shadow-sm transition">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                    </svg>
-                                    Reject
-                                </button>
-                                </div>
-                            </div>
-                        <div class="flex items-center justify-between p-3 rounded-md bg-slate-50">
-                            <div>
-                                <p class="font-semibold text-gray-900 dark:text-gray-100">Sales Team Software Upgrade</p>
-                                <p class="text-sm text-gray-500">$15,000 - Submitted by L. Harper</p>
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-500 hover:bg-green-600 text-white text-sm font-medium shadow-sm transition">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                    Approve
-                                </button>
-                                <button class="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-medium shadow-sm transition">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                    </svg>
-                                    Reject
-                                </button>
-                            </div>
-                        </div>
-                        <button class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400">Review All Proposals</button>
-                    </div>
-                </div>
-
-                <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-5 rounded-xl shadow-sm flex flex-col gap-6">
-                <h3 class="ml-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Fund Reallocation</h3>
-                    <form class="flex flex-col gap-3">
-                        <div class="grid grid-cols-2 gap-3">
-                            <select class="w-full rounded-md border-gray-300 text-sm">
-                                <option>From: Finance</option>
-                                <option>From: Human Resources</option>
-                                <option>From: Information Technology</option>
-                                <option>From: Marketing</option>
-                                <option>From: Sales</option>
-                                <option>From: Operations</option>
-                            </select>
-                            <select class="w-full rounded-md border-gray-300 text-sm">
-                                <option>To: Finance</option>
-                                <option>To: Human Resources</option>
-                                <option>To: Information Technology</option>
-                                <option>To: Marketing</option>
-                                <option>To: Sales</option>
-                                <option>To: Operations</option>
-                            </select>
-                        </div>
-                        <input class="w-full rounded-md border-gray-300 text-sm" placeholder="Amount" type="text"/>
-                            <button class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400">Initiate Transfer</button>                    
-                    </form>
-                </div>
+        <!-- Enhanced Main Content Grid -->
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-6">
+            <!-- Financial Analytics Chart -->
+            <div class="xl:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                <livewire:finance-chart />
             </div>
 
+            <!-- Budget Status Overview -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Budget Status</h2>
+                    <span class="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs font-bold px-2 py-1 rounded-full">
+                        On Track
+                    </span>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Total Budget</span>
+                            <span class="text-sm font-bold text-gray-900 dark:text-gray-100">RM 2.5M</span>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full" style="width: 100%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Spent</span>
+                            <span class="text-sm font-bold text-gray-900 dark:text-gray-100">RM 1.83M</span>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full" style="width: 73%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Remaining</span>
+                            <span class="text-sm font-bold text-gray-900 dark:text-gray-100">RM 670K</span>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-orange-500 to-amber-500 h-2 rounded-full" style="width: 27%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        <!-- Enhanced Action Items -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+            <!-- Departmental Budget Approvals -->
+            <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Departmental Budget Approvals</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Pending budget proposals requiring review</p>
+                    </div>
+                    <button class="bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition">
+                        View All ({{ $pendingExpenses->count() ?? 5 }})
+                    </button>
+                </div>
+                
+                @if($pendingExpenses->count() > 0)
+                    <div class="space-y-4">
+                        @foreach ($pendingExpenses->take(3) as $expense)
+                            <div class="flex justify-between items-center p-4 hover:bg-gray-50 dark:hover:bg-gray-700/30 rounded-lg transition border border-transparent hover:border-gray-100 dark:hover:border-gray-700">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                                        {{ substr($expense->user->name ?? 'UN', 0, 2) }}
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-gray-900 dark:text-gray-100">{{ $expense->description ?? 'Budget Proposal' }}</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $expense->budget->name ?? 'Unknown Department' }} • Submitted by {{ $expense->user->name ?? 'Unknown User' }}</p>
+                                        <div class="flex items-center space-x-4 mt-2">
+                                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                                                {{ $expense->category ?? 'General' }}
+                                            </span>
+                                            <span class="text-xs text-gray-400 dark:text-gray-500">{{ $expense->created_at->format('M d, Y h:i A') }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center space-x-4">
+                                    <div class="text-right">
+                                        <p class="font-bold text-lg text-gray-900 dark:text-gray-100">RM {{ number_format($expense->amount, 2) }}</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $expense->status ?? 'pending' }}</p>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button class="flex items-center gap-1 px-3 py-2 rounded-lg bg-green-500 hover:bg-green-600 text-white text-sm font-medium shadow-sm transition">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                            Approve
+                                        </button>
+                                        <button class="flex items-center gap-1 px-3 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-medium shadow-sm transition">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                            Reject
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-center py-10 text-gray-500 dark:text-gray-400 text-sm italic">
+                        <svg class="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        No pending budget approvals.
+                    </div>
+                @endif
+            </div>
 
+            <!-- Enhanced Fund Reallocation -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Fund Reallocation</h2>
+                    <span class="bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-xs font-bold px-2 py-1 rounded-full">
+                        2 Pending
+                    </span>
+                </div>
+                
+                <form class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Transfer From</label>
+                        <select class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-100">
+                            <option>Finance Department</option>
+                            <option>Human Resources</option>
+                            <option>Information Technology</option>
+                            <option>Marketing</option>
+                            <option>Sales</option>
+                            <option>Operations</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Transfer To</label>
+                        <select class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-100">
+                            <option>Marketing</option>
+                            <option>Sales</option>
+                            <option>Operations</option>
+                            <option>Finance Department</option>
+                            <option>Human Resources</option>
+                            <option>Information Technology</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Amount (RM)</label>
+                        <input type="number" placeholder="0.00" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-100" />
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Reason</label>
+                        <textarea rows="3" placeholder="Enter reason for fund reallocation..." class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-gray-100"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                d="M7 7h14M7 7l4-4M7 7l4 4M17 17H3m14 0l-4-4m4 4l-4 4"/>
+                        </svg>
+                        Initiate Transfer
+                    </button>
+                </form>
+            </div>
+        </div>
 
-
-
-
-
-
-                                                 
+        <!-- Financial Alerts Section -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm mt-6">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Financial Alerts & Notifications</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Critical budget alerts and system notifications</p>
+                </div>
+                <button class="text-indigo-600 dark:text-indigo-400 text-xs font-bold hover:underline">Mark All Read</button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                @forelse($anomalyAlerts as $alert)
+                    <div class="flex items-start space-x-3 p-3 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors border border-red-100 dark:border-red-800/30">
+                        <div class="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg mt-0.5">
+                            <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-sm text-gray-900 dark:text-gray-100">Budget Alert</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ $alert['message'] ?? 'Department approaching budget limit' }}</p>
+                            @if(isset($alert['date']))
+                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ $alert['date'] }}</p>
+                            @endif
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-span-full text-center py-6">
+                        <svg class="w-12 h-12 mx-auto mb-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 italic">No financial alerts at this time. All systems operating normally.</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
     </main>
-
-    
-
 @endhasrole
 
    
@@ -816,19 +998,131 @@
             }
         });
 
-                    // Chart.js for System Overview
-            const ctx = document.getElementById('systemChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr'],
-                    datasets: [{
-                        label: 'User Activity',
-                        data: [120, 150, 180, 200],
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    }]
-                }
-            });
+                    // Chart.js for Finance Admin Analytics
+            const financeCanvas = document.getElementById('financeChart');
+            if (financeCanvas) {
+                const ctx = financeCanvas.getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        datasets: [
+                            {
+                                label: 'Marketing',
+                                data: [45000, 52000, 48000, 61000, 58000, 67000],
+                                borderColor: 'rgba(99, 102, 241, 1)',
+                                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                                tension: 0.4
+                            },
+                            {
+                                label: 'Sales',
+                                data: [38000, 42000, 45000, 43000, 49000, 52000],
+                                borderColor: 'rgba(34, 197, 94, 1)',
+                                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                                tension: 0.4
+                            },
+                            {
+                                label: 'Operations',
+                                data: [28000, 31000, 29000, 33000, 35000, 32000],
+                                borderColor: 'rgba(251, 146, 60, 1)',
+                                backgroundColor: 'rgba(251, 146, 60, 0.1)',
+                                tension: 0.4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    color: document.documentElement.classList.contains('dark') ? '#9CA3AF' : '#6B7280',
+                                    usePointStyle: true,
+                                    padding: 20
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: '#1f2937',
+                                titleColor: '#ffffff',
+                                bodyColor: '#ffffff',
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ': RM ' + context.parsed.y.toLocaleString();
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    color: document.documentElement.classList.contains('dark') ? '#9CA3AF' : '#6B7280',
+                                    callback: function(value) {
+                                        return 'RM ' + value.toLocaleString();
+                                    }
+                                },
+                                grid: {
+                                    color: document.documentElement.classList.contains('dark') ? '#374151' : '#E5E7EB'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: document.documentElement.classList.contains('dark') ? '#9CA3AF' : '#6B7280'
+                                },
+                                grid: {
+                                    color: document.documentElement.classList.contains('dark') ? '#374151' : '#E5E7EB'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Chart.js for System Overview
+            const systemCanvas = document.getElementById('systemChart');
+            if (systemCanvas) {
+                const ctx = systemCanvas.getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr'],
+                        datasets: [{
+                            label: 'User Activity',
+                            data: [120, 150, 180, 200],
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: document.documentElement.classList.contains('dark') ? '#9CA3AF' : '#6B7280'
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                ticks: {
+                                    color: document.documentElement.classList.contains('dark') ? '#9CA3AF' : '#6B7280'
+                                },
+                                grid: {
+                                    color: document.documentElement.classList.contains('dark') ? '#374151' : '#E5E7EB'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: document.documentElement.classList.contains('dark') ? '#9CA3AF' : '#6B7280'
+                                },
+                                grid: {
+                                    color: document.documentElement.classList.contains('dark') ? '#374151' : '#E5E7EB'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
 
 </script>

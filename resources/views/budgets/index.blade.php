@@ -33,15 +33,17 @@
 
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        @livewireScripts
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const departmentData = @json($charts['departmentData'] ?? []);
                 const categoryData = @json($categoryData ?? []);
                 
-                if (document.getElementById('departmentPieChart') && departmentData.length > 0) {
-                    const ctx = document.getElementById('departmentPieChart').getContext('2d');
-                    new Chart(ctx, {
+                // Department Pie Chart
+                const deptPieChartEl = document.getElementById('departmentPieChart');
+                if (deptPieChartEl && departmentData.length > 0) {
+                    const ctx = deptPieChartEl.getContext('2d');
+                    if (ctx) {
+                        new Chart(ctx, {
                         type: 'doughnut',
                         data: {
                             labels: departmentData.map(item => item.department),
@@ -90,12 +92,15 @@
                     });
                 }
                 
-                if (document.getElementById('categoryDoughnutChart') && Object.keys(categoryData).length > 0) {
-                    const ctx = document.getElementById('categoryDoughnutChart').getContext('2d');
-                    const categories = Object.keys(categoryData);
-                    const amounts = Object.values(categoryData);
-                    
-                    new Chart(ctx, {
+                // Category Doughnut Chart
+                const categoryChartEl = document.getElementById('categoryDoughnutChart');
+                if (categoryChartEl && Object.keys(categoryData).length > 0) {
+                    const ctx = categoryChartEl.getContext('2d');
+                    if (ctx) {
+                        const categories = Object.keys(categoryData);
+                        const amounts = Object.values(categoryData);
+                        
+                        new Chart(ctx, {
                         type: 'doughnut',
                         data: {
                             labels: categories,
@@ -144,12 +149,14 @@
                     });
                 }
                 
-                if (document.getElementById('departmentBarChart') && departmentData.length > 0) {
-                    const ctx = document.getElementById('departmentBarChart').getContext('2d');
-                    
-                    const sortedData = [...departmentData].sort((a, b) => b.amount - a.amount);
-                    
-                    new Chart(ctx, {
+                // Department Bar Chart
+                const deptBarChartEl = document.getElementById('departmentBarChart');
+                if (deptBarChartEl && departmentData.length > 0) {
+                    const ctx = deptBarChartEl.getContext('2d');
+                    if (ctx) {
+                        const sortedData = [...departmentData].sort((a, b) => b.amount - a.amount);
+                        
+                        new Chart(ctx, {
                         type: 'bar',
                         data: {
                             labels: sortedData.map(item => item.department),

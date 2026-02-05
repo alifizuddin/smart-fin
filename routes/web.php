@@ -35,6 +35,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('expenses.delete');
         Route::post('expenses/analyze', [ExpenseController::class, 'analyzeReceipt'])
         ->name('expenses.analyze');
+        
+        // Export personal expenses to PDF
+        Route::get('expenses/export/pdf', [ExpenseController::class, 'exportMyExpensesPdf'])
+            ->name('expenses.export.pdf');
     });
 
     // --- ADMIN-ONLY ROUTES ---
