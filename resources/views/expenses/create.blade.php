@@ -130,6 +130,12 @@
                                     </div>
 
                                     <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Payment Method</label>
+                                        <input type="text" name="payment_method" id="payment_method" readonly 
+                                               class="mt-1 w-full rounded-md border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400">
+                                    </div>
+
+                                    <div>
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
                                         <textarea name="description" id="description" rows="3" readonly 
                                                   class="mt-1 w-full rounded-md border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400"></textarea>
@@ -200,6 +206,10 @@
                     document.getElementById('category').value = data.category;
                     document.getElementById('description').value = data.description;
 
+                    if (data.payment_method) {
+                        document.getElementById('payment_method').value = data.payment_method;
+                    }
+
                     // Show Confirmation
                     document.getElementById('initialFormState').classList.add('hidden');
                     document.getElementById('confirmationSection').classList.remove('hidden');
@@ -221,14 +231,12 @@
         }
 
         function resetForm() {
-            // Clear form and file input
             document.getElementById('expenseForm').reset();
-            
-            // Hide confirmation, show upload area again
+    
+            document.getElementById('payment_method').value = '';
             document.getElementById('confirmationSection').classList.add('hidden');
             document.getElementById('initialFormState').classList.remove('hidden');
-            
-            // Clear preview
+    
             document.getElementById('previewImage').src = '';
         }
     </script>

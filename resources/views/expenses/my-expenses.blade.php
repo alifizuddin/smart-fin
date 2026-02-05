@@ -9,84 +9,85 @@
                     View and manage all your submitted expenses
                 </p>
             </div>
-            <a href="{{ route('expenses.create') }}" 
-               class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                </svg>
-                {{ __('New Expense') }}
-            </a>
+            <div class="flex space-x-3">
+                <a href="{{ route('expenses.export.pdf', ['search' => request('search'), 'status' => request('status')]) }}" 
+                   class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    {{ __('Export PDF') }}
+                </a>
+                <a href="{{ route('expenses.create') }}" 
+                   class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    {{ __('New Expense') }}
+                </a>
+            </div>
         </div>
     </x-slot>
 
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Stats Cards -->
-            <div class="grid grid-cols-1 gap-5 mb-8 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <!-- Total Expenses -->
-                <div class="p-5 bg-white rounded-lg shadow dark:bg-gray-800">
-                    <div class="flex items-center">
-                        <div class="p-3 rounded-full bg-indigo-500 bg-opacity-20">
-                            <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
+                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/30 text-blue-800 dark:text-blue-300 p-5 rounded-xl shadow-sm relative overflow-hidden">
+                    <div class="flex justify-between items-start relative z-10">
+                        <div>
+                            <p class="text-sm font-medium text-blue-700 dark:text-blue-400">Total Expenses</p>
+                            <p class="text-2xl font-bold mt-1">RM{{ number_format($totalExpenses, 2) }}</p>
                         </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Expenses</p>
-                            <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
-                                RM{{ number_format($totalExpenses, 2) }}
-                            </p>
+                        <div class="bg-white/60 dark:bg-white/10 p-2 rounded-full text-blue-800 dark:text-blue-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
                         </div>
                     </div>
                 </div>
 
                 <!-- Pending -->
-                <div class="p-5 bg-white rounded-lg shadow dark:bg-gray-800">
-                    <div class="flex items-center">
-                        <div class="p-3 rounded-full bg-yellow-500 bg-opacity-20">
-                            <svg class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
+                <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800/30 text-yellow-800 dark:text-yellow-300 p-5 rounded-xl shadow-sm relative overflow-hidden">
+                    <div class="flex justify-between items-start relative z-10">
+                        <div>
+                            <p class="text-sm font-medium text-yellow-700 dark:text-yellow-400">Pending</p>
+                            <p class="text-2xl font-bold mt-1">{{ $totalPending }}</p>
                         </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Pending</p>
-                            <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
-                                {{ $totalPending }}
-                            </p>
+                        <div class="bg-white/60 dark:bg-white/10 p-2 rounded-full text-yellow-800 dark:text-yellow-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
                         </div>
                     </div>
                 </div>
 
                 <!-- Approved -->
-                <div class="p-5 bg-white rounded-lg shadow dark:bg-gray-800">
-                    <div class="flex items-center">
-                        <div class="p-3 rounded-full bg-green-500 bg-opacity-20">
-                            <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
+                <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/30 text-green-800 dark:text-green-300 p-5 rounded-xl shadow-sm relative overflow-hidden">
+                    <div class="flex justify-between items-start relative z-10">
+                        <div>
+                            <p class="text-sm font-medium text-green-700 dark:text-green-400">Approved</p>
+                            <p class="text-2xl font-bold mt-1">{{ $totalApproved }}</p>
                         </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Approved</p>
-                            <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
-                                {{ $totalApproved }}
-                            </p>
+                        <div class="bg-white/60 dark:bg-white/10 p-2 rounded-full text-green-800 dark:text-green-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
                         </div>
                     </div>
                 </div>
 
                 <!-- Rejected -->
-                <div class="p-5 bg-white rounded-lg shadow dark:bg-gray-800">
-                    <div class="flex items-center">
-                        <div class="p-3 rounded-full bg-red-500 bg-opacity-20">
-                            <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 text-red-800 dark:text-red-300 p-5 rounded-xl shadow-sm relative overflow-hidden">
+                    <div class="flex justify-between items-start relative z-10">
+                        <div>
+                            <p class="text-sm font-medium text-red-700 dark:text-red-400">Rejected</p>
+                            <p class="text-2xl font-bold mt-1">{{ $totalRejected }}</p>
                         </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Rejected</p>
-                            <p class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
-                                {{ $totalRejected }}
-                            </p>
+                        <div class="bg-white/60 dark:bg-white/10 p-2 rounded-full text-red-800 dark:text-red-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
                         </div>
                     </div>
                 </div>
@@ -109,7 +110,7 @@
                                            name="search" 
                                            id="search"
                                            value="{{ request('search') }}" 
-                                           class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" 
+                                           class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-colors duration-200" 
                                            placeholder="Search by category, description, or status...">
                                 </div>
                             </div>
@@ -117,8 +118,7 @@
                                 <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
                                 <select name="status" 
                                         id="status"
-                                        onchange="this.form.submit()" 
-                                        class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                        class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-200">
                                     <option value="all" {{ request('status') === 'all' ? 'selected' : '' }}>All Statuses</option>
                                     @foreach($statuses as $status)
                                         <option value="{{ $status }}" {{ request('status') === $status ? 'selected' : '' }}>
@@ -129,18 +129,32 @@
                             </div>
                             <div class="flex items-end">
                                 <button type="submit" 
-                                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 h-10">
-                                    <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        id="filterButton"
+                                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 h-10 transition-all duration-200">
+                                    <svg class="-ml-1 mr-2 h-5 w-5 filter-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
                                     </svg>
-                                    Filter
+                                    <svg class="-ml-1 mr-2 h-5 w-5 loading-spinner hidden animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                    </svg>
+                                    <span class="filter-text">Filter</span>
                                 </button>
                             </div>
                         </form>
                     </div>
 
                     <!-- Expenses Table -->
-                    <div class="overflow-hidden overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+                    <div class="overflow-hidden overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 relative">
+                        <!-- Loading Overlay -->
+                        <div id="loadingOverlay" class="absolute inset-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm z-10 flex items-center justify-center hidden">
+                            <div class="flex flex-col items-center space-y-3">
+                                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Loading expenses...</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Table Container -->
+                        <div id="tableContainer" class="transition-opacity duration-300">
                         @if($expenses->isEmpty())
                             <div class="text-center py-12 px-4 sm:px-6 lg:px-8">
                                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -356,6 +370,7 @@
                                 </div>
                             @endif
                         @endif
+                        </div>
                     </div>
                 </div>
             </div>
@@ -371,6 +386,201 @@
 
     @push('scripts')
 <script>
+    // Function to show loading state
+    function showLoading() {
+        const overlay = document.getElementById('loadingOverlay');
+        const container = document.getElementById('tableContainer');
+        const statusSelect = document.getElementById('status');
+        const searchInput = document.getElementById('search');
+        const filterButton = document.getElementById('filterButton');
+        const filterIcon = filterButton?.querySelector('.filter-icon');
+        const loadingSpinner = filterButton?.querySelector('.loading-spinner');
+        const filterText = filterButton?.querySelector('.filter-text');
+        
+        if (overlay) overlay.classList.remove('hidden');
+        if (container) container.classList.add('opacity-50');
+        if (statusSelect) statusSelect.disabled = true;
+        if (searchInput) searchInput.disabled = true;
+        if (filterButton) filterButton.disabled = true;
+        
+        // Show loading spinner on filter button
+        if (filterIcon) filterIcon.classList.add('hidden');
+        if (loadingSpinner) loadingSpinner.classList.remove('hidden');
+        if (filterText) filterText.textContent = 'Loading...';
+    }
+
+    // Function to hide loading state
+    function hideLoading() {
+        const overlay = document.getElementById('loadingOverlay');
+        const container = document.getElementById('tableContainer');
+        const statusSelect = document.getElementById('status');
+        const searchInput = document.getElementById('search');
+        const filterButton = document.getElementById('filterButton');
+        const filterIcon = filterButton?.querySelector('.filter-icon');
+        const loadingSpinner = filterButton?.querySelector('.loading-spinner');
+        const filterText = filterButton?.querySelector('.filter-text');
+        
+        if (overlay) overlay.classList.add('hidden');
+        if (container) container.classList.remove('opacity-50');
+        if (statusSelect) statusSelect.disabled = false;
+        if (searchInput) searchInput.disabled = false;
+        if (filterButton) filterButton.disabled = false;
+        
+        // Restore filter button
+        if (filterIcon) filterIcon.classList.remove('hidden');
+        if (loadingSpinner) loadingSpinner.classList.add('hidden');
+        if (filterText) filterText.textContent = 'Filter';
+    }
+
+    // Function to update table content via AJAX
+    function updateExpenses(status) {
+        showLoading();
+        
+        const url = new URL(window.location.href);
+        if (status === 'all') {
+            url.searchParams.delete('status');
+        } else {
+            url.searchParams.set('status', status);
+        }
+        
+        // Update browser history
+        window.history.pushState({}, '', url);
+        
+        // Fetch updated content
+        fetch(url.toString(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            // Parse the response and extract the table content
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newTableContainer = doc.getElementById('tableContainer');
+            
+            if (newTableContainer && document.getElementById('tableContainer')) {
+                document.getElementById('tableContainer').innerHTML = newTableContainer.innerHTML;
+            }
+        })
+        .catch(error => {
+            console.error('Error updating expenses:', error);
+            // Fallback to full page reload on error
+            window.location.href = url.toString();
+        })
+        .finally(() => {
+            hideLoading();
+        });
+    }
+
+    // Handle status dropdown change
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusSelect = document.getElementById('status');
+        if (statusSelect) {
+            statusSelect.addEventListener('change', function() {
+                updateExpenses(this.value);
+            });
+        }
+        
+        // Handle search input with debouncing
+        const searchInput = document.getElementById('search');
+        let searchTimeout;
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    performSearch();
+                }, 500); // Wait 500ms after user stops typing
+            });
+        }
+        
+        // Handle filter button click
+        const filterForm = document.querySelector('form[action*="expenses.my-expenses"]');
+        if (filterForm) {
+            filterForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                performSearch();
+            });
+        }
+    });
+    
+    // Function to perform search
+    function performSearch() {
+        showLoading();
+        
+        const searchInput = document.getElementById('search');
+        const statusSelect = document.getElementById('status');
+        
+        const url = new URL(window.location.href);
+        
+        // Update search parameter
+        if (searchInput && searchInput.value.trim()) {
+            url.searchParams.set('search', searchInput.value.trim());
+        } else {
+            url.searchParams.delete('search');
+        }
+        
+        // Update status parameter
+        const status = statusSelect ? statusSelect.value : 'all';
+        if (status === 'all') {
+            url.searchParams.delete('status');
+        } else {
+            url.searchParams.set('status', status);
+        }
+        
+        // Update browser history
+        window.history.pushState({}, '', url);
+        
+        // Fetch updated content
+        fetch(url.toString(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            // Parse the response and extract the table content
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newTableContainer = doc.getElementById('tableContainer');
+            
+            if (newTableContainer && document.getElementById('tableContainer')) {
+                document.getElementById('tableContainer').innerHTML = newTableContainer.innerHTML;
+            }
+        })
+        .catch(error => {
+            console.error('Error performing search:', error);
+            // Fallback to full page reload on error
+            window.location.href = url.toString();
+        })
+        .finally(() => {
+            hideLoading();
+        });
+    }
+
+    // Handle browser back/forward buttons
+    window.addEventListener('popstate', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const status = urlParams.get('status') || 'all';
+        const search = urlParams.get('search') || '';
+        
+        // Update form inputs
+        const statusSelect = document.getElementById('status');
+        const searchInput = document.getElementById('search');
+        
+        if (statusSelect) {
+            statusSelect.value = status;
+        }
+        if (searchInput) {
+            searchInput.value = search;
+        }
+        
+        // Update content
+        performSearch();
+    });
     // Function to show delete confirmation modal
     function showDeleteConfirmation(actionUrl) {
         const modalId = 'deleteConfirmationModal';

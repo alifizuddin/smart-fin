@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\DB;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ExpenseController extends Controller
 {
@@ -62,8 +63,54 @@ class ExpenseController extends Controller
             'totalPending' => $pendingCount,
             'totalApproved' => $approvedCount,
             'totalRejected' => $rejectedCount,
-            'statuses' => ['pending', 'approved', 'rejected']
+            'statuses' => ['pending', 'approved', 'rejected'],
+            'search' => $request->input('search'),
+            'statusFilter' => $request->input('status', 'all')
         ]);
+    }
+
+    /**
+     * Export user's expenses as PDF
+     */
+    public function exportMyExpensesPdf(Request $request)
+    {
+        $user = Auth::user();
+        
+        $query = $user->expenses()
+            ->with(['budget', 'department'])
+            ->latest('created_at');
+            
+        // Apply search filter if present
+        if ($request->filled('search')) {
+            $searchTerm = $request->input('search');
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('category', 'like', "%{$searchTerm}%")
+                  ->orWhere('description', 'like', "%{$searchTerm}%")
+                  ->orWhere('status', 'like', "%{$searchTerm}%");
+            });
+        }
+        
+        // Apply status filter if present
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+        
+        $expenses = $query->get();
+        $totalAmount = $expenses->sum('amount');
+        
+        $pdf = Pdf::loadView('expenses.pdf.export', [
+            'expenses' => $expenses,
+            'totalAmount' => $totalAmount,
+            'user' => $user,
+            'filters' => [
+                'search' => $request->input('search'),
+                'status' => $request->input('status')
+            ]
+        ]);
+        
+        $filename = 'expense_report_' . now()->format('Y-m-d') . '.pdf';
+        
+        return $pdf->download($filename);
     }
     public function analyzeReceipt(Request $request)
     {
@@ -85,6 +132,9 @@ class ExpenseController extends Controller
             if ($response->successful()) {
                 $data = $response->json();
                 
+                // Debug log the N8N response
+                \Log::info('N8N Response:', $data);
+                
                 // Return structured JSON for the frontend
                 return response()->json([
                     'success' => true,
@@ -92,6 +142,7 @@ class ExpenseController extends Controller
                     'date' => isset($data['data']['date']) ? Carbon::parse($data['data']['date'])->format('Y-m-d') : now()->format('Y-m-d'),
                     'category' => $data['category'] ?? 'Uncategorized',
                     'description' => $data['description'] ?? '',
+                    'payment_method' => $data['data']['payment_method'] ?? $data['payment_method'] ?? 'Not specified', 
                 ]);
             }
 
@@ -378,6 +429,7 @@ class ExpenseController extends Controller
             'transaction_date' => 'required|date',
             'category' => 'required|string',
             'description' => 'nullable|string',
+            'payment_method' => 'required|string|max:50',
         ]);
 
         // 2. Upload File
@@ -395,7 +447,7 @@ class ExpenseController extends Controller
                 'transaction_date' => $validated['transaction_date'],
                 'category'         => $validated['category'],
                 'description'      => $validated['description'],
-                'payment_method'   => 'Not specified',
+                'payment_method'   => $validated['payment_method'],
             ]);
 
             // Notify Managers
