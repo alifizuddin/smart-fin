@@ -75,7 +75,7 @@ class ExpenseController extends Controller
         $n8nWebhookUrl = 'http://n8n:5678/webhook/process-receipt';
 
         try {
-            $response = Http::timeout(30)
+            $response = Http::timeout(120)
                 ->attach(
                     'receipt',
                     file_get_contents($request->file('receipt')),
@@ -455,7 +455,7 @@ public function departmentExpenses(Request $request)
 
     $query = Expense::where('department_id', $user->department_id)
         ->with(['user', 'budget'])
-        ->latest('transaction_date');
+        ->latest('created_at');
 
     // Search functionality
     if ($request->filled('search')) {
@@ -477,7 +477,7 @@ public function departmentExpenses(Request $request)
 
     // Date range filter
     if ($request->filled('start_date') && $request->filled('end_date')) {
-        $query->whereBetween('transaction_date', [
+        $query->whereBetween('created_at', [
             $request->start_date,
             $request->end_date
         ]);

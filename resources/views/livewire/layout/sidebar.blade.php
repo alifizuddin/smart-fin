@@ -63,7 +63,7 @@ new class extends Component
                     </button>
                     
                     <div x-show="budgetsDropdownOpen && sidebarOpen" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 transform scale-100" x-transition:leave-end="opacity-0 transform scale-95" class="space-y-1">
-                        @hasrole('Admin')
+                        @hasrole('Finance Admin')
                         <x-sidebar-link :href="route('budgets.create')" :active="request()->routeIs('budgets.create')">
                             <svg class="flex-shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />

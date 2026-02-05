@@ -23,6 +23,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('my-expenses', [ExpenseController::class, 'myExpenses'])
             ->name('expenses.my-expenses');
             
+        Route::get('/expenses/create', [ExpenseController::class, 'create'])->name('expenses.create');
+            
         Route::post('expenses/quick-store', [ExpenseController::class, 'quickStore'])
             ->name('expenses.quickStore');
             
