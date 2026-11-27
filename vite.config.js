@@ -10,6 +10,8 @@ export default defineConfig({
     ],
     server: {
         host: '0.0.0.0', // Allow access from outside the container
+        port: 5173,
+        strictPort: true,
         hmr: {
             host: 'localhost', // Tell the browser to look for the server at localhost
         },

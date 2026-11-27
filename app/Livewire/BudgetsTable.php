@@ -190,6 +190,8 @@ public function editBudget($budgetId)
     } finally {
         $this->isLoading = false;
     }
+
+    $this->dispatch('open-edit-budget-modal');
 }
 
 public function cancelEdit()
@@ -218,6 +220,7 @@ public function updateBudget()
 public function closeEditModal()
 {
     $this->editingBudget = null;
+    $this->isLoading = false;
     $this->reset('form');
 }
 

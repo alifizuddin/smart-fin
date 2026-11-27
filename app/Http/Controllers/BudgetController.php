@@ -140,9 +140,6 @@ class BudgetController extends Controller
         'budget_ids.*' => 'exists:budgets,id',          // Ensure all IDs exist in DB
     ]);
 
-    // ============================================================
-    // 3️⃣ Handle Requested Bulk Action
-    // ============================================================
     switch ($request->action) {
         case 'delete':
             // Perform bulk deletion
@@ -162,22 +159,14 @@ class BudgetController extends Controller
     
     public function create()
 {
-    // ============================================================
-    // 1️⃣ Authorization
-    // ============================================================
+
     $this->authorize('create', Budget::class); 
     // Only admins can access the create budget form.
 
-    // ============================================================
-    // 2️⃣ Fetch Required Data
-    // ============================================================
     $departments = Department::all();
     $projects = Projects::orderBy('name')->get();
     // Retrieve all departments for the department dropdown list.
 
-    // ============================================================
-    // 3️⃣ Return View
-    // ============================================================
     return view('budgets.create', compact('departments', 'projects'));
 }
 
@@ -269,15 +258,10 @@ public function storeExpense(Request $request)
  */
 public function store(Request $request)
 {
-    // ============================================================
-    // 1️⃣ Authorization
-    // ============================================================
+
     $this->authorize('create', Budget::class); 
     // Only admins/managers can create new budgets
 
-    // ============================================================
-    // 2️⃣ Validation
-    // ============================================================
     $validated = $request->validate([
         'name' => 'required|string',
         'department_id' => 'required|exists:departments,id',
@@ -287,10 +271,6 @@ public function store(Request $request)
         'period_end'    => 'required|date|after_or_equal:period_start',
     ]);
 
-    // ============================================================
-    // 3️⃣ Prepare Data (FIXED)
-    // ============================================================
-    
     // Start with validated data and the creator
     $data = $validated + ['created_by' => Auth::id()];
 

@@ -39,7 +39,10 @@ WORKDIR /var/www/html
 COPY . .
 
 # 👉 Install PHP dependencies including laravel-dompdf
-RUN composer install --no-interaction --prefer-dist
+RUN COMPOSER_PROCESS_TIMEOUT=600 composer install \
+    --no-interaction \
+    --prefer-dist \
+    --no-progress
 RUN composer require barryvdh/laravel-dompdf
 
 # Fix permissions

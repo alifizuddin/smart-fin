@@ -27,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
         Expense::observe(ExpenseObserver::class);
         Blade::component('chatbot-widget', \App\View\Components\ChatbotWidget::class);
         if (app()->environment('local')) {
-        URL::forceScheme('https');
+        //URL::forceScheme('https');
     }
     }
 }

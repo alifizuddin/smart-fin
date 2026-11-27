@@ -1,6 +1,4 @@
-
 services:
- 
   # 1. Laravel Application Service
   app:
     build:
@@ -11,12 +9,15 @@ services:
     working_dir: /var/www/html
     volumes:
       - ./:/var/www/html
+      - /var/www/html/node_modules
+    ports:
+      - "5173:5173"
     depends_on:
       - db
     networks:
       - smartfin-net
     mem_limit: 1024m
-    
+
   queue:
     build:
       context: .
@@ -33,7 +34,7 @@ services:
     networks:
       - smartfin-net
     mem_limit: 512m
-    
+
   n8n:
     image: n8nio/n8n
     container_name: n8n_local
@@ -51,15 +52,13 @@ services:
       - smartfin-net
     mem_limit: 1024m
 
-
-  # 2. Nginx Web Server Service
+    # 2. Nginx Web Server Service
   web:
     image: nginx:alpine
     container_name: smartfin-web
     restart: unless-stopped
     ports:
-      - "8000:80" 
-      - "5173:5173"
+      - "8000:80"
       - "8080:8080"
     volumes:
       - ./:/var/www/html
@@ -75,7 +74,7 @@ services:
     container_name: smartfin-db
     restart: unless-stopped
     ports:
-      - "3306:3306" # Expose MySQL to your host machine (optional)
+      - "3308:3306" # Expose MySQL to your host machine (optional)
     environment:
       MYSQL_DATABASE: smartfin
       MYSQL_USER: smartfin_user
@@ -97,4 +96,3 @@ volumes:
   smartfin-db-data:
     driver: local
   n8n_data_local:
-
